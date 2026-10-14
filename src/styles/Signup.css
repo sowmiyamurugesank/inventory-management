@@ -1,0 +1,58 @@
+.signup-panel {
+  padding: 30px 32px;
+  align-items: center;
+}
+
+.signup-container {
+  width: 100%;
+  max-width: 430px;
+  margin: auto;
+}
+
+.signup-container .form-heading {
+  margin-bottom: 22px;
+}
+
+.signup-form {
+  gap: 14px;
+}
+
+.signup-form .form-field {
+  gap: 7px;
+}
+
+.signup-form .form-field input {
+  height: 43px;
+}
+
+.signup-form .auth-submit {
+  min-height: 46px;
+  margin-top: 3px;
+}
+
+.signup-container .auth-switch {
+  margin-top: 20px;
+}
+
+@media (max-width: 760px) {
+  .signup-panel {
+    justify-content: flex-start;
+    padding: 25px 22px;
+  }
+
+  .signup-container {
+    max-width: 430px;
+  }
+
+  .signup-panel .mobile-brand {
+    margin-bottom: 28px;
+  }
+
+  .signup-container .form-heading {
+    margin-bottom: 20px;
+  }
+
+  .signup-form {
+    gap: 12px;
+  }
+}
