@@ -1,0 +1,142 @@
+.dashboard {
+    padding: 22px 30px;
+    background-color: #f7f9ff;
+    min-height: 100vh;
+    box-sizing: border-box;
+    text-align: left;
+}
+.dashboard h1 {
+    margin: 0 0 4px;
+    color: #102f70;
+    font-size: 32px;
+    font-weight: 700;
+}
+.welcome-text {
+    margin: 0 0 18px;
+    color: #63759b;
+    font-size: 14px;
+}
+.dashboard-section {
+    margin: 0 0 15px;
+}
+.dashboard-section h2,
+.dashboard-box h2 {
+    text-align: left;
+    margin: 0 0 12px;
+    color: #102f70;
+    font-size: 21px;
+    font-weight: 600;
+}
+.card-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+}
+.stat-card {
+    background-color: white;
+    border: 1px solid #dce4f5;
+    border-radius: 10px;
+    padding: 15px;
+    min-height: 75px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.stat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #eeeaff;
+}
+.stat-icon svg {
+    width: 21px;
+    height: 21px;
+    color: #4935d4;
+}
+.stat-content h3 {
+    margin: 0 0 6px;
+    color: #193879;
+    font-size: 14px;
+    font-weight: 500;
+}
+.stat-content p {
+    margin: 0;
+    color: #102f70;
+    font-size: 24px;
+    font-weight: 700;
+}
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+.dashboard-box {
+    background-color: white;
+    border: 1px solid #dce4f5;
+    border-radius: 10px;
+    padding: 15px;
+}
+.stock-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border: 1px solid #e0e6f2;
+    border-radius: 8px;
+    padding: 12px 8px;
+}
+.stock-item {
+    text-align: center;
+    border-right: 1px solid #e0e6f2;
+}
+.stock-item:last-child {
+    border-right: none;
+}
+.summary-icon {
+    width: 32px;
+    height: 32px;
+    margin: 0 auto 5px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #eef9f5;
+}
+.summary-icon svg {
+    width: 18px;
+    height: 18px;
+    color: #18a879;
+}
+.stock-item h4 {
+    margin: 0 0 4px;
+    color: #193879;
+    font-size: 13px;
+    font-weight: 500;
+}
+.stock-item strong {
+    color: #102f70;
+    font-size: 23px;
+}
+.empty-state {
+    min-height: 75px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #7a88a5;
+}
+.empty-state svg {
+    width: 25px;
+    height: 25px;
+    margin-bottom: 5px;
+}
+.empty-state p {
+    margin: 0;
+    font-size: 13px;
+}
+.activity-section {
+    margin-top: 0;
+    min-height: 100px;
+}
