@@ -1,10 +1,9 @@
+import Dashboard from "./Dashboard";
+
 function App() {
-  return (
-    <div>
-      <h1>Inventory Management</h1>
-      <p>Team project setup</p>
-    </div>
-  );
+    return (
+        <Dashboard />
+    );
 }
 
 export default App;
