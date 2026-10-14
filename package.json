@@ -1,5 +1,9 @@
 {
+<<<<<<< HEAD
   "name": "inventory-managemnet",
+=======
+  "name": "inventory-management",
+>>>>>>> origin/main
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,12 +14,18 @@
     "preview": "vite preview"
   },
   "dependencies": {
+<<<<<<< HEAD
     "@hookform/resolvers": "^5.9.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-hook-form": "^7.90.0",
     "react-router-dom": "^7.18.4",
     "zod": "^4.6.7"
+=======
+    "lucide-react": "^1.57.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+>>>>>>> origin/main
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
