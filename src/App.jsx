@@ -1,19 +1,86 @@
+
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+
+import MainLayout from "./pages/Mainlayout.jsx";
 import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
-import Dashboard from "./Dashboard";
+
+function Dashboard() {
+  return <h1>Dashboard</h1>;
+}
+
+function Page({ title }) {
+  return <h1>{title}</h1>;
+}
 
 export default function App() {
   return (
     <BrowserRouter>
-         <Dashboard />
       <Routes>
-        <Route path="/" element={<Login />} />
+        {/* Login page */}
         <Route path="/login" element={<Login />} />
+
+        {/* Signup page */}
         <Route path="/signup" element={<Signup />} />
+
+        {/* Main application with sidebar */}
+        <Route path="/" element={<MainLayout />}>
+          <Route index element={<Dashboard />} />
+
+          <Route
+            path="products"
+            element={<Page title="Products" />}
+          />
+
+          <Route
+            path="storage"
+            element={<Page title="Storage" />}
+          />
+
+          <Route
+            path="billing"
+            element={<Page title="Billing" />}
+          />
+
+          <Route
+            path="parties"
+            element={<Page title="Parties" />}
+          />
+
+          <Route
+            path="income-expense"
+            element={<Page title="Income & Expense" />}
+          />
+
+          <Route
+            path="design"
+            element={<Page title="Design" />}
+          />
+
+          <Route
+            path="transport"
+            element={<Page title="Transport" />}
+          />
+
+          <Route
+            path="reports"
+            element={<Page title="Reports" />}
+          />
+
+          <Route
+            path="activity-log"
+            element={<Page title="Activity Log" />}
+          />
+
+          <Route
+            path="settings"
+            element={<Page title="Settings" />}
+          />
+        </Route>
+
+        {/* Redirect unknown URLs to Login */}
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
   );
 }
-
