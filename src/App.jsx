@@ -17,13 +17,10 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Login page */}
+       
         <Route path="/login" element={<Login />} />
-
-        {/* Signup page */}
         <Route path="/signup" element={<Signup />} />
 
-        {/* Main application with sidebar */}
         <Route path="/" element={<MainLayout />}>
           <Route index element={<Dashboard />} />
 
@@ -78,7 +75,7 @@ export default function App() {
           />
         </Route>
 
-        {/* Redirect unknown URLs to Login */}
+       
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
