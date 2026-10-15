@@ -23,6 +23,10 @@ function App() {
         <Route path="/signup" element={<Signup />} />
 
         {/* Main layout with Sidebar and Header */}
+       
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+
         <Route path="/" element={<MainLayout />}>
           {/* Dashboard */}
           <Route index element={<Dashboard />} />
@@ -55,6 +59,7 @@ function App() {
         </Route>
 
         {/* Unknown URL */}
+       
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
