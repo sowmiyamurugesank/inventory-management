@@ -1,0 +1,63 @@
+
+.add-item-page {
+  min-height: 100vh;
+  padding: 24px;
+  background: #f5f6fc;
+  color: #20243a;
+}
+
+.add-item-card {
+  max-width: 850px;
+  margin: auto;
+  padding: 28px;
+  background: white;
+  border-radius: 12px;
+}
+
+.add-item-card h1 {
+  margin-top: 0;
+}
+
+.add-item-card section {
+  padding: 20px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.add-item-card h2 {
+  font-size: 17px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 14px 0;
+}
+
+.form-field input,
+.form-field select {
+  padding: 11px;
+  border: 1px solid #d5dbea;
+  border-radius: 6px;
+}
+
+.verified-toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.add-item-card button {
+  margin: 6px;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 6px;
+  background: #5b5de6;
+  color: white;
+  cursor: pointer;
+}
+
+.error {
+  color: #dc2626;
+}
