@@ -1,20 +1,52 @@
-import "../component/Dropdown.css";
+import { useState } from "react";
+import { ChevronDown } from "lucide-react";
+import Button from "./Button";
+import "../styles/Dropdown.css";
 
-function Dropdown({ options, value, onChange, placeholder }) {
+function Dropdown({
+  options = [],
+  value = "",
+  onChange,
+  placeholder = "All Categories",
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const selectedOption = options.find(
+    (option) => option.value === value
+  );
+
   return (
-    <select
-      className="reusable-dropdown"
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-    >
-      <option value="">{placeholder}</option>
+    <div className="dropdown-wrapper">
 
-      {options.map((option) => (
-        <option key={option.value} value={option.value}>
-          {option.label}
-        </option>
-      ))}
-    </select>
+      <Button
+        className="reusable-dropdown"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <span>
+          {selectedOption?.label || placeholder}
+        </span>
+
+        <ChevronDown size={16} />
+      </Button>
+
+      {isOpen && (
+        <div className="dropdown-options">
+          {options.map((option) => (
+            <Button
+              key={option.value}
+              className="dropdown-option"
+              onClick={() => {
+                onChange(option.value);
+                setIsOpen(false);
+              }}
+            >
+              {option.label}
+            </Button>
+          ))}
+        </div>
+      )}
+
+    </div>
   );
 }
 

@@ -6,6 +6,7 @@ function Button({
   onClick,
   className = "",
   disabled = false,
+  type="button"
 }) {
   return (
     <button
