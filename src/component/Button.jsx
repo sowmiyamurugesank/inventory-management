@@ -1,11 +1,12 @@
 
-import "../component/Button.css";
+import "../styles/Button.css";
 
 function Button({
   children,
   onClick,
   className = "",
   disabled = false,
+  type="button"
 }) {
   return (
     <button

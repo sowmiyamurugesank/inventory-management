@@ -6,7 +6,7 @@ import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
 import Dashboard from "./Dashboard.jsx";
 import Product from "./pages/Product.jsx";
-import AddItem from "./pages/AddItem";
+
 
 function Page({ title }) {
   return <h1>{title}</h1>;
@@ -16,27 +16,25 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Login */}
+      
         <Route path="/login" element={<Login />} />
 
-        {/* Signup */}
+     
         <Route path="/signup" element={<Signup />} />
 
-        {/* Main layout with Sidebar and Header */}
+   
        
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
 
         <Route path="/" element={<MainLayout />}>
-          {/* Dashboard */}
+        
           <Route index element={<Dashboard />} />
 
-          {/* Products */}
           <Route path="products" element={<Product />} />
-          <Route path="product/add" element={<AddItem />} />
+          
 
-
-          {/* Other pages */}
+          
           <Route path="storage" element={<Page title="Storage" />} />
           <Route path="billing" element={<Page title="Billing" />} />
           <Route path="parties" element={<Page title="Parties" />} />
@@ -58,7 +56,7 @@ function App() {
           <Route path="settings" element={<Page title="Settings" />} />
         </Route>
 
-        {/* Unknown URL */}
+      
        
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
