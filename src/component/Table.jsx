@@ -32,7 +32,7 @@ function Table({
       return "Out of Stock";
     }
 
-    if (Number(item.quantity) <= Number(item.reorderLevel ?? 5)) {
+    if (Number(item.quantity) <=5) {
       return "Low Stock";
     }
 
