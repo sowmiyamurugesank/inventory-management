@@ -178,3 +178,200 @@
   border-radius: 6px;
   cursor: pointer;
 }
+/* =========================
+   Categories
+========================= */
+
+.category-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.category-header h3 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #20243a;
+}
+
+/* Add Category Button */
+
+.add-category-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+
+    background: #2563eb !important;
+    color: #ffffff !important;
+
+    padding: 9px 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.add-category-button:hover {
+    background: #1d4ed8 !important;
+}
+
+
+/* =========================
+   Category Modal
+========================= */
+
+.category-modal-overlay {
+    position: fixed;
+    inset: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(0, 0, 0, 0.35);
+
+    z-index: 1000;
+}
+
+
+/* Modal Box */
+
+.category-modal {
+    width: 400px;
+
+    padding: 24px;
+    box-sizing: border-box;
+
+    background: #ffffff;
+    border-radius: 10px;
+
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+
+/* Modal Header */
+
+.category-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 20px;
+}
+
+.category-modal-header h3 {
+    margin: 0;
+
+    font-size: 20px;
+    font-weight: 600;
+
+    color: #20243a;
+}
+
+
+/* Close X */
+
+.category-modal-header button {
+    width: 32px;
+    height: 32px;
+
+    border: none;
+    background: transparent;
+
+    font-size: 24px;
+    line-height: 1;
+
+    color: #697085;
+
+    cursor: pointer;
+}
+
+.category-modal-header button:hover {
+    color: #20243a;
+}
+
+
+/* Labels */
+
+.category-modal label {
+    display: block;
+
+    margin-bottom: 6px;
+
+    font-size: 13px;
+    font-weight: 500;
+
+    color: #444b61;
+}
+
+
+/* Inputs */
+
+.category-modal input {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 10px 12px;
+    margin-bottom: 16px;
+
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+
+    font-size: 14px;
+
+    outline: none;
+}
+
+.category-modal input:focus {
+    border-color: #5b5de6;
+}
+
+
+/* Modal Buttons */
+
+.category-modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+
+    gap: 8px;
+
+    margin-top: 8px;
+}
+
+
+/* =========================
+   Stock Management
+========================= */
+
+.stock-filters {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    margin-bottom: 20px;
+}
+
+
+/* =========================
+   Suppliers
+========================= */
+
+.supplier-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 20px;
+}
+
+.supplier-header h3 {
+    margin: 0;
+
+    font-size: 20px;
+    font-weight: 600;
+
+    color: #20243a;
+}
