@@ -1,0 +1,478 @@
+
+/* =========================
+   Main Product Page
+========================= */
+
+.products-page {
+  width: 100%;
+  min-height: 100%;
+  padding: 24px;
+  box-sizing: border-box;
+  background: #f5f6fc;
+  color: #20243a;
+}
+
+/* =========================
+   Page Heading
+========================= */
+
+.products-heading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 24px;
+}
+
+.products-heading-icon {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  padding: 10px;
+  box-sizing: border-box;
+  color: #4b49ed;
+  background: #eeeeff;
+  border-radius: 12px;
+}
+
+.products-heading h1 {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #20243a;
+}
+
+.products-heading p {
+  margin: 5px 0 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #697085;
+}
+
+/* =========================
+   Product Tabs
+========================= */
+
+.product-tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+  padding: 6px;
+  overflow-x: auto;
+  background: #ffffff;
+  border: 1px solid #e1e4f0;
+  border-radius: 10px;
+}
+
+.product-tab {
+  flex-shrink: 0;
+  padding: 11px 20px;
+  border: none;
+  border-radius: 7px;
+  background: #eaecf2;
+  color: #444b61;
+  font-size: 13px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.product-tab:hover {
+  background: #f0efff;
+}
+
+.product-tab.active {
+  background: #5b4de6;
+  color: #ffffff;
+}
+
+/* =========================
+   Product Summary Cards
+========================= */
+
+.product-cards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+.product-cards .stat-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  min-height: 115px;
+  padding: 18px;
+  box-sizing: border-box;
+  background: #ffffff;
+  border: 1px solid #e5e7ef;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(32, 36, 58, 0.04);
+}
+
+.product-cards .stat-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 11px;
+  background: #e8edff;
+  color: #5965e8;
+}
+
+.product-cards .stat-icon-image {
+  width: 22px;
+  height: 22px;
+}
+
+.product-cards .stat-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.product-cards .stat-content h2 {
+  margin: 0 0 7px;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #63729f;
+}
+
+.product-cards .stat-content p {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: #20243a;
+  overflow-wrap: anywhere;
+}
+
+/* =========================
+   All Products Section
+========================= */
+
+.all-products-section {
+  width: 100%;
+  margin-top: 24px;
+  padding: 20px;
+  box-sizing: border-box;
+  background: #ffffff;
+  border: 1px solid #e1e4f0;
+  border-radius: 12px;
+}
+
+/* All Products Heading + Add Product Button */
+
+.products-table-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.products-table-heading h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #20243a;
+  text-align: left;
+}
+
+/* =========================
+   Add Product Button
+========================= */
+
+.products-page .add-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 10px 16px;
+  box-sizing: border-box;
+  background: #5b4de6;
+  color: #ffffff;
+  border: none;
+  border-radius: 7px;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.products-page .add-button:hover {
+  background: #493bd0;
+}
+
+.products-table-heading .add-button {
+  flex-shrink: 0;
+}
+
+/* =========================
+   Table Toolbar
+========================= */
+
+.all-products-section .table-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.all-products-section .table-search,
+.all-products-section .table-toolbar select,
+.all-products-section .table-toolbar .dropdown {
+  width: 280px;
+  height: 44px;
+  padding: 0 14px;
+  box-sizing: border-box;
+  border: 1px solid #dfe3ee;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #20243a;
+  font-size: 14px;
+  outline: none;
+}
+
+.all-products-section .table-search:hover,
+.all-products-section .table-toolbar select:hover,
+.all-products-section .table-toolbar .dropdown:hover {
+  border-color: #b8bce0;
+}
+
+.all-products-section .table-search:focus,
+.all-products-section .table-toolbar select:focus {
+  border-color: #c2bef0;
+  box-shadow: 0 0 0 1px rgba(91, 77, 230, 0.12);
+}
+
+.all-products-section .table-search {
+  height: 36px;
+}
+
+/* =========================
+   Other Tab Content
+========================= */
+
+.product-tab-content {
+  margin-top: 20px;
+  padding: 24px;
+  box-sizing: border-box;
+  background: #ffffff;
+  border: 1px solid #e5e7ef;
+  border-radius: 12px;
+}
+
+.product-tab-content h2 {
+  margin: 0 0 12px;
+  font-size: 21px;
+  color: #5965e8;
+}
+
+.product-tab-content p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #697085;
+}
+
+/* =========================
+   Back Button
+========================= */
+
+.back-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 14px;
+  background: #5b4de6;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.back-button:hover {
+  background: #493bd0;
+}
+
+/* =========================
+   Category Modal
+========================= */
+
+.category-modal {
+  width: 100%;
+  max-width: 400px;
+  padding: 24px;
+  box-sizing: border-box;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.category-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.category-modal-header h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #20243a;
+}
+
+.category-modal-header button {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  font-size: 24px;
+  color: #697085;
+  cursor: pointer;
+}
+
+.category-modal-header button:hover {
+  color: #20243a;
+}
+
+.category-modal label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #444b61;
+}
+
+.category-modal input {
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 16px;
+  box-sizing: border-box;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+}
+
+.category-modal input:focus {
+  border-color: #5b5de6;
+}
+
+.category-modal-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* =========================
+   Responsive Layout
+========================= */
+
+@media (max-width: 1100px) {
+  .product-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .products-page {
+    padding: 14px;
+  }
+
+  .products-heading {
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .products-heading-icon {
+    width: 38px;
+    height: 38px;
+  }
+
+  .products-heading h1 {
+    font-size: 22px;
+  }
+
+  .products-heading p {
+    font-size: 13px;
+  }
+
+  .product-tabs {
+    margin-bottom: 18px;
+  }
+
+  .product-tab {
+    padding: 10px 14px;
+  }
+
+  .product-cards {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .product-cards .stat-card {
+    min-height: 100px;
+  }
+
+  .all-products-section {
+    padding: 12px;
+  }
+
+  .products-table-heading {
+    gap: 10px;
+  }
+
+  .products-table-heading h2 {
+    font-size: 18px;
+  }
+
+  .products-table-heading .add-button {
+    min-height: 38px;
+    padding: 9px 10px;
+    font-size: 13px;
+  }
+
+  .all-products-section .table-toolbar {
+    justify-content: flex-start;
+    gap: 10px;
+  }
+
+  .all-products-section .table-search {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .product-tab-content {
+    padding: 16px;
+  }
+
+  .product-modal-overlay {
+    padding: 10px;
+  }
+
+  .product-modal {
+    max-height: 95vh;
+    padding: 16px;
+  }
+
+  .category-modal {
+    padding: 18px;
+  }
+}

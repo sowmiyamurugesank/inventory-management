@@ -12,6 +12,7 @@ function Button({
       className={`button ${className}`}
       onClick={onClick}git 
       disabled={disabled}
+       type={type}
     >
       {children}
     </button>
