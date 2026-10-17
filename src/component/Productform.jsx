@@ -120,15 +120,10 @@ function ProductForm({ initialData, onSave, onCancel }) {
     });
   };
 
-  const renderField = (
-    label,
-    name,
-    type = "text",
-    required = false
-  ) => (
+  const renderField = (label, name, type = "text", required = false) => (
     <div className="form-field" key={name}>
       <label htmlFor={name}>
-        {label} {required && "*"}
+        {label} {required && <span className="required-mark">*</span>}
       </label>
 
       <input
@@ -136,9 +131,9 @@ function ProductForm({ initialData, onSave, onCancel }) {
         name={name}
         type={type}
         step={type === "number" ? "any" : undefined}
+        min={type === "number" ? "0" : undefined}
         value={formData[name]}
         onChange={handleChange}
-        min={type === "number" ? "0" : undefined}
       />
 
       {errors[name] && (
@@ -147,57 +142,81 @@ function ProductForm({ initialData, onSave, onCancel }) {
     </div>
   );
 
-  const renderAttributes = (title, section) => (
-    <section className="form-section" key={section}>
+  const renderAttributes = (title, section, buttonLabel) => (
+    <section className="form-section attribute-card" key={section}>
       <h3>{title}</h3>
+
+      <p className="attribute-description">
+        Add product-specific information below.
+      </p>
 
       {formData[section].map((attribute, index) => (
         <div className="attribute-row" key={index}>
-          <input
-            placeholder="Attribute name"
-            value={attribute.name}
-            onChange={(e) =>
-              handleAttributeChange(
-                section,
-                index,
-                "name",
-                e.target.value
-              )
-            }
-          />
+          <div className="form-field">
+            <label htmlFor={`${section}-name-${index}`}>
+              Attribute Name
+            </label>
+            <input
+              id={`${section}-name-${index}`}
+              placeholder="Enter name"
+              value={attribute.name}
+              onChange={(e) =>
+                handleAttributeChange(
+                  section,
+                  index,
+                  "name",
+                  e.target.value
+                )
+              }
+            />
+          </div>
 
-          <input
-            placeholder="Attribute value"
-            value={attribute.value}
-            onChange={(e) =>
-              handleAttributeChange(
-                section,
-                index,
-                "value",
-                e.target.value
-              )
-            }
-          />
+          <div className="form-field">
+            <label htmlFor={`${section}-value-${index}`}>
+              Attribute Value
+            </label>
+            <input
+              id={`${section}-value-${index}`}
+              placeholder="Enter value"
+              value={attribute.value}
+              onChange={(e) =>
+                handleAttributeChange(
+                  section,
+                  index,
+                  "value",
+                  e.target.value
+                )
+              }
+            />
+          </div>
 
-          <Button
-            type="button"
-            onClick={() => removeAttribute(section, index)}
-            disabled={formData[section].length === 1}
-          >
-            Remove
-          </Button>
+          {formData[section].length > 1 && (
+            <Button
+              type="button"
+              onClick={() => removeAttribute(section, index)}
+            >
+              Remove
+            </Button>
+          )}
         </div>
       ))}
 
-      <Button type="button" onClick={() => addAttribute(section)}>
-        + Add Attribute
+      <Button
+        type="button"
+        className="add-attribute-button"
+        onClick={() => addAttribute(section)}
+      >
+        + {buttonLabel}
       </Button>
     </section>
   );
 
   return (
     <form className="product-form" onSubmit={handleSubmit}>
-      <h2>{initialData ? "Edit Product" : "Add Product"}</h2>
+      <div className="product-form-header">
+        <h2>{initialData ? "Edit Product" : "Add Product"}</h2>
+        <p>Enter the details to manage your product information.</p>
+      </div>
 
       <section className="form-section">
         <h3>Basic Details</h3>
@@ -207,7 +226,9 @@ function ProductForm({ initialData, onSave, onCancel }) {
           {renderField("Item Name", "itemName", "text", true)}
 
           <div className="form-field">
-            <label htmlFor="itemType">Item Type *</label>
+            <label htmlFor="itemType">
+              Item Type <span className="required-mark">*</span>
+            </label>
 
             <select
               id="itemType"
@@ -226,12 +247,26 @@ function ProductForm({ initialData, onSave, onCancel }) {
           </div>
 
           {renderField("Category", "category")}
-          {renderField("Description", "description")}
+
+          <div className="form-field full-width">
+            <label htmlFor="description">Description</label>
+            <textarea
+              id="description"
+              name="description"
+              rows={3}
+              placeholder="Enter product description"
+              value={formData.description}
+              onChange={handleChange}
+            />
+            {errors.description && (
+              <span className="form-error">{errors.description}</span>
+            )}
+          </div>
         </div>
       </section>
 
       <section className="form-section">
-        <h3>Manufacturer Details</h3>
+        <h3>Product Details</h3>
 
         <div className="form-grid">
           {renderField("Brand Name", "brandName")}
@@ -244,16 +279,15 @@ function ProductForm({ initialData, onSave, onCancel }) {
       </section>
 
       <section className="form-section">
-        <h3>Units and Pricing</h3>
+        <h3>Unit and Pricing</h3>
 
         <div className="form-grid">
           {renderField("Base Unit", "baseUnit", "text", true)}
-          {renderField("Purchase Cost", "purchaseCost", "number", true)}
-          {renderField("Selling Price", "sellingPrice", "number", true)}
-          {renderField("MRP", "mrp", "number", true)}
 
           <div className="form-field">
-            <label htmlFor="currency">Currency *</label>
+            <label htmlFor="currency">
+              Currency <span className="required-mark">*</span>
+            </label>
 
             <select
               id="currency"
@@ -269,33 +303,55 @@ function ProductForm({ initialData, onSave, onCancel }) {
               <span className="form-error">{errors.currency}</span>
             )}
           </div>
+
+          {renderField("Purchase Cost", "purchaseCost", "number", true)}
+          {renderField("Selling Price", "sellingPrice", "number", true)}
+          {renderField("MRP", "mrp", "number", true)}
         </div>
       </section>
 
-      <section className="form-section">
-        <h3>Verification</h3>
+      <section className="form-section additional-details">
+        <h3>Additional Details</h3>
 
-        <Toggle
-          label="Verified"
-          checked={formData.verified}
-          onChange={(value) =>
-            setFormData((prev) => ({
-              ...prev,
-              verified: value,
-            }))
-          }
-        />
+        <div className="verification-row">
+          <div className="verification-text">
+            <label>Verified</label>
+            <p>Mark as verified after authorised review</p>
+          </div>
+
+          <Toggle
+            label=""
+            checked={formData.verified}
+            onChange={(value) =>
+              setFormData((prev) => ({
+                ...prev,
+                verified: value,
+              }))
+            }
+          />
+        </div>
       </section>
 
-      {renderAttributes("Item Attributes", "itemAttributes")}
-      {renderAttributes("Custom Attributes", "customAttributes")}
+      <div className="attribute-cards-grid">
+        {renderAttributes(
+          "Item Attributes",
+          "itemAttributes",
+          "Add Attribute"
+        )}
+
+        {renderAttributes(
+          "Custom Attributes",
+          "customAttributes",
+          "Add Custom Attribute"
+        )}
+      </div>
 
       <div className="form-actions">
         <Button type="button" onClick={onCancel}>
           Cancel
         </Button>
 
-        <Button type="submit">
+        <Button type="submit" className="save-product-button">
           {initialData ? "Update Product" : "Save Product"}
         </Button>
       </div>
