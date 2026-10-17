@@ -32,7 +32,7 @@ function Table({
       return "Out of Stock";
     }
 
-    if (Number(item.quantity) <= Number(item.reorderLevel ?? 5)) {
+    if (Number(item.quantity) <=5) {
       return "Low Stock";
     }
 
@@ -143,33 +143,27 @@ function Table({
           }}
         />
 
-        {data.some((item) => item.category) && (
-          <Dropdown
-            options={categoryOptions}
-            value={category}
-            onChange={(value) => {
-              setCategory(value);
-              setActiveFilter("category");
-              setCurrentPage(1);
-            }}
-            placeholder="All Categories"
-          />
-        )}
+        <Dropdown
+          options={categoryOptions}
+          value={category}
+          onChange={(value) => {
+            setCategory(value);
+            setActiveFilter("category");
+            setCurrentPage(1);
+          }}
+          placeholder="All Categories"
+        />
 
-        {data.some(
-          (item) => item.quantity !== undefined && item.quantity !== null
-        ) && (
-          <Dropdown
-            options={statusOptions}
-            value={status}
-            onChange={(value) => {
-              setStatus(value);
-              setActiveFilter("status");
-              setCurrentPage(1);
-            }}
-            placeholder="All Status"
-          />
-        )}
+        <Dropdown
+          options={statusOptions}
+          value={status}
+          onChange={(value) => {
+            setStatus(value);
+            setActiveFilter("status");
+            setCurrentPage(1);
+          }}
+          placeholder="All Status"
+        />
       </div>
 
       <div className="table-scroll">

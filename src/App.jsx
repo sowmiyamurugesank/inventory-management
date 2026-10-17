@@ -6,9 +6,7 @@ import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
 import Dashboard from "./Dashboard.jsx";
 import Product from "./pages/Product.jsx";
-import AddItem from "./pages/AddItem.jsx";
-import Storage from "./pages/Storage.jsx";
-import WarehouseLocation from "./pages/WarehouseLocation.jsx";
+
 
 function Page({ title }) {
   return <h1>{title}</h1>;
@@ -18,6 +16,13 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+      
+        <Route path="/login" element={<Login />} />
+
+     
+        <Route path="/signup" element={<Signup />} />
+
+   
        
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
@@ -28,9 +33,9 @@ function App() {
 
           
           <Route path="products" element={<Product />} />
-          <Route path="product/add" element={<AddItem />} />
+       
 
-         
+  
           <Route path="storage" element={<Storage />} />
           <Route
             path="storage/warehouse-location"

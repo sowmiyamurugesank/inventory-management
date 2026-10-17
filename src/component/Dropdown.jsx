@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import Button from "./Button";
-import "./Dropdown.css";
+import "../styles/Dropdown.css";
 
 function Dropdown({
   options = [],

@@ -1,7 +1,7 @@
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Button from "./Button";
-import "../component/Pagination.css";
+import "../styles/Pagination.css";
 
 function Pagination({ currentPage, totalPages, onPageChange }) {
   if (totalPages <= 1) return null;
