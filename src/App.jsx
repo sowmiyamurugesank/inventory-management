@@ -6,7 +6,7 @@ import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
 import Dashboard from "./Dashboard.jsx";
 import Product from "./pages/Product.jsx";
-
+import WarehouseLocation from "./pages/WarehouseLocation";
 
 function Page({ title }) {
   return <h1>{title}</h1>;
