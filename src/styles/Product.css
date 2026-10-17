@@ -34,8 +34,6 @@
   border-radius: 12px;
 }
 
-
-
 .products-heading h1 {
   margin: 0;
   font-size: 26px;
@@ -62,7 +60,7 @@
   margin-bottom: 24px;
   padding: 6px;
   overflow-x: auto;
-  background: #ffffff;
+  background: #fff;
   border: 1px solid #e1e4f0;
   border-radius: 10px;
 }
@@ -82,11 +80,13 @@
 
 .product-tab:hover {
   background: #f0efff;
+  color: #4b49ed;
 }
 
 .product-tab.active {
   background: #5b4de6;
-  color: #ffffff;
+  color: #fff;
+  font-weight: 600;
 }
 
 /* =========================
@@ -109,7 +109,7 @@
   min-height: 115px;
   padding: 18px;
   box-sizing: border-box;
-  background: #ffffff;
+  background: #fff;
   border: 1px solid #e5e7ef;
   border-radius: 12px;
   box-shadow: 0 2px 6px rgba(32, 36, 58, 0.04);
@@ -163,12 +163,10 @@
   margin-top: 24px;
   padding: 20px;
   box-sizing: border-box;
-  background: #ffffff;
+  background: #fff;
   border: 1px solid #e1e4f0;
   border-radius: 12px;
 }
-
-/* All Products heading + Add Product button */
 
 .products-table-heading {
   display: flex;
@@ -201,7 +199,7 @@
   padding: 10px 16px;
   box-sizing: border-box;
   background: #5b4de6;
-  color: #ffffff;
+  color: #fff;
   border: none;
   border-radius: 7px;
   font-size: 14px;
@@ -219,6 +217,9 @@
   flex-shrink: 0;
 }
 
+/* =========================
+   Product Table Toolbar
+========================= */
 
 .all-products-section .table-toolbar {
   display: flex;
@@ -233,12 +234,12 @@
 .all-products-section .table-toolbar select,
 .all-products-section .table-toolbar .dropdown {
   width: 280px;
-  height: 44px;
+  height: 36px;
   padding: 0 14px;
   box-sizing: border-box;
   border: 1px solid #dfe3ee;
   border-radius: 9px;
-  background: white;
+  background: #fff;
   color: #20243a;
   font-size: 14px;
   outline: none;
@@ -255,9 +256,7 @@
   border-color: #c2bef0;
   box-shadow: 0 0 0 1px rgba(91, 77, 230, 0.12);
 }
-.all-products-section .table-search {
-  height: 36px;
-}
+
 /* =========================
    Other Tab Content
 ========================= */
@@ -266,7 +265,7 @@
   margin-top: 20px;
   padding: 24px;
   box-sizing: border-box;
-  background: #ffffff;
+  background: #fff;
   border: 1px solid #e5e7ef;
   border-radius: 12px;
 }
@@ -285,35 +284,64 @@
 }
 
 /* =========================
-   Back Button
+   Category Header
 ========================= */
 
-.back-button {
+.category-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.category-header h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #20243a;
+}
+
+.add-category-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 10px 14px;
-  background: #5b4de6;
-  color: #ffffff;
+  gap: 6px;
+  padding: 9px 14px;
   border: none;
   border-radius: 6px;
+  background: #2563eb;
+  color: #fff;
   cursor: pointer;
 }
 
-.back-button:hover {
-  background: #493bd0;
+.add-category-button:hover {
+  background: #1d4ed8;
 }
 
 /* =========================
    Category Modal
 ========================= */
 
+.category-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.35);
+}
+
 .category-modal {
   width: 100%;
   max-width: 400px;
+  max-height: 90vh;
+  overflow-y: auto;
   padding: 24px;
   box-sizing: border-box;
-  background: #ffffff;
+  background: #fff;
   border-radius: 10px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
 }
@@ -334,16 +362,22 @@
 }
 
 .category-modal-header button {
-  width: 32px;
-  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
   border: none;
-  background: transparent;
-  font-size: 24px;
+  border-radius: 50%;
+  background: #f3f4f6;
   color: #697085;
+  font-size: 20px;
   cursor: pointer;
 }
 
 .category-modal-header button:hover {
+  background: #e5e7eb;
   color: #20243a;
 }
 
@@ -376,6 +410,57 @@
   justify-content: flex-end;
   gap: 8px;
   margin-top: 8px;
+}
+
+/* =========================
+   Stock Management
+========================= */
+
+.stock-filters {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+/* =========================
+   Suppliers
+========================= */
+
+.supplier-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.supplier-header h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #20243a;
+}
+
+/* =========================
+   Back Button
+========================= */
+
+.back-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 14px;
+  background: #5b4de6;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.back-button:hover {
+  background: #493bd0;
 }
 
 /* =========================
@@ -449,9 +534,12 @@
   .all-products-section .table-toolbar {
     justify-content: flex-start;
     gap: 10px;
+    padding: 10px 0;
   }
 
-  .all-products-section .table-search {
+  .all-products-section .table-search,
+  .all-products-section .table-toolbar select,
+  .all-products-section .table-toolbar .dropdown {
     width: 100%;
     min-width: 0;
   }
@@ -460,16 +548,17 @@
     padding: 16px;
   }
 
-  .product-modal-overlay {
-    padding: 10px;
-  }
-
-  .product-modal {
-    max-height: 95vh;
-    padding: 16px;
-  }
-
   .category-modal {
     padding: 18px;
+  }
+
+  .category-header,
+  .supplier-header {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .stock-filters {
+    gap: 8px;
   }
 }

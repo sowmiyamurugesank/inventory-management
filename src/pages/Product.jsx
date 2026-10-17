@@ -87,9 +87,7 @@ function Products() {
   const handleUpdate = (updatedProduct) => {
     setProducts((previous) =>
       previous.map((product) =>
-        product.id === updatedProduct.id
-          ? updatedProduct
-          : product
+        product.id === updatedProduct.id ? updatedProduct : product
       )
     );
   };
@@ -125,28 +123,21 @@ function Products() {
 
   return (
     <div className="products-page">
-      {/* Page Heading */}
       <div className="products-heading">
         <Package className="products-heading-icon" />
-
         <div>
           <h1>Products</h1>
-          <p>
-            Manage your products, categories, stock and suppliers.
-          </p>
+          <p>Manage your products, categories, stock and suppliers.</p>
         </div>
       </div>
 
-      {/* Product Tabs */}
       <div className="product-tabs">
         {tabs.map((tab) => (
           <button
             key={tab}
             type="button"
             className={
-              activeTab === tab
-                ? "product-tab active"
-                : "product-tab"
+              activeTab === tab ? "product-tab active" : "product-tab"
             }
             onClick={() => setActiveTab(tab)}
           >
@@ -155,26 +146,22 @@ function Products() {
         ))}
       </div>
 
-      {/* Summary Cards */}
       <div className="product-cards">
         <StatCard
           title="Total Products"
           value={products.length}
           icon={<Package className="stat-icon-image" />}
         />
-
         <StatCard
           title="Low Stock"
           value={lowStock}
           icon={<AlertTriangle className="stat-icon-image" />}
         />
-
         <StatCard
           title="Out of Stock"
           value={outOfStock}
           icon={<PackageX className="stat-icon-image" />}
         />
-
         <StatCard
           title="Total Value"
           value={`₹ ${totalValue.toLocaleString("en-IN", {
@@ -185,12 +172,10 @@ function Products() {
         />
       </div>
 
-      {/* All Products Tab */}
       {activeTab === "All Products" && (
         <div className="all-products-section">
           <div className="products-table-heading">
             <h2>All Products</h2>
-
             <Button
               className="add-button"
               onClick={() => {
@@ -214,18 +199,13 @@ function Products() {
         </div>
       )}
 
-      {/* Other Tabs */}
       {activeTab !== "All Products" && (
         <div className="product-tab-content">
           <ProductManagement activeTab={activeTab} />
         </div>
       )}
 
-      {/* Add / Edit Product Modal */}
-      <Modal
-        isOpen={showForm}
-        onClose={handleCancel}
-      >
+      <Modal isOpen={showForm} onClose={handleCancel}>
         <ProductForm
           key={editingProduct?.id ?? "new-product"}
           initialData={editingProduct}
