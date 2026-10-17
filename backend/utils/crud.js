@@ -1,6 +1,10 @@
 import pool from "../config/db.js";
 
 const CRUD_OPERATIONS = {
+  // ==========================================
+  // ITEM LIST OPERATIONS
+  // ==========================================
+
   LIST: {
     sql: `
             SELECT list_item_list(
@@ -18,9 +22,7 @@ const CRUD_OPERATIONS = {
 
   GET: {
     sql: `
-            SELECT get_item_list(
-                $1::uuid
-            ) AS result
+            SELECT get_item_list($1::uuid) AS result
         `,
     params: (data) => [data.id],
   },
@@ -49,6 +51,73 @@ const CRUD_OPERATIONS = {
   DELETE: {
     sql: `
             SELECT delete_item_list(
+                $1::uuid,
+                $2::uuid
+            ) AS result
+        `,
+    params: (data) => [data.id, data.userId ?? null],
+  },
+
+  // ==========================================
+  // SUPPLIER / VENDOR OPERATIONS
+  // ==========================================
+
+  VENDOR_LIST: {
+    sql: `
+            SELECT list_vendors(
+                $1::jsonb,
+                $2::integer,
+                $3::integer
+            ) AS result
+        `,
+    params: (data) => [
+      JSON.stringify(data.filters ?? {}),
+      data.page ?? 1,
+      data.pageSize ?? 10,
+    ],
+  },
+
+  VENDOR_GET: {
+    sql: `
+            SELECT get_vendor($1::uuid) AS result
+        `,
+    params: (data) => [data.id],
+  },
+
+  VENDOR_CREATE: {
+    sql: `
+            SELECT create_vendor($1::jsonb) AS result
+        `,
+    params: (data) => {
+      const payload = {
+        ...data.data,
+        created_by: data.userId ?? null,
+      };
+
+      return [JSON.stringify(payload)];
+    },
+  },
+
+  VENDOR_UPDATE: {
+    sql: `
+            SELECT update_vendor(
+                $1::uuid,
+                $2::jsonb
+            ) AS result
+        `,
+    params: (data) => {
+      const payload = {
+        ...data.data,
+        updated_by: data.userId ?? null,
+      };
+
+      return [data.id, JSON.stringify(payload)];
+    },
+  },
+
+  VENDOR_DELETE: {
+    sql: `
+            SELECT delete_vendor(
                 $1::uuid,
                 $2::uuid
             ) AS result
