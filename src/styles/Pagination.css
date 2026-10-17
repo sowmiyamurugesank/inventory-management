@@ -1,10 +1,11 @@
-
 .pagination {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: center;
   gap: 8px;
-  margin-top: 16px;
+  margin: 0;
+  padding: 0;
+  flex-wrap: nowrap;
 }
 
 .page-button {
@@ -42,7 +43,8 @@
 @media (max-width: 480px) {
   .pagination {
     justify-content: center;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    gap: 4px;
   }
 
   .page-button {

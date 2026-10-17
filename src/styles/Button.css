@@ -1,45 +1,86 @@
 
+/* Common Button */
 
 .button {
-  padding: 10px 16px;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  padding: 8px 14px;
+  min-height: 36px;
+  box-sizing: border-box;
+
+  border: 1px solid transparent;
+  border-radius: 7px;
+
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  line-height: 1.4;
+
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  white-space: nowrap;
+
+  transition: background-color 0.2s ease,
+              border-color 0.2s ease,
+              box-shadow 0.2s ease;
 }
 
+/* Add Button */
 
 .add-button {
-  background-color: #6c5ce7;
-  color: white;
+  background-color: #5b4de6;
+  color: #ffffff;
 }
 
 .add-button:hover {
-  background-color: #5846d8;
+  background-color: #493bd0;
 }
 
+.add-button:focus-visible {
+  outline: 2px solid #5b4de6;
+  outline-offset: 2px;
+}
+
+/* Cancel Button */
 
 .cancel-button {
-  background-color: #e5e7eb;
+  background-color: #f3f4f6;
   color: #374151;
+  border-color: #e5e7eb;
 }
 
 .cancel-button:hover {
-  background-color: #d1d5db;
+  background-color: #e5e7eb;
+  border-color: #d1d5db;
 }
 
+/* Delete Button */
 
 .delete-button {
   background-color: #dc2626;
-  color: white;
+  color: #ffffff;
 }
 
 .delete-button:hover {
   background-color: #b91c1c;
 }
 
+/* Disabled Button */
+
 .button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Small Screens */
+
+@media (max-width: 600px) {
+  .button {
+    padding: 7px 11px;
+    min-height: 34px;
+    font-size: 12px;
+  }
 }

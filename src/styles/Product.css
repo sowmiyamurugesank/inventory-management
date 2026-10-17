@@ -1,3 +1,7 @@
+/* =========================
+   Main Product Page
+========================= */
+
 .products-page {
     width: 100%;
     min-height: 100%;
@@ -7,6 +11,10 @@
     color: #20243a;
     text-align: left;
 }
+
+/* =========================
+   Page Heading
+========================= */
 
 .products-heading {
     display: flex;
@@ -38,7 +46,6 @@
     margin: 0 0 6px;
     font-size: 28px;
     font-weight: 700;
-    text-align: left;
     color: #172033;
 }
 
@@ -48,7 +55,9 @@
     color: #64748b;
 }
 
-/* Product Tabs */
+/* =========================
+   Product Tabs
+========================= */
 
 .product-tabs {
     display: flex;
@@ -83,9 +92,12 @@
 .product-tab.active {
     background: #5b4de6;
     color: #fff;
+    font-weight: 600;
 }
 
-/* Product Cards */
+/* =========================
+   Product Summary Cards
+========================= */
 
 .product-cards {
     display: grid;
@@ -148,11 +160,18 @@
     overflow-wrap: anywhere;
 }
 
-/* All Products */
+/* =========================
+   All Products Section
+========================= */
 
 .all-products-section {
     width: 100%;
     margin-top: 24px;
+    padding: 20px;
+    box-sizing: border-box;
+    background: #fff;
+    border: 1px solid #e1e4f0;
+    border-radius: 12px;
 }
 
 .products-table-heading {
@@ -160,7 +179,8 @@
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    margin-bottom: 18px;
+    width: 100%;
+    margin-bottom: 20px;
 }
 
 .products-table-heading h2 {
@@ -170,27 +190,63 @@
     font-weight: 600;
 }
 
-.add-product-button {
+/* =========================
+   Add Product Button
+========================= */
+
+.products-page .add-button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 11px 16px;
+    min-height: 40px;
+    padding: 10px 16px;
+    box-sizing: border-box;
+    background: #5b4de6;
+    color: #fff;
     border: none;
-    border-radius: 8px;
-    background: #4b49ed;
-    color: #ffffff;
+    border-radius: 7px;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 500;
     white-space: nowrap;
     cursor: pointer;
 }
 
-.add-product-button:hover {
-    background: #3937d5;
+.products-page .add-button:hover {
+    background: #493bd0;
 }
 
-/* Product Tab Content */
+/* =========================
+   Product Table Toolbar
+========================= */
+
+.all-products-section .table-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.all-products-section .table-search,
+.all-products-section .table-toolbar select,
+.all-products-section .table-toolbar .dropdown {
+    width: 280px;
+    height: 36px;
+    padding: 0 14px;
+    box-sizing: border-box;
+    border: 1px solid #dfe3ee;
+    border-radius: 9px;
+    background: #fff;
+    color: #20243a;
+    font-size: 14px;
+    outline: none;
+}
+
+/* =========================
+   Product Tab Content
+========================= */
 
 .product-tab-content {
     width: 100%;
@@ -214,15 +270,24 @@
     color: #697085;
 }
 
-/* Back Button */
+/* =========================
+   Back Button
+========================= */
 
 .back-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     padding: 10px 14px;
     background: #5b4de6;
     color: #fff;
     border: none;
     border-radius: 6px;
     cursor: pointer;
+}
+
+.back-button:hover {
+    background: #493bd0;
 }
 
 /* =========================
@@ -270,22 +335,22 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 20px;
     background: rgba(0, 0, 0, 0.35);
     z-index: 1000;
 }
 
-/* Modal Box */
-
 .category-modal {
-    width: 400px;
+    width: 100%;
+    max-width: 400px;
+    max-height: 90vh;
+    overflow-y: auto;
     padding: 24px;
     box-sizing: border-box;
     background: #ffffff;
     border-radius: 10px;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
 }
-
-/* Modal Header */
 
 .category-modal-header {
     display: flex;
@@ -316,8 +381,6 @@
     color: #20243a;
 }
 
-/* Labels */
-
 .category-modal label {
     display: block;
     margin-bottom: 6px;
@@ -325,8 +388,6 @@
     font-weight: 500;
     color: #444b61;
 }
-
-/* Inputs */
 
 .category-modal input {
     width: 100%;
@@ -342,8 +403,6 @@
 .category-modal input:focus {
     border-color: #5b5de6;
 }
-
-/* Modal Buttons */
 
 .category-modal-buttons {
     display: flex;
@@ -371,6 +430,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
+    flex-wrap: wrap;
     margin-bottom: 20px;
 }
 
@@ -409,7 +469,9 @@
     background: #1d4ed8 !important;
 }
 
-/* Validation */
+/* =========================
+   Validation
+========================= */
 
 .category-modal .validation-error {
     margin: -10px 0 14px;
@@ -417,16 +479,20 @@
     color: red !important;
 }
 
-/* Focus */
+/* =========================
+   Focus
+========================= */
 
-.add-product-button:focus-visible,
+.add-button:focus-visible,
 .product-tab:focus-visible,
 .back-button:focus-visible {
     outline: 2px solid #4b49ed;
     outline-offset: 3px;
 }
 
-/* Responsive */
+/* =========================
+   Responsive
+========================= */
 
 @media (max-width: 1100px) {
     .product-cards {
@@ -480,11 +546,26 @@
         flex-direction: column;
     }
 
-    .add-product-button {
+    .products-page .add-button {
         width: 100%;
+    }
+
+    .all-products-section {
+        padding: 16px;
     }
 
     .product-tab-content {
         padding: 18px;
+    }
+
+    .all-products-section .table-toolbar {
+        padding: 10px 0;
+    }
+
+    .all-products-section .table-search,
+    .all-products-section .table-toolbar select,
+    .all-products-section .table-toolbar .dropdown {
+        width: 100%;
+        min-width: 0;
     }
 }
