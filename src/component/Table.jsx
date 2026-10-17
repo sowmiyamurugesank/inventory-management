@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Pencil, Trash2 } from "lucide-react";
 
@@ -22,6 +21,7 @@ function Table({
   const [currentPage, setCurrentPage] = useState(1);
   const [editingCell, setEditingCell] = useState(null);
   const [editValue, setEditValue] = useState("");
+  const [openDropdown, setOpenDropdown] = useState(null);
 
   const getStatus = (item) => {
     if (item.quantity === undefined || item.quantity === null) {
@@ -143,13 +143,18 @@ function Table({
           }}
         />
 
-        <Dropdown
+                <Dropdown
           options={categoryOptions}
           value={category}
+          isOpen={openDropdown === "category"}
+          onToggle={(open) =>
+            setOpenDropdown(open ? "category" : null)
+          }
           onChange={(value) => {
             setCategory(value);
             setActiveFilter("category");
             setCurrentPage(1);
+            setOpenDropdown(null);
           }}
           placeholder="All Categories"
         />
@@ -157,10 +162,15 @@ function Table({
         <Dropdown
           options={statusOptions}
           value={status}
+          isOpen={openDropdown === "status"}
+          onToggle={(open) =>
+            setOpenDropdown(open ? "status" : null)
+          }
           onChange={(value) => {
             setStatus(value);
             setActiveFilter("status");
             setCurrentPage(1);
+            setOpenDropdown(null);
           }}
           placeholder="All Status"
         />
