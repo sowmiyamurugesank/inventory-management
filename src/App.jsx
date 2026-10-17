@@ -27,15 +27,22 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
 
+      
         <Route path="/" element={<MainLayout />}>
-        
           <Route index element={<Dashboard />} />
 
+          
           <Route path="products" element={<Product />} />
-          
+       
 
-          
-          <Route path="storage" element={<Page title="Storage" />} />
+  
+          <Route path="storage" element={<Storage />} />
+          <Route
+            path="storage/warehouse-location"
+            element={<WarehouseLocation />}
+          />
+
+         
           <Route path="billing" element={<Page title="Billing" />} />
           <Route path="parties" element={<Page title="Parties" />} />
 
@@ -56,9 +63,11 @@ function App() {
           <Route path="settings" element={<Page title="Settings" />} />
         </Route>
 
-      
        
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route
+          path="*"
+          element={<Navigate to="/login" replace />}
+        />
       </Routes>
     </BrowserRouter>
   );
