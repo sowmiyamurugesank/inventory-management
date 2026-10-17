@@ -23,7 +23,6 @@ function Products() {
   return (
     <div className="products-page">
 
-      {/* Heading */}
       <div className="products-heading">
         <Package className="products-heading-icon" />
 
@@ -35,7 +34,6 @@ function Products() {
         </div>
       </div>
 
-      {/* Tabs */}
       <div className="product-tabs">
         {tabs.map((tab) => (
           <button
@@ -53,7 +51,6 @@ function Products() {
         ))}
       </div>
 
-      {/* Summary Cards */}
       <div className="product-cards">
         <StatCard
           title="Total Products"
@@ -83,8 +80,6 @@ function Products() {
     
       {activeTab !== "All Products" && (
         <div className="product-tab-content">
-          <h2>{activeTab}</h2>
-          <p>This section will be developed next.</p>
 
           <button
             type="button"

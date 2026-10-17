@@ -1,5 +1,5 @@
 
-import "../component/Button.css";
+import "../styles/Button.css";
 
 function Button({
   children,

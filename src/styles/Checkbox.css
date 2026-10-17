@@ -1,0 +1,20 @@
+
+.reusable-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #40465a;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.reusable-checkbox input {
+  width: 16px;
+  height: 16px;
+  accent-color: #4b49ed;
+  cursor: pointer;
+}
+
+.reusable-checkbox input:disabled {
+  cursor: not-allowed;
+}

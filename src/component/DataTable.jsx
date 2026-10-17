@@ -1,4 +1,4 @@
-import "./DataTable.css";
+import "../styles/DataTable.css";
 
 function DataTable(props) {
     return (
