@@ -10,7 +10,6 @@ import Storage from "./pages/Storage.jsx";
 import IncomingStock from "./pages/IncomingStock.jsx";
 import WarehouseLocation from "./pages/WarehouseLocation.jsx";
 import OutgoingStock from "./pages/OutgoingStock.jsx";
-import WarehouseLocation from "./pages/WarehouseLocation";
 
 function Page({ title }) {
   return <h1>{title}</h1>;
@@ -42,7 +41,7 @@ function App() {
   
           <Route path="storage" element={<Storage />} />
           <Route
-            path="storage/warehouse-location"
+            path="storage/warehouse"
             element={<WarehouseLocation />}/>
           <Route path="storage/incoming-stock" element={<IncomingStock />}/>
           <Route path="storage/outgoing-stock"  element={<OutgoingStock />} />

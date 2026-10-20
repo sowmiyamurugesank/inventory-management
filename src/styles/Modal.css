@@ -7,7 +7,7 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: rgba(0, 0, 0, 0.45);
+  
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
 }
@@ -112,7 +112,8 @@
 .modal-body textarea::placeholder,
 .attribute-row input::placeholder {
   font-size: 12px;
-  color: #9ca3af;
+  color: #2464d1;
+  
 }
 
 .modal-body input:focus,
