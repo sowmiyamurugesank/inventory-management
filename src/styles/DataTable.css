@@ -1,40 +1,174 @@
+
 .table-container {
-    width: 100%;
-    overflow-x: auto;
+  width: 100%;
+  min-width: 0;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  overflow-x: auto;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+   table-layout: fixed;
+}
+/* S.No */
+.table-container th:nth-child(1),
+.table-container td:nth-child(1) {
+  width: 10%;
 }
 
+/* Category */
+.table-container th:nth-child(2),
+.table-container td:nth-child(2) {
+  width: 20%;
+}
+
+/* Description */
+.table-container th:nth-child(3),
+.table-container td:nth-child(3) {
+  width: 35%;
+}
+
+/* Status */
+.table-container th:nth-child(4),
+.table-container td:nth-child(4) {
+  width: 15%;
+}
+
+/* Action */
+.table-container th:nth-child(5),
+.table-container td:nth-child(5) {
+  width: 20%;
+}
 .table-container table {
-    width: 100%;
-    border-collapse: collapse;
-    background: white;
+  width: 100%;
+  min-width: 900px;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  table-layout: auto;
+  background: #ffffff;
+  color: #374151;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  text-align: left;
 }
 
-.table-container th,
-.table-container td {
-    padding: 12px 16px;
-    text-align: left;
-    border-bottom: 1px solid #e5e5e5;
+.table-container thead th {
+  padding: 14px 16px;
+  background: #f8fafc;
+  color: #1f2937;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+  white-space: nowrap;
+  border: none;
+  border-bottom: 1px solid #e5e7eb !important;
 }
 
-.table-container th {
-    font-weight: 600;
-    background: #f8f8f8;
+.table-container tbody td {
+  padding: 13px 16px;
+  color: #374151;
+  background: #ffffff;
+  font-size: 14px;
+  font-weight: 400;
+  text-align: left;
+  vertical-align: middle;
+  border: none;
+  border-bottom: 1px solid #edf0f4 !important;
 }
 
-.table-container tr:hover {
-    background: #f8f8f8;
+.table-container tbody tr:last-child td {
+  border-bottom: 1px solid #edf0f4 !important;
 }
+
+.table-container tbody tr:hover td {
+  background: #f9fafb;
+}
+
+.table-container tbody td.empty-table {
+  padding: 24px 16px;
+  text-align: center;
+  vertical-align: middle;
+  color: #4b5563;
+  font-size: 14px;
+  font-weight: 500;
+  background: #ffffff;
+  border-bottom: none !important;
+  white-space: normal;
+}
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.action-buttons button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  min-height: 28px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  color: #4b5563;
+  cursor: pointer;
+}
+
+.action-buttons button:hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.action-buttons button svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+}
+
 .table-footer {
-    width: 100%;
-    margin-top: 16px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: #ffffff;
+  border-top: 1px solid #e5e7eb;
+  box-sizing: border-box;
 }
 
 .table-footer p {
-    margin: 0;
-    font-size: 13px;
-    color: #6b7280;
-    text-align: center;
+  margin: 0;
+  color: #374151;
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .table-container thead th {
+    padding: 12px;
+  }
+
+  .table-container tbody td {
+    padding: 11px 12px;
+  }
+
+  .table-container tbody td.empty-table {
+    padding: 24px 12px;
+  }
+
+  .table-footer {
+    padding: 12px;
+    overflow-x: auto;
+  }
+
+  .table-footer p {
+    font-size: 12px;
+  }
 }

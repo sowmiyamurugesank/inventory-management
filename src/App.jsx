@@ -10,7 +10,7 @@ import Storage from "./pages/Storage.jsx";
 import IncomingStock from "./pages/IncomingStock.jsx";
 import WarehouseLocation from "./pages/WarehouseLocation.jsx";
 import OutgoingStock from "./pages/OutgoingStock.jsx";
-import WarehouseLocation from "./pages/WarehouseLocation";
+
 
 function Page({ title }) {
   return <h1>{title}</h1>;

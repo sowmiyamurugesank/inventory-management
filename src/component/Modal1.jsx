@@ -1,6 +1,6 @@
 
 import Button from "./Button.jsx";
-import "../styles/Modal.css";
+import "../styles/Modal1.css";
 
 function Modal({ isOpen, onClose, children }) {
   if (!isOpen) {
@@ -11,13 +11,13 @@ function Modal({ isOpen, onClose, children }) {
     <div className="modal-overlay">
       <div className="modal">
         <div className="modal-header">
-          <Button
-            type="button"
-            onClick={onClose}
-            className="modal-close"
-          >
-            ✕
-          </Button>
+         <Button
+  type="Button"
+  onClick={onClose}
+  className="product-modal-cross"
+>
+  ×
+</Button>
         </div>
 
         <div className="modal-body">

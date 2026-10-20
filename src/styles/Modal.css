@@ -66,29 +66,6 @@
   background: #fff;
 }
 
-.modal-close {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 17px;
-  height: 20px;
-  padding: 0;
-  border: 1px solid #d1d5db;
-  border-radius: 50%;
-  background: #fff;
-  color: #6b7280;
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 1;
-  cursor: pointer;
-  transition: 0.2s ease;
-}
-
-.modal-close:hover {
-  background: #fee2e2;
-  border-color: #fca5a5;
-  color: #dc2626;
-}
 
 .modal-body {
   width: 100%;
