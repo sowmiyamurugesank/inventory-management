@@ -9,22 +9,22 @@ import {
 
 import StatCard from "../StatCard.jsx";
 import WarehouseLocation from "./WarehouseLocation.jsx";
+import IncomingStock from "./IncomingStock.jsx";
 import "../styles/Storage.css";
+import OutgoingStock from "./OutgoingStock.jsx";
 
 function Storage() {
-  const [activeTab, setActiveTab] = useState("Warehouse Location");
+  const [activeTab, setActiveTab] = useState("Warehouse");
 
   const tabs = [
-    "Warehouse Location",
-    "Stock Overview",
+    "Warehouse",
     "Incoming Stock",
     "Outgoing Stock",
   ];
 
   return (
     <div className="storage-page">
-  
-       <div className="storage-heading">
+      <div className="storage-heading">
         <div className="storage-heading-icon">
           <Warehouse />
         </div>
@@ -34,11 +34,11 @@ function Storage() {
         </div>
       </div>
 
-     
       <div className="storage-tabs">
         {tabs.map((tab) => (
           <button
             key={tab}
+            type="button"
             className={
               activeTab === tab
                 ? "storage-tab active"
@@ -51,59 +51,45 @@ function Storage() {
         ))}
       </div>
 
-     
-      <div className="storage-summary">
-        <StatCard
-          title="Total Warehouses"
-          value="0"
-          icon={<Warehouse />}
-        />
+      {activeTab === "Warehouse" && (
+        <div className="storage-summary">
+          <StatCard
+            title="Total Warehouses"
+            value="0"
+            icon={<Warehouse />}
+          />
 
-        <StatCard
-          title="Total Stock"
-          value="0"
-          icon={<Package />}
-        />
+          <StatCard
+            title="Total Stock"
+            value="0"
+            icon={<Package />}
+          />
 
-        <StatCard
-          title="Incoming Stock"
-          value="0"
-          icon={<PackagePlus />}
-        />
+          <StatCard
+            title="Incoming Stock"
+            value="0"
+            icon={<PackagePlus />}
+          />
 
-        <StatCard
-          title="Outgoing Stock"
-          value="0"
-          icon={<PackageMinus />}
-        />
-      </div>
+          <StatCard
+            title="Outgoing Stock"
+            value="0"
+            icon={<PackageMinus />}
+          />
+        </div>
+      )}
 
-     
       <div className="storage-content">
-        {activeTab === "Warehouse Location" && (
+        {activeTab === "Warehouse" && (
           <WarehouseLocation />
         )}
 
-        {activeTab === "Stock Overview" && (
-          <>
-            <h3>Stock Overview</h3>
-            <p>View current stock and stock status here.</p>
-          </>
-        )}
-
         {activeTab === "Incoming Stock" && (
-          <>
-            <h3>Incoming Stock</h3>
-            <p>Manage incoming stock from suppliers here.</p>
-          </>
+          <IncomingStock />
         )}
-
-        {activeTab === "Outgoing Stock" && (
-          <>
-            <h3>Outgoing Stock</h3>
-            <p>Manage outgoing stock and dispatches here.</p>
-          </>
-        )}
+           
+           {activeTab === "Outgoing Stock" && (<OutgoingStock />)}
+       
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Eye } from "lucide-react";
 
 import Button from "./Button";
 import Dropdown from "./Dropdown";
@@ -143,7 +143,7 @@ function Table({
           }}
         />
 
-                <Dropdown
+          <Dropdown
           options={categoryOptions}
           value={category}
           isOpen={openDropdown === "category"}

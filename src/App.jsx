@@ -6,7 +6,10 @@ import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
 import Dashboard from "./Dashboard.jsx";
 import Product from "./pages/Product.jsx";
-import WarehouseLocation from "./pages/WarehouseLocation";
+import Storage from "./pages/Storage.jsx";
+import IncomingStock from "./pages/IncomingStock.jsx";
+import WarehouseLocation from "./pages/WarehouseLocation.jsx";
+import OutgoingStock from "./pages/OutgoingStock.jsx";
 
 function Page({ title }) {
   return <h1>{title}</h1>;
@@ -38,9 +41,11 @@ function App() {
   
           <Route path="storage" element={<Storage />} />
           <Route
-            path="storage/warehouse-location"
-            element={<WarehouseLocation />}
-          />
+            path="storage/warehouse"
+            element={<WarehouseLocation />}/>
+          <Route path="storage/incoming-stock" element={<IncomingStock />}/>
+          <Route path="storage/outgoing-stock"  element={<OutgoingStock />} />
+          
 
          
           <Route path="billing" element={<Page title="Billing" />} />

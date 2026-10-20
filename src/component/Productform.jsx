@@ -24,7 +24,17 @@ const emptyForm = {
   customAttributes: [{ name: "", value: "" }],
 };
 
-function ProductForm({ initialData, onSave, onCancel }) {
+const requiredFields = [
+  ["itemCode", "Item Code"],
+  ["itemName", "Item Name"],
+  ["itemType", "Item Type"],
+  ["baseUnit", "Base Unit"],
+  ["purchaseCost", "Purchase Cost"],
+  ["sellingPrice", "Selling Price"],
+  ["mrp", "MRP"],
+];
+
+function ProductForm({ initialData, onSave, onCancel, disabled = false }) {
   const [formData, setFormData] = useState({ ...emptyForm });
   const [errors, setErrors] = useState({});
 
@@ -33,6 +43,14 @@ function ProductForm({ initialData, onSave, onCancel }) {
       setFormData({
         ...emptyForm,
         ...initialData,
+        itemCode: initialData.itemCode ?? "",
+        itemName: initialData.itemName ?? "",
+        itemType: initialData.itemType ?? "",
+        baseUnit: initialData.baseUnit ?? "",
+        purchaseCost: initialData.purchaseCost ?? "",
+        sellingPrice: initialData.sellingPrice ?? "",
+        mrp: initialData.mrp ?? "",
+        currency: initialData.currency ?? "INR",
         itemAttributes: initialData.itemAttributes?.length
           ? initialData.itemAttributes
           : [{ name: "", value: "" }],
@@ -41,7 +59,11 @@ function ProductForm({ initialData, onSave, onCancel }) {
           : [{ name: "", value: "" }],
       });
     } else {
-      setFormData({ ...emptyForm });
+      setFormData({
+        ...emptyForm,
+        itemAttributes: [{ name: "", value: "" }],
+        customAttributes: [{ name: "", value: "" }],
+      });
     }
 
     setErrors({});
@@ -86,15 +108,44 @@ function ProductForm({ initialData, onSave, onCancel }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (disabled) return;
 
-    const result = itemSchema.safeParse({
-      ...formData,
-      purchaseCost:
-        formData.purchaseCost === "" ? NaN : formData.purchaseCost,
-      sellingPrice:
-        formData.sellingPrice === "" ? NaN : formData.sellingPrice,
-      mrp: formData.mrp === "" ? NaN : formData.mrp,
+    const requiredErrors = {};
+
+    requiredFields.forEach(([key, label]) => {
+      const value = formData[key];
+
+      if (value === "" || value === null || value === undefined ||
+          (typeof value === "string" && !value.trim())) {
+        requiredErrors[key] = `${label} is required`;
+      }
     });
+
+    ["purchaseCost", "sellingPrice", "mrp"].forEach((key) => {
+      const value = formData[key];
+
+      if (value !== "" && value !== null && value !== undefined) {
+        if (!Number.isFinite(Number(value))) {
+          requiredErrors[key] = "Enter a valid number";
+        } else if (Number(value) < 0) {
+          requiredErrors[key] = "Cannot be negative";
+        }
+      }
+    });
+
+    if (Object.keys(requiredErrors).length > 0) {
+      setErrors(requiredErrors);
+      return;
+    }
+
+    const schemaData = {
+      ...formData,
+      purchaseCost: Number(formData.purchaseCost),
+      sellingPrice: Number(formData.sellingPrice),
+      mrp: Number(formData.mrp),
+    };
+
+    const result = itemSchema.safeParse(schemaData);
 
     if (!result.success) {
       const fieldErrors = {};
@@ -102,17 +153,22 @@ function ProductForm({ initialData, onSave, onCancel }) {
       result.error.issues.forEach((issue) => {
         const field = issue.path[0];
 
-        if (!fieldErrors[field]) {
+        if (
+          requiredFields.some(([key]) => key === field) &&
+          !fieldErrors[field]
+        ) {
           fieldErrors[field] = issue.message;
         }
       });
 
-      setErrors(fieldErrors);
-      return;
+      if (Object.keys(fieldErrors).length > 0) {
+        setErrors(fieldErrors);
+        return;
+      }
     }
 
     onSave({
-      ...result.data,
+      ...schemaData,
       ...(initialData?.id !== undefined && {
         id: initialData.id,
       }),
@@ -134,6 +190,7 @@ function ProductForm({ initialData, onSave, onCancel }) {
         min={type === "number" ? "0" : undefined}
         value={formData[name]}
         onChange={handleChange}
+        aria-invalid={Boolean(errors[name])}
       />
 
       {errors[name] && (
@@ -145,7 +202,6 @@ function ProductForm({ initialData, onSave, onCancel }) {
   const renderAttributes = (title, section, buttonLabel) => (
     <section className="form-section attribute-card" key={section}>
       <h3>{title}</h3>
-
       <p className="attribute-description">
         Add product-specific information below.
       </p>
@@ -161,12 +217,7 @@ function ProductForm({ initialData, onSave, onCancel }) {
               placeholder="Enter name"
               value={attribute.name}
               onChange={(e) =>
-                handleAttributeChange(
-                  section,
-                  index,
-                  "name",
-                  e.target.value
-                )
+                handleAttributeChange(section, index, "name", e.target.value)
               }
             />
           </div>
@@ -180,12 +231,7 @@ function ProductForm({ initialData, onSave, onCancel }) {
               placeholder="Enter value"
               value={attribute.value}
               onChange={(e) =>
-                handleAttributeChange(
-                  section,
-                  index,
-                  "value",
-                  e.target.value
-                )
+                handleAttributeChange(section, index, "value", e.target.value)
               }
             />
           </div>
@@ -194,6 +240,7 @@ function ProductForm({ initialData, onSave, onCancel }) {
             <Button
               type="button"
               onClick={() => removeAttribute(section, index)}
+              disabled={disabled}
             >
               Remove
             </Button>
@@ -205,6 +252,7 @@ function ProductForm({ initialData, onSave, onCancel }) {
         type="button"
         className="add-attribute-button"
         onClick={() => addAttribute(section)}
+        disabled={disabled}
       >
         + {buttonLabel}
       </Button>
@@ -212,7 +260,7 @@ function ProductForm({ initialData, onSave, onCancel }) {
   );
 
   return (
-    <form className="product-form" onSubmit={handleSubmit}>
+    <form className="product-form" onSubmit={handleSubmit} noValidate>
       <div className="product-form-header">
         <h2>{initialData ? "Edit Product" : "Add Product"}</h2>
         <p>Enter the details to manage your product information.</p>
@@ -235,6 +283,7 @@ function ProductForm({ initialData, onSave, onCancel }) {
               name="itemType"
               value={formData.itemType}
               onChange={handleChange}
+              aria-invalid={Boolean(errors.itemType)}
             >
               <option value="">Select Type</option>
               <option value="Goods">Goods</option>
@@ -258,9 +307,6 @@ function ProductForm({ initialData, onSave, onCancel }) {
               value={formData.description}
               onChange={handleChange}
             />
-            {errors.description && (
-              <span className="form-error">{errors.description}</span>
-            )}
           </div>
         </div>
       </section>
@@ -271,10 +317,7 @@ function ProductForm({ initialData, onSave, onCancel }) {
         <div className="form-grid">
           {renderField("Brand Name", "brandName")}
           {renderField("Manufacturer", "manufacturer")}
-          {renderField(
-            "Manufacturer Part Number",
-            "manufacturerPartNumber"
-          )}
+          {renderField("Manufacturer Part Number", "manufacturerPartNumber")}
         </div>
       </section>
 
@@ -285,10 +328,7 @@ function ProductForm({ initialData, onSave, onCancel }) {
           {renderField("Base Unit", "baseUnit", "text", true)}
 
           <div className="form-field">
-            <label htmlFor="currency">
-              Currency <span className="required-mark">*</span>
-            </label>
-
+            <label htmlFor="currency">Currency</label>
             <select
               id="currency"
               name="currency"
@@ -298,10 +338,6 @@ function ProductForm({ initialData, onSave, onCancel }) {
               <option value="INR">INR (₹)</option>
               <option value="USD">USD ($)</option>
             </select>
-
-            {errors.currency && (
-              <span className="form-error">{errors.currency}</span>
-            )}
           </div>
 
           {renderField("Purchase Cost", "purchaseCost", "number", true)}
@@ -333,26 +369,25 @@ function ProductForm({ initialData, onSave, onCancel }) {
       </section>
 
       <div className="attribute-cards-grid">
-        {renderAttributes(
-          "Item Attributes",
-          "itemAttributes",
-          "Add Attribute"
-        )}
-
-        {renderAttributes(
-          "Custom Attributes",
-          "customAttributes",
-          "Add Custom Attribute"
-        )}
+        {renderAttributes("Item Attributes", "itemAttributes", "Add Attribute")}
+        {renderAttributes("Custom Attributes", "customAttributes", "Add Custom Attribute")}
       </div>
 
       <div className="form-actions">
-        <Button type="button" onClick={onCancel}>
+        <Button type="button" onClick={onCancel} disabled={disabled}>
           Cancel
         </Button>
 
-        <Button type="submit" className="save-product-button">
-          {initialData ? "Update Product" : "Save Product"}
+        <Button
+          type="submit"
+          className="save-product-button"
+          disabled={disabled}
+        >
+          {disabled
+            ? "Saving..."
+            : initialData
+              ? "Update Product"
+              : "Save Product"}
         </Button>
       </div>
     </form>
