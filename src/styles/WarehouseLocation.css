@@ -18,20 +18,14 @@
   border-radius: 14px;
 }
 
-
 .warehouse-heading {
-  display: block;
-  width: 100%;
   margin: 0 0 22px;
-  padding: 0;
   color: #20243a;
   font-size: 24px;
   line-height: 1.4;
   font-weight: 700;
   text-align: left;
-  opacity: 1;
 }
-
 
 .warehouse-toolbar {
   display: flex;
@@ -50,7 +44,6 @@
 
 .warehouse-search input,
 .warehouse-search .search-box-input {
-  display: block;
   width: 100%;
   height: 42px;
   padding: 0 13px;
@@ -61,6 +54,7 @@
   background: #ffffff;
   color: #20243a;
   font-size: 14px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .warehouse-search input:focus,
@@ -74,14 +68,13 @@
   color: #9298ad;
 }
 
-
 .warehouse-toolbar .add-warehouse-btn {
   display: inline-flex;
   flex: 0 0 auto;
   align-items: center;
   justify-content: center;
   min-height: 42px;
-  padding: 0 16px;
+  padding: 0 18px;
   box-sizing: border-box;
   border: 1px solid #5b5de6;
   border-radius: 8px;
@@ -91,7 +84,7 @@
   font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: background 0.2s ease, border-color 0.2s ease;
 }
 
 .warehouse-toolbar .add-warehouse-btn:hover {
@@ -104,33 +97,85 @@
   outline-offset: 2px;
 }
 
+.warehouse-toolbar .add-warehouse-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .warehouse-message {
   margin: 0 0 14px;
-  padding: 10px 12px;
+  padding: 12px 14px;
+  border: 1px solid #e4e7f0;
   border-radius: 8px;
   background: #f7f8fc;
   color: #626b80;
-  font-size: 13px;
+  font-size: 14px;
 }
 
+/* Table container support */
+.warehouse-section table {
+  width: 100%;
+  border-collapse: collapse;
+}
 
-@media (max-width: 640px) {
+.warehouse-section th {
+  padding: 14px 16px;
+  background: #f7f8fc;
+  color: #626b80;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.warehouse-section td {
+  padding: 14px 16px;
+  border-bottom: 1px solid #edf0f6;
+  color: #343b52;
+  font-size: 14px;
+}
+
+.warehouse-section tbody tr:hover {
+  background: #fafbff;
+}
+
+@media (max-width: 768px) {
   .warehouse-page {
-    padding: 14px;
+    padding: 18px;
   }
 
   .warehouse-section {
-    padding: 16px;
+    padding: 18px;
+  }
+
+  .warehouse-toolbar {
+    align-items: stretch;
+  }
+
+  .warehouse-search {
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .warehouse-page {
+    padding: 12px;
+  }
+
+  .warehouse-section {
+    padding: 14px;
+    border-radius: 10px;
   }
 
   .warehouse-heading {
+    margin-bottom: 18px;
     font-size: 21px;
   }
 
   .warehouse-toolbar {
-    align-items: flex-start;
     flex-direction: column;
     gap: 12px;
+    margin-bottom: 18px;
   }
 
   .warehouse-search {
@@ -139,5 +184,14 @@
 
   .warehouse-toolbar .add-warehouse-btn {
     align-self: flex-start;
+    width: auto;
+  }
+
+  .warehouse-section {
+    overflow-x: auto;
+  }
+
+  .warehouse-section table {
+    min-width: 600px;
   }
 }

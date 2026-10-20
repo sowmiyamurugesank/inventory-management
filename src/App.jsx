@@ -41,7 +41,7 @@ function App() {
   
           <Route path="storage" element={<Storage />} />
           <Route
-            path="storage/warehouse-location"
+            path="storage/warehouse"
             element={<WarehouseLocation />}/>
           <Route path="storage/incoming-stock" element={<IncomingStock />}/>
           <Route path="storage/outgoing-stock"  element={<OutgoingStock />} />
