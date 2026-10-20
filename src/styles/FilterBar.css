@@ -1,0 +1,49 @@
+
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.filter-search,
+.filter-date,
+.filter-select {
+  box-sizing: border-box;
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid #d9deea;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #333333;
+  font-size: 14px;
+  outline: none;
+}
+
+.filter-search {
+  flex: 1;
+  min-width: 200px;
+}
+
+.filter-date,
+.filter-select {
+  width: 180px;
+}
+
+.filter-search:focus,
+.filter-date:focus,
+.filter-select:focus {
+  border-color: #4b49ed;
+}
+
+@media (max-width: 768px) {
+  .filter-search,
+  .filter-date,
+  .filter-select {
+    width: 100%;
+    min-width: 0;
+    flex: none;
+  }
+}
