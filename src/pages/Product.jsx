@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import {
   Package,
@@ -51,7 +50,7 @@ function fromApiItem(item) {
     mrp: item.mrp ?? 0,
     currency: item.currency_code ?? "INR",
     verified: item.is_verified ?? false,
-    status: item.status ?? "Active",
+    status: item.status ?? "OUT_OF_STOCK",
     quantity: item.quantity ?? 0,
   };
 }
@@ -91,6 +90,8 @@ function toApiItem(formData) {
     selling_price: Number(formData.sellingPrice),
     mrp: Number(formData.mrp),
     currency_code: formData.currency || "INR",
+    status: "OUT_OF_STOCK",
+    is_active: true,
     is_verified: Boolean(formData.verified),
   };
 
@@ -205,39 +206,39 @@ function Products() {
     loadProducts();
   }, []);
 
- const handleSave = async (formData) => {
-  if (saving) return;
+  const handleSave = async (formData) => {
+    if (saving) return;
 
-  const validationError = validateRequiredFields(formData);
+    const validationError = validateRequiredFields(formData);
 
-  if (validationError) {
-    setError(validationError);
-    return;
-  }
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
 
-  setSaving(true);
-  setError("");
+    setSaving(true);
+    setError("");
 
-  try {
-    const payload = toApiItem(formData);
+    try {
+      const payload = toApiItem(formData);
 
-    const result = editingProduct
-      ? await updateItem(editingProduct.id, payload)
-      : await createItem(payload);
+      const result = editingProduct
+        ? await updateItem(editingProduct.id, payload)
+        : await createItem(payload);
 
-    console.log("Save response:", result);
+      console.log("Save response:", result);
 
-    await loadProducts();
+      await loadProducts();
 
-    setShowForm(false);
-    setEditingProduct(null);
-  } catch (err) {
-    console.error("Save product error:", err);
-    setError(err.message || "Unable to save product");
-  } finally {
-    setSaving(false);
-  }
-};
+      setShowForm(false);
+      setEditingProduct(null);
+    } catch (err) {
+      console.error("Save product error:", err);
+      setError(err.message || "Unable to save product");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleEdit = (product) => {
     setEditingProduct(product);
