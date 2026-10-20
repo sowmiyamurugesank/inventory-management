@@ -80,7 +80,7 @@ function WarehouseLocation() {
     <main className="warehouse-page">
       <section className="warehouse-section">
         <h2 className="warehouse-heading">
-          Warehouse Locations
+          Warehouse 
         </h2>
 
         <div className="warehouse-toolbar">
