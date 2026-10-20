@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import {
   Package,
@@ -89,6 +88,8 @@ function toApiItem(formData) {
     selling_price: Number(formData.sellingPrice || 0),
     mrp: Number(formData.mrp || 0),
     currency_code: formData.currency || "INR",
+    status: "OUT_OF_STOCK",
+    is_active: true,
     is_verified: Boolean(formData.verified),
   };
 

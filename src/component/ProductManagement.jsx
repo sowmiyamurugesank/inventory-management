@@ -6,7 +6,7 @@ import Pagination from "./Pagination";
 import Dropdown from "./Dropdown";
 import "../styles/Supplier.css";
 import supplierSchema from "../schema/supplierSchema";
-
+import PurchaseOrder from "./PurchaseOrder";
 
 function ProductManagement({ activeTab }) {
     const [currentPage, setCurrentPage] = useState(1);
@@ -17,6 +17,8 @@ function ProductManagement({ activeTab }) {
     const [editingSupplier, setEditingSupplier] = useState(null);
     const [stockCategory, setStockCategory] = useState("all");
     const [stockStatus, setStockStatus] = useState("all");
+    const [showPurchaseOrder, setShowPurchaseOrder] = useState(false);
+    
 
 const [supplierForm, setSupplierForm] = useState({
     vendorType: "Business",
@@ -268,6 +270,12 @@ const [supplierForm, setSupplierForm] = useState({
     onChange={setStockStatus}
     placeholder="All Status"
 />
+              <button
+    className="purchase-order-btn"
+    onClick={() => setShowPurchaseOrder(true)}
+>
+    + Purchase Order
+</button>
                     </div>
 
                     <DataTable
@@ -277,6 +285,11 @@ const [supplierForm, setSupplierForm] = useState({
                             <Button>View</Button>
                         )}
                     />
+                    {showPurchaseOrder && (
+    <PurchaseOrder
+        onClose={() => setShowPurchaseOrder(false)}
+    />
+)}
                 </>
             )}
 
