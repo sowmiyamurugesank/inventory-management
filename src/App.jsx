@@ -11,6 +11,7 @@ import IncomingStock from "./pages/IncomingStock.jsx";
 import WarehouseLocation from "./pages/WarehouseLocation.jsx";
 import OutgoingStock from "./pages/OutgoingStock.jsx";
 
+
 function Page({ title }) {
   return <h1>{title}</h1>;
 }
