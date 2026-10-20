@@ -723,24 +723,24 @@ const [supplierForm, setSupplierForm] = useState({
         // Everything correct
         setSupplierErrors({});
 
-        // Edit existing supplier
         if (editingSupplier) {
-            setSuppliers(
-                suppliers.map((supplier) =>
-                    supplier.id === editingSupplier.id
-                        ? {
-                            ...supplier,
-                            name: supplierForm.vendorName,
-                            contact: supplierForm.contactPerson,
-                            email: supplierForm.email,
-                            status: supplierForm.activeVendor
-                                ? "Active"
-                                : "Inactive"
-                        }
-                        : supplier
-                )
-            );
-        }
+    setSuppliers((prevSuppliers) =>
+        prevSuppliers.map((supplier) =>
+            supplier.id === editingSupplier.id
+                ? {
+                    ...supplier,
+                    ...supplierForm,
+                    name: supplierForm.vendorName,
+                    contact: supplierForm.contactPerson,
+                    email: supplierForm.email,
+                    status: supplierForm.activeVendor
+                        ? "Active"
+                        : "Inactive"
+                }
+                : supplier
+        )
+    );
+}
 
         // Add new supplier
         else {

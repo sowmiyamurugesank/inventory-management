@@ -34,7 +34,9 @@ function DataTable(props) {
                                     ))}
 
                                     <td>
-                                        {props.actions(item)}
+                                        <div className="action-buttons">
+                                            {props.actions(item)}
+                                        </div>
                                     </td>
 
                                 </tr>
@@ -55,7 +57,6 @@ function DataTable(props) {
 
             </div>
 
-            {/* Records count - outside table box */}
             <div className="table-footer">
                 <p>
                     Showing{" "}
