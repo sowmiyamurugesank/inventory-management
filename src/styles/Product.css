@@ -12,9 +12,7 @@
     text-align: left;
 }
 
-/* =========================
-   Page Heading
-========================= */
+
 
 .products-heading {
     display: flex;
@@ -55,9 +53,6 @@
     color: #64748b;
 }
 
-/* =========================
-   Product Tabs
-========================= */
 
 .product-tabs {
     display: flex;
@@ -289,10 +284,6 @@
 .back-button:hover {
     background: #493bd0;
 }
-
-/* =========================
-   Categories
-========================= */
 
 .category-header {
     display: flex;
@@ -568,4 +559,9 @@
         width: 100%;
         min-width: 0;
     }
+}
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    align-items: center;
 }
