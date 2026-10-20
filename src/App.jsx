@@ -8,9 +8,9 @@ import Dashboard from "./Dashboard.jsx";
 import Product from "./pages/Product.jsx";
 import Storage from "./pages/Storage.jsx";
 import IncomingStock from "./pages/IncomingStock.jsx";
-import WarehouseLocation from "./pages/WarehouseLocation.jsx";
+
 import OutgoingStock from "./pages/OutgoingStock.jsx";
-import WarehouseLocation from "./pages/WarehouseLocation";
+import WarehouseLocation from "./pages/WarehouseLocation.jsx";
 
 function Page({ title }) {
   return <h1>{title}</h1>;
