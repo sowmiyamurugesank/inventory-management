@@ -1,0 +1,52 @@
+
+/* Reusable Input */
+.reusable-input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 11px 12px;
+
+  border: 1px solid #d1d9e6;
+  border-radius: 6px;
+
+  background-color: #ffffff;
+  color: #1e293b;
+
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+
+  transition: border-color 0.2s ease,
+              box-shadow 0.2s ease;
+}
+
+/* Placeholder */
+.reusable-input::placeholder {
+  color: #94a3b8;
+}
+
+/* Focus */
+.reusable-input:focus {
+  border-color: #4b49ed;
+  box-shadow: 0 0 0 3px rgba(75, 73, 237, 0.12);
+}
+
+/* Disabled */
+.reusable-input:disabled {
+  background-color: #f1f5f9;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+/* Invalid input */
+.reusable-input[aria-invalid="true"] {
+  border-color: #dc2626;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .reusable-input {
+    padding: 10px;
+    font-size: 13px;
+  }
+}
