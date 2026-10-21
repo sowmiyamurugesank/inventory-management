@@ -1,12 +1,9 @@
 
 import { useEffect, useState } from "react";
-<<<<<<< HEAD
-import { itemSchema } from "../schema/itemSchema";
-
-=======
 
 import { itemSchema } from "../schema/itemSchema";
->>>>>>> 077911c7c7cf34d096575750ac7f732a65e69793
+
+
 import Button from "./Button";
 import Toggle from "./Toggle";
 import "../styles/ProductForm.css";
