@@ -2,7 +2,7 @@ import { useState } from "react";
 import "../styles/PurchaseOrder.css";
 import Toast from "./Toast";
 
-function PurchaseOrder({ onClose }) {
+function PurchaseOrder({ onClose, onSubmit }) {
 
     const [orderQuantity, setOrderQuantity] = useState("1");
     const [unitPurchasePrice, setUnitPurchasePrice] = useState("");
@@ -586,19 +586,32 @@ function PurchaseOrder({ onClose }) {
                             onClick={() => {
 
                                 if (
-                                    !product ||
-                                    !supplier ||
-                                    !poNumber ||
-                                    !poDate ||
-                                    !orderQuantity ||
-                                    !quantityUnit ||
-                                    !unitPurchasePrice
-                                ) {
-                                    setShowError(true);
-                                    return;
-                                }
+    !product ||
+    !poNumber ||
+    !poDate ||
+    !orderQuantity ||
+    !quantityUnit ||
+    !unitPurchasePrice
+) {
+    setShowError(true);
+    return;
+}
 
                                 setShowError(false);
+
+                                // Send purchase order data to Products.jsx
+                                if (onSubmit) {
+                                    onSubmit({
+    poNumber,
+    supplier: supplier || "Not Selected",
+    poDate,
+    product,
+    quantity: orderQuantity,
+    currency,
+    totalPurchaseOrder,
+});
+                                }
+
                                 setShowToast(true);
 
                                 setTimeout(() => {

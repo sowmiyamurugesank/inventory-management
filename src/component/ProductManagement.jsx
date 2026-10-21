@@ -1,12 +1,17 @@
+
 import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
+
 import DataTable from "./DataTable";
 import Button from "./Button";
 import Pagination from "./Pagination";
 import Dropdown from "./Dropdown";
-import "../styles/Supplier.css";
-import supplierSchema from "../schema/supplierSchema";
 import PurchaseOrder from "./PurchaseOrder";
+
+import "../styles/Supplier.css";
+
+import supplierSchema from "../schema/supplierSchema";
+
 import {
   getVendors,
   createVendor,
@@ -42,7 +47,9 @@ const emptySupplierForm = {
 function vendorToForm(vendor) {
   return {
     vendorType:
-      vendor.vendor_type === "INDIVIDUAL" ? "Individual" : "Business",
+      vendor.vendor_type === "INDIVIDUAL"
+        ? "Individual"
+        : "Business",
     vendorCode: vendor.code || "",
     numericCode: vendor.code_int ?? "",
     vendorName: vendor.name || "",
@@ -68,9 +75,13 @@ function vendorToForm(vendor) {
 }
 
 function buildVendorPayload(form) {
-  const optionalText = (value) => value.trim() || undefined;
+  const optionalText = (value) =>
+    value.trim() || undefined;
+
   const optionalNumber = (value) =>
-    value === "" || value === null || value === undefined
+    value === "" ||
+    value === null ||
+    value === undefined
       ? undefined
       : Number(value);
 
@@ -92,7 +103,9 @@ function buildVendorPayload(form) {
     country_code: form.countryCode.trim().toUpperCase(),
     gstin: optionalText(form.gstin),
     pan: optionalText(form.pan),
-    payment_terms_days: optionalNumber(form.paymentTerms),
+    payment_terms_days: optionalNumber(
+      form.paymentTerms
+    ),
     credit_limit: optionalNumber(form.creditLimit),
     currency_code: form.currency,
     is_active: form.activeVendor,
@@ -104,26 +117,55 @@ function ProductManagement({ activeTab }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [supplierPage, setSupplierPage] = useState(1);
 
-  const [showCategoryForm, setShowCategoryForm] = useState(false);
-  const [showSupplierForm, setShowSupplierForm] = useState(false);
-  const [showPurchaseOrder, setShowPurchaseOrder] = useState(false);
+  const [showCategoryForm, setShowCategoryForm] =
+    useState(false);
 
-  const [editingCategory, setEditingCategory] = useState(null);
-  const [editingSupplier, setEditingSupplier] = useState(null);
+  const [showSupplierForm, setShowSupplierForm] =
+    useState(false);
 
-  const [stockCategory, setStockCategory] = useState("all");
-  const [stockStatus, setStockStatus] = useState("all");
+  const [showPurchaseOrder, setShowPurchaseOrder] =
+    useState(false);
 
-  const [supplierForm, setSupplierForm] = useState(emptySupplierForm);
-  const [supplierErrors, setSupplierErrors] = useState({});
-  const [supplierApiError, setSupplierApiError] = useState("");
-  const [isSavingSupplier, setIsSavingSupplier] = useState(false);
+  const [editingCategory, setEditingCategory] =
+    useState(null);
 
-  const [categoryName, setCategoryName] = useState("");
-  const [categoryDescription, setCategoryDescription] = useState("");
-  const [categories, setCategories] = useState([]);
-  const [categoryNameError, setCategoryNameError] = useState("");
-  const [categoryDescriptionError, setCategoryDescriptionError] = useState("");
+  const [editingSupplier, setEditingSupplier] =
+    useState(null);
+
+  const [stockCategory, setStockCategory] =
+    useState("all");
+
+  const [stockStatus, setStockStatus] =
+    useState("all");
+
+  const [supplierForm, setSupplierForm] =
+    useState(emptySupplierForm);
+
+  const [supplierErrors, setSupplierErrors] =
+    useState({});
+
+  const [supplierApiError, setSupplierApiError] =
+    useState("");
+
+  const [isSavingSupplier, setIsSavingSupplier] =
+    useState(false);
+
+  const [categoryName, setCategoryName] =
+    useState("");
+
+  const [categoryDescription, setCategoryDescription] =
+    useState("");
+
+  const [categories, setCategories] =
+    useState([]);
+
+  const [categoryNameError, setCategoryNameError] =
+    useState("");
+
+  const [
+    categoryDescriptionError,
+    setCategoryDescriptionError,
+  ] = useState("");
 
   const [suppliers, setSuppliers] = useState([]);
 
@@ -136,8 +178,14 @@ function ProductManagement({ activeTab }) {
 
   const stockColumns = [
     { key: "name", label: "Product" },
-    { key: "availableStock", label: "Available Stock" },
-    { key: "reorderLevel", label: "Reorder Level" },
+    {
+      key: "availableStock",
+      label: "Available Stock",
+    },
+    {
+      key: "reorderLevel",
+      label: "Reorder Level",
+    },
     { key: "status", label: "Status" },
   ];
 
@@ -148,6 +196,10 @@ function ProductManagement({ activeTab }) {
     { key: "email", label: "Email" },
     { key: "status", label: "Status" },
   ];
+
+  /* ================================
+     SUPPLIER API
+  ================================ */
 
   const loadVendors = async () => {
     try {
@@ -160,11 +212,15 @@ function ProductManagement({ activeTab }) {
           ...vendor,
           serialNo: index + 1,
           contact: vendor.contact_person || "",
-          status: vendor.is_active ? "Active" : "Inactive",
+          status: vendor.is_active
+            ? "Active"
+            : "Inactive",
         }))
       );
     } catch (error) {
-      setSupplierApiError(error.message || "Unable to load suppliers");
+      setSupplierApiError(
+        error.message || "Unable to load suppliers"
+      );
     }
   };
 
@@ -196,15 +252,18 @@ function ProductManagement({ activeTab }) {
     const errors = {};
 
     if (!supplierForm.vendorCode.trim()) {
-      errors.vendorCode = "Please enter vendor code";
+      errors.vendorCode =
+        "Please enter vendor code";
     }
 
     if (!supplierForm.vendorName.trim()) {
-      errors.vendorName = "Please enter vendor name";
+      errors.vendorName =
+        "Please enter vendor name";
     }
 
     if (!supplierForm.countryCode.trim()) {
-      errors.countryCode = "Please enter country code";
+      errors.countryCode =
+        "Please enter country code";
     }
 
     if (Object.keys(errors).length > 0) {
@@ -212,28 +271,32 @@ function ProductManagement({ activeTab }) {
       return;
     }
 
-    const validation = supplierSchema.safeParse(supplierForm);
+    const validation =
+      supplierSchema.safeParse(supplierForm);
 
-if (!validation.success) {
-  const zodErrors = {};
+    if (!validation.success) {
+      const zodErrors = {};
 
-  validation.error.issues.forEach((issue) => {
-    zodErrors[issue.path[0]] = issue.message;
-  });
+      validation.error.issues.forEach((issue) => {
+        zodErrors[issue.path[0]] =
+          issue.message;
+      });
 
-  setSupplierErrors(zodErrors);
-  setSupplierApiError("Please correct the invalid supplier details.");
-  return;
-}
+      setSupplierErrors(zodErrors);
+      setSupplierApiError(
+        "Please correct the invalid supplier details."
+      );
 
-    
+      return;
+    }
 
     try {
       setIsSavingSupplier(true);
       setSupplierErrors({});
       setSupplierApiError("");
 
-      const payload = buildVendorPayload(supplierForm);
+      const payload =
+        buildVendorPayload(supplierForm);
 
       if (editingSupplier) {
         await updateVendor(editingSupplier.id, {
@@ -249,7 +312,11 @@ if (!validation.success) {
     } catch (error) {
       setSupplierApiError(
         error.message ||
-          `Unable to ${editingSupplier ? "update" : "add"} supplier`
+          `Unable to ${
+            editingSupplier
+              ? "update"
+              : "add"
+          } supplier`
       );
     } finally {
       setIsSavingSupplier(false);
@@ -273,15 +340,24 @@ if (!validation.success) {
 
     try {
       setSupplierApiError("");
+
       await deleteVendor(supplier.id);
+
       await loadVendors();
     } catch (error) {
-      setSupplierApiError(error.message || "Unable to delete supplier");
+      setSupplierApiError(
+        error.message ||
+          "Unable to delete supplier"
+      );
     }
   };
 
   return (
     <div>
+      {/* ================================
+          CATEGORIES
+      ================================ */}
+
       {activeTab === "Categories" && (
         <>
           <div className="category-header">
@@ -289,7 +365,11 @@ if (!validation.success) {
 
             <Button
               className="add-category-button"
-              onClick={() => setShowCategoryForm(!showCategoryForm)}
+              onClick={() =>
+                setShowCategoryForm(
+                  !showCategoryForm
+                )
+              }
             >
               <Plus size={16} />
               Add Category
@@ -300,42 +380,72 @@ if (!validation.success) {
             <div className="category-modal-overlay">
               <div className="category-modal">
                 <div className="category-modal-header">
-                  <h3>Add Category</h3>
+                  <h3>
+                    {editingCategory
+                      ? "Edit Category"
+                      : "Add Category"}
+                  </h3>
 
                   <button
                     type="button"
-                    onClick={() => setShowCategoryForm(false)}
+                    onClick={() => {
+                      setShowCategoryForm(false);
+                      setEditingCategory(null);
+                    }}
                   >
                     ×
                   </button>
                 </div>
 
                 <label>Category Name</label>
+
                 <input
                   type="text"
                   placeholder="Enter category name"
                   value={categoryName}
-                  onChange={(e) => setCategoryName(e.target.value)}
+                  onChange={(e) => {
+                    setCategoryName(
+                      e.target.value
+                    );
+                    setCategoryNameError("");
+                  }}
                 />
 
                 {categoryNameError && (
-                  <p className="validation-error">{categoryNameError}</p>
+                  <p className="validation-error">
+                    {categoryNameError}
+                  </p>
                 )}
 
                 <label>Description</label>
+
                 <input
                   type="text"
                   placeholder="Enter description"
                   value={categoryDescription}
-                  onChange={(e) => setCategoryDescription(e.target.value)}
+                  onChange={(e) => {
+                    setCategoryDescription(
+                      e.target.value
+                    );
+                    setCategoryDescriptionError(
+                      ""
+                    );
+                  }}
                 />
 
                 {categoryDescriptionError && (
-                  <p className="validation-error">{categoryDescriptionError}</p>
+                  <p className="validation-error">
+                    {categoryDescriptionError}
+                  </p>
                 )}
 
                 <div className="category-modal-buttons">
-                  <Button onClick={() => setShowCategoryForm(false)}>
+                  <Button
+                    onClick={() => {
+                      setShowCategoryForm(false);
+                      setEditingCategory(null);
+                    }}
+                  >
                     Cancel
                   </Button>
 
@@ -344,19 +454,33 @@ if (!validation.success) {
                       let hasError = false;
 
                       if (!categoryName.trim()) {
-                        setCategoryNameError("Please enter category name");
+                        setCategoryNameError(
+                          "Please enter category name"
+                        );
                         hasError = true;
-                      } else if (!/^[A-Za-z ]+$/.test(categoryName)) {
+                      } else if (
+                        !/^[A-Za-z ]+$/.test(
+                          categoryName
+                        )
+                      ) {
                         setCategoryNameError(
                           "Only letters and spaces are allowed"
                         );
                         hasError = true;
                       }
 
-                      if (!categoryDescription.trim()) {
-                        setCategoryDescriptionError("Please enter description");
+                      if (
+                        !categoryDescription.trim()
+                      ) {
+                        setCategoryDescriptionError(
+                          "Please enter description"
+                        );
                         hasError = true;
-                      } else if (!/^[A-Za-z ]+$/.test(categoryDescription)) {
+                      } else if (
+                        !/^[A-Za-z ]+$/.test(
+                          categoryDescription
+                        )
+                      ) {
                         setCategoryDescriptionError(
                           "Only letters and spaces are allowed"
                         );
@@ -367,23 +491,31 @@ if (!validation.success) {
 
                       if (editingCategory) {
                         setCategories(
-                          categories.map((category) =>
-                            category.id === editingCategory.id
-                              ? {
-                                  ...category,
-                                  category: categoryName,
-                                  description: categoryDescription,
-                                }
-                              : category
+                          categories.map(
+                            (category) =>
+                              category.id ===
+                              editingCategory.id
+                                ? {
+                                    ...category,
+                                    category:
+                                      categoryName,
+                                    description:
+                                      categoryDescription,
+                                  }
+                                : category
                           )
                         );
                       } else {
                         setCategories([
                           ...categories,
                           {
-                            id: categories.length + 1,
-                            category: categoryName,
-                            description: categoryDescription,
+                            id:
+                              categories.length +
+                              1,
+                            category:
+                              categoryName,
+                            description:
+                              categoryDescription,
                             status: "Active",
                           },
                         ]);
@@ -391,11 +523,15 @@ if (!validation.success) {
 
                       setCategoryName("");
                       setCategoryDescription("");
+                      setCategoryNameError("");
+                      setCategoryDescriptionError("");
                       setEditingCategory(null);
                       setShowCategoryForm(false);
                     }}
                   >
-                    {editingCategory ? "Update" : "Add"}
+                    {editingCategory
+                      ? "Update"
+                      : "Add"}
                   </Button>
                 </div>
               </div>
@@ -410,8 +546,14 @@ if (!validation.success) {
                 <Button
                   onClick={() => {
                     setEditingCategory(item);
-                    setCategoryName(item.category);
-                    setCategoryDescription(item.description);
+                    setCategoryName(
+                      item.category
+                    );
+                    setCategoryDescription(
+                      item.description
+                    );
+                    setCategoryNameError("");
+                    setCategoryDescriptionError("");
                     setShowCategoryForm(true);
                   }}
                 >
@@ -421,7 +563,10 @@ if (!validation.success) {
                 <Button
                   onClick={() => {
                     setCategories(
-                      categories.filter((category) => category.id !== item.id)
+                      categories.filter(
+                        (category) =>
+                          category.id !== item.id
+                      )
                     );
                   }}
                 >
@@ -434,12 +579,18 @@ if (!validation.success) {
           {categories.length > 15 && (
             <Pagination
               currentPage={currentPage}
-              totalPages={Math.ceil(categories.length / 15)}
+              totalPages={Math.ceil(
+                categories.length / 15
+              )}
               onPageChange={setCurrentPage}
             />
           )}
         </>
       )}
+
+      {/* ================================
+          STOCK MANAGEMENT
+      ================================ */}
 
       {activeTab === "Stock Management" && (
         <>
@@ -450,10 +601,22 @@ if (!validation.success) {
           <div className="stock-filters">
             <Dropdown
               options={[
-                { value: "all", label: "All Categories" },
-                { value: "electronics", label: "Electronics" },
-                { value: "furniture", label: "Furniture" },
-                { value: "stationery", label: "Stationery" },
+                {
+                  value: "all",
+                  label: "All Categories",
+                },
+                {
+                  value: "electronics",
+                  label: "Electronics",
+                },
+                {
+                  value: "furniture",
+                  label: "Furniture",
+                },
+                {
+                  value: "stationery",
+                  label: "Stationery",
+                },
               ]}
               value={stockCategory}
               onChange={setStockCategory}
@@ -462,10 +625,22 @@ if (!validation.success) {
 
             <Dropdown
               options={[
-                { value: "all", label: "All Status" },
-                { value: "in-stock", label: "In Stock" },
-                { value: "low-stock", label: "Low Stock" },
-                { value: "out-of-stock", label: "Out of Stock" },
+                {
+                  value: "all",
+                  label: "All Status",
+                },
+                {
+                  value: "in-stock",
+                  label: "In Stock",
+                },
+                {
+                  value: "low-stock",
+                  label: "Low Stock",
+                },
+                {
+                  value: "out-of-stock",
+                  label: "Out of Stock",
+                },
               ]}
               value={stockStatus}
               onChange={setStockStatus}
@@ -474,7 +649,9 @@ if (!validation.success) {
 
             <button
               className="purchase-order-btn"
-              onClick={() => setShowPurchaseOrder(true)}
+              onClick={() =>
+                setShowPurchaseOrder(true)
+              }
             >
               + Purchase Order
             </button>
@@ -483,14 +660,24 @@ if (!validation.success) {
           <DataTable
             columns={stockColumns}
             data={[]}
-            actions={() => <Button>View</Button>}
+            actions={() => (
+              <Button>View</Button>
+            )}
           />
 
           {showPurchaseOrder && (
-            <PurchaseOrder onClose={() => setShowPurchaseOrder(false)} />
+            <PurchaseOrder
+              onClose={() =>
+                setShowPurchaseOrder(false)
+              }
+            />
           )}
         </>
       )}
+
+      {/* ================================
+          SUPPLIERS
+      ================================ */}
 
       {activeTab === "Suppliers" && (
         <>
@@ -506,150 +693,221 @@ if (!validation.success) {
           </div>
 
           {supplierApiError && (
-            <p className="validation-error">{supplierApiError}</p>
+            <p className="validation-error">
+              {supplierApiError}
+            </p>
           )}
 
           {showSupplierForm && (
             <div className="supplier-modal-overlay">
               <div className="supplier-modal">
+
                 <div className="supplier-modal-header">
                   <h3>
-                    {editingSupplier ? "Edit Supplier" : "Add Supplier"}
+                    {editingSupplier
+                      ? "Edit Supplier"
+                      : "Add Supplier"}
                   </h3>
 
-                  <button type="button" onClick={closeSupplierForm}>
+                  <button
+                    type="button"
+                    onClick={closeSupplierForm}
+                  >
                     ×
                   </button>
                 </div>
 
+                {/* Vendor Information */}
+
                 <div className="supplier-section">
                   <h4>Vendor Information</h4>
 
-                  <label>Vendor Type *</label>
+                  <label>
+                    Vendor Type *
+                  </label>
+
                   <select
-                    value={supplierForm.vendorType}
+                    value={
+                      supplierForm.vendorType
+                    }
                     onChange={(e) =>
                       setSupplierForm({
                         ...supplierForm,
-                        vendorType: e.target.value,
+                        vendorType:
+                          e.target.value,
                       })
                     }
                   >
-                    <option value="Business">Business</option>
-                    <option value="Individual">Individual</option>
+                    <option value="Business">
+                      Business
+                    </option>
+
+                    <option value="Individual">
+                      Individual
+                    </option>
                   </select>
 
                   <div className="supplier-form-row">
                     <div>
-                      <label>Vendor Code *</label>
+                      <label>
+                        Vendor Code *
+                      </label>
+
                       <input
                         type="text"
-                        value={supplierForm.vendorCode}
+                        value={
+                          supplierForm.vendorCode
+                        }
                         onChange={(e) => {
                           setSupplierForm({
                             ...supplierForm,
-                            vendorCode: e.target.value,
+                            vendorCode:
+                              e.target.value,
                           });
+
                           setSupplierErrors({
                             ...supplierErrors,
                             vendorCode: "",
                           });
                         }}
                       />
+
                       {supplierErrors.vendorCode && (
                         <p className="validation-error">
-                          {supplierErrors.vendorCode}
+                          {
+                            supplierErrors.vendorCode
+                          }
                         </p>
                       )}
                     </div>
 
                     <div>
-                      <label>Numeric Code</label>
+                      <label>
+                        Numeric Code
+                      </label>
+
                       <input
                         type="number"
-                        value={supplierForm.numericCode}
+                        value={
+                          supplierForm.numericCode
+                        }
                         onChange={(e) =>
                           setSupplierForm({
                             ...supplierForm,
-                            numericCode: e.target.value,
+                            numericCode:
+                              e.target.value,
                           })
                         }
                       />
                     </div>
                   </div>
 
-                  <label>Vendor Name *</label>
+                  <label>
+                    Vendor Name *
+                  </label>
+
                   <input
                     type="text"
-                    value={supplierForm.vendorName}
+                    value={
+                      supplierForm.vendorName
+                    }
                     onChange={(e) => {
                       setSupplierForm({
                         ...supplierForm,
-                        vendorName: e.target.value,
+                        vendorName:
+                          e.target.value,
                       });
+
                       setSupplierErrors({
                         ...supplierErrors,
                         vendorName: "",
                       });
                     }}
                   />
+
                   {supplierErrors.vendorName && (
                     <p className="validation-error">
-                      {supplierErrors.vendorName}
+                      {
+                        supplierErrors.vendorName
+                      }
                     </p>
                   )}
 
                   <label>Description</label>
+
                   <textarea
-                    value={supplierForm.description}
+                    value={
+                      supplierForm.description
+                    }
                     onChange={(e) =>
                       setSupplierForm({
                         ...supplierForm,
-                        description: e.target.value,
+                        description:
+                          e.target.value,
                       })
                     }
                   />
                 </div>
 
+                {/* Contact Details */}
+
                 <div className="supplier-section">
                   <h4>Contact Details</h4>
 
-                  <label>Contact Person</label>
+                  <label>
+                    Contact Person
+                  </label>
+
                   <input
                     type="text"
-                    value={supplierForm.contactPerson}
+                    value={
+                      supplierForm.contactPerson
+                    }
                     onChange={(e) =>
                       setSupplierForm({
                         ...supplierForm,
-                        contactPerson: e.target.value,
+                        contactPerson:
+                          e.target.value,
                       })
                     }
                   />
 
                   <div className="supplier-form-row">
                     <div>
-                      <label>Email Address</label>
+                      <label>
+                        Email Address
+                      </label>
+
                       <input
                         type="email"
-                        value={supplierForm.email}
+                        value={
+                          supplierForm.email
+                        }
                         onChange={(e) =>
                           setSupplierForm({
                             ...supplierForm,
-                            email: e.target.value,
+                            email:
+                              e.target.value,
                           })
                         }
                       />
                     </div>
 
                     <div>
-                      <label>Phone Number</label>
+                      <label>
+                        Phone Number
+                      </label>
+
                       <input
                         type="text"
-                        value={supplierForm.phone}
+                        value={
+                          supplierForm.phone
+                        }
                         onChange={(e) =>
                           setSupplierForm({
                             ...supplierForm,
-                            phone: e.target.value,
+                            phone:
+                              e.target.value,
                           })
                         }
                       />
@@ -657,41 +915,59 @@ if (!validation.success) {
                   </div>
 
                   <label>Website</label>
+
                   <input
                     type="text"
-                    value={supplierForm.website}
+                    value={
+                      supplierForm.website
+                    }
                     onChange={(e) =>
                       setSupplierForm({
                         ...supplierForm,
-                        website: e.target.value,
+                        website:
+                          e.target.value,
                       })
                     }
                   />
                 </div>
 
+                {/* Address Details */}
+
                 <div className="supplier-section">
                   <h4>Address Details</h4>
 
-                  <label>Address Line 1</label>
+                  <label>
+                    Address Line 1
+                  </label>
+
                   <input
                     type="text"
-                    value={supplierForm.addressLine1}
+                    value={
+                      supplierForm.addressLine1
+                    }
                     onChange={(e) =>
                       setSupplierForm({
                         ...supplierForm,
-                        addressLine1: e.target.value,
+                        addressLine1:
+                          e.target.value,
                       })
                     }
                   />
 
-                  <label>Address Line 2</label>
+                  <label>
+                    Address Line 2
+                  </label>
+
                   <input
                     type="text"
-                    value={supplierForm.addressLine2}
+                    value={
+                      supplierForm.addressLine2
+                    }
                     onChange={(e) =>
                       setSupplierForm({
                         ...supplierForm,
-                        addressLine2: e.target.value,
+                        addressLine2:
+                          e.target.value,
                       })
                     }
                   />
@@ -699,13 +975,17 @@ if (!validation.success) {
                   <div className="supplier-form-row">
                     <div>
                       <label>City</label>
+
                       <input
                         type="text"
-                        value={supplierForm.city}
+                        value={
+                          supplierForm.city
+                        }
                         onChange={(e) =>
                           setSupplierForm({
                             ...supplierForm,
-                            city: e.target.value,
+                            city:
+                              e.target.value,
                           })
                         }
                       />
@@ -713,13 +993,17 @@ if (!validation.success) {
 
                     <div>
                       <label>State</label>
+
                       <input
                         type="text"
-                        value={supplierForm.state}
+                        value={
+                          supplierForm.state
+                        }
                         onChange={(e) =>
                           setSupplierForm({
                             ...supplierForm,
-                            state: e.target.value,
+                            state:
+                              e.target.value,
                           })
                         }
                       />
@@ -728,58 +1012,82 @@ if (!validation.success) {
 
                   <div className="supplier-form-row">
                     <div>
-                      <label>Postal Code</label>
+                      <label>
+                        Postal Code
+                      </label>
+
                       <input
                         type="text"
-                        value={supplierForm.postalCode}
+                        value={
+                          supplierForm.postalCode
+                        }
                         onChange={(e) =>
                           setSupplierForm({
                             ...supplierForm,
-                            postalCode: e.target.value,
+                            postalCode:
+                              e.target.value,
                           })
                         }
                       />
                     </div>
 
                     <div>
-                      <label>Country Code *</label>
+                      <label>
+                        Country Code *
+                      </label>
+
                       <input
                         type="text"
                         maxLength="2"
-                        value={supplierForm.countryCode}
+                        value={
+                          supplierForm.countryCode
+                        }
                         onChange={(e) => {
                           setSupplierForm({
                             ...supplierForm,
-                            countryCode: e.target.value,
+                            countryCode:
+                              e.target.value,
                           });
+
                           setSupplierErrors({
                             ...supplierErrors,
                             countryCode: "",
                           });
                         }}
                       />
+
                       {supplierErrors.countryCode && (
                         <p className="validation-error">
-                          {supplierErrors.countryCode}
+                          {
+                            supplierErrors.countryCode
+                          }
                         </p>
                       )}
                     </div>
                   </div>
                 </div>
 
+                {/* Tax & Payment */}
+
                 <div className="supplier-section">
-                  <h4>Tax & Payment Details</h4>
+                  <h4>
+                    Tax & Payment Details
+                  </h4>
 
                   <div className="supplier-form-row">
                     <div>
                       <label>GSTIN</label>
+
                       <input
                         type="text"
-                        value={supplierForm.gstin}
+                        value={
+                          supplierForm.gstin
+                        }
                         onChange={(e) =>
                           setSupplierForm({
                             ...supplierForm,
-                            gstin: e.target.value,
+                            gstin:
+                              e.target.value,
                           })
                         }
                       />
@@ -787,13 +1095,17 @@ if (!validation.success) {
 
                     <div>
                       <label>PAN</label>
+
                       <input
                         type="text"
-                        value={supplierForm.pan}
+                        value={
+                          supplierForm.pan
+                        }
                         onChange={(e) =>
                           setSupplierForm({
                             ...supplierForm,
-                            pan: e.target.value,
+                            pan:
+                              e.target.value,
                           })
                         }
                       />
@@ -802,31 +1114,43 @@ if (!validation.success) {
 
                   <div className="supplier-form-row">
                     <div>
-                      <label>Payment Terms (Days)</label>
+                      <label>
+                        Payment Terms (Days)
+                      </label>
+
                       <input
                         type="number"
                         min="0"
-                        value={supplierForm.paymentTerms}
+                        value={
+                          supplierForm.paymentTerms
+                        }
                         onChange={(e) =>
                           setSupplierForm({
                             ...supplierForm,
-                            paymentTerms: e.target.value,
+                            paymentTerms:
+                              e.target.value,
                           })
                         }
                       />
                     </div>
 
                     <div>
-                      <label>Credit Limit</label>
+                      <label>
+                        Credit Limit
+                      </label>
+
                       <input
                         type="number"
                         min="0"
                         step="0.01"
-                        value={supplierForm.creditLimit}
+                        value={
+                          supplierForm.creditLimit
+                        }
                         onChange={(e) =>
                           setSupplierForm({
                             ...supplierForm,
-                            creditLimit: e.target.value,
+                            creditLimit:
+                              e.target.value,
                           })
                         }
                       />
@@ -834,20 +1158,34 @@ if (!validation.success) {
                   </div>
 
                   <label>Currency *</label>
+
                   <select
-                    value={supplierForm.currency}
+                    value={
+                      supplierForm.currency
+                    }
                     onChange={(e) =>
                       setSupplierForm({
                         ...supplierForm,
-                        currency: e.target.value,
+                        currency:
+                          e.target.value,
                       })
                     }
                   >
-                    <option value="INR">INR</option>
-                    <option value="USD">USD</option>
-                    <option value="EUR">EUR</option>
+                    <option value="INR">
+                      INR
+                    </option>
+
+                    <option value="USD">
+                      USD
+                    </option>
+
+                    <option value="EUR">
+                      EUR
+                    </option>
                   </select>
                 </div>
+
+                {/* Vendor Status */}
 
                 <div className="supplier-section">
                   <h4>Vendor Status</h4>
@@ -855,38 +1193,52 @@ if (!validation.success) {
                   <label className="supplier-checkbox">
                     <input
                       type="checkbox"
-                      checked={supplierForm.activeVendor}
+                      checked={
+                        supplierForm.activeVendor
+                      }
                       onChange={(e) =>
                         setSupplierForm({
                           ...supplierForm,
-                          activeVendor: e.target.checked,
+                          activeVendor:
+                            e.target.checked,
                         })
                       }
                     />
+
                     Active Vendor
                   </label>
 
                   <label className="supplier-checkbox">
                     <input
                       type="checkbox"
-                      checked={supplierForm.verifiedVendor}
+                      checked={
+                        supplierForm.verifiedVendor
+                      }
                       onChange={(e) =>
                         setSupplierForm({
                           ...supplierForm,
-                          verifiedVendor: e.target.checked,
+                          verifiedVendor:
+                            e.target.checked,
                         })
                       }
                     />
+
                     Verified Vendor
                   </label>
                 </div>
 
                 {supplierApiError && (
-                  <p className="validation-error">{supplierApiError}</p>
+                  <p className="validation-error">
+                    {supplierApiError}
+                  </p>
                 )}
 
                 <div className="supplier-modal-buttons">
-                  <Button onClick={closeSupplierForm}>Cancel</Button>
+                  <Button
+                    onClick={closeSupplierForm}
+                  >
+                    Cancel
+                  </Button>
 
                   <Button
                     onClick={handleSupplierSubmit}
@@ -895,8 +1247,8 @@ if (!validation.success) {
                     {isSavingSupplier
                       ? "Saving..."
                       : editingSupplier
-                        ? "Update Supplier"
-                        : "Add Supplier"}
+                      ? "Update Supplier"
+                      : "Add Supplier"}
                   </Button>
                 </div>
               </div>
@@ -908,8 +1260,19 @@ if (!validation.success) {
             data={suppliers}
             actions={(item) => (
               <>
-                <Button onClick={() => handleEditSupplier(item)}>Edit</Button>
-                <Button onClick={() => handleDeleteSupplier(item)}>
+                <Button
+                  onClick={() =>
+                    handleEditSupplier(item)
+                  }
+                >
+                  Edit
+                </Button>
+
+                <Button
+                  onClick={() =>
+                    handleDeleteSupplier(item)
+                  }
+                >
                   Delete
                 </Button>
               </>
@@ -919,7 +1282,9 @@ if (!validation.success) {
           {suppliers.length > 15 && (
             <Pagination
               currentPage={supplierPage}
-              totalPages={Math.ceil(suppliers.length / 15)}
+              totalPages={Math.ceil(
+                suppliers.length / 15
+              )}
               onPageChange={setSupplierPage}
             />
           )}
@@ -930,3 +1295,4 @@ if (!validation.success) {
 }
 
 export default ProductManagement;
+
