@@ -1,4 +1,4 @@
-import { crud } from "../utils/crud.js";
+import { crud } from "../utils/vendor.js";
 
 export const vendorService = {
   // Get all suppliers with filters and pagination
