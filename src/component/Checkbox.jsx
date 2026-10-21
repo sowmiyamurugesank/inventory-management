@@ -1,5 +1,5 @@
 
-import "../Checkbox.css";
+import "../styles/Checkbox.css";
 
 function Checkbox({
   label,

@@ -1,30 +1,30 @@
-const tabs = [
-  "Details",
-  "Address",
-  "Capacity",
-  "Hours",
-  "Zones",
-];
 
-function WarehouseTabs({ activeTab, setActiveTab }) {
+import "../styles/WarehouseTabs.css";
+
+function WarehouseTabs({
+  tabs = [],
+  activeTab = 0,
+  setActiveTab,
+  disabled = false,
+}) {
   return (
-    <div className="warehouse-tabs">
+    <nav className="" aria-label="Form steps">
       {tabs.map((tab, index) => (
         <button
           key={tab}
           type="button"
-          className={
-            activeTab === index
-              ? "warehouse-tab active"
-              : "warehouse-tab"
-          }
+          className={`warehouse-tab ${
+            activeTab === index ? "active" : ""
+          } ${activeTab > index ? "completed" : ""}`}
           onClick={() => setActiveTab(index)}
+          disabled={disabled}
+          aria-current={activeTab === index ? "step" : undefined}
         >
-          <span className="tab-number">{index + 1}</span>
-          {tab}
+          
+          <span>{tab}</span>
         </button>
       ))}
-    </div>
+    </nav>
   );
 }
 
