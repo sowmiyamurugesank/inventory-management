@@ -235,9 +235,12 @@ function Table({
                           </span>
                         ) : (
                           <span
+                            className={column.editable ? "editable-cell" : ""}
                             onDoubleClick={() =>
                               startEditing(item, column)
                             }
+                            title={column.editable ? "Click to edit" : ""}
+
                           >
                             {cellValue ?? "-"}
                           </span>

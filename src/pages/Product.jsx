@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import {
   Package,
@@ -24,16 +23,6 @@ import {
 
 import "../styles/Product.css";
 
-const requiredFields = [
-  ["itemCode", "Item Code"],
-  ["itemName", "Item Name"],
-  ["itemType", "Item Type"],
-  ["baseUnit", "Base Unit"],
-  ["purchaseCost", "Purchase Cost"],
-  ["sellingPrice", "Selling Price"],
-  ["mrp", "MRP"],
-];
-
 function fromApiItem(item) {
   return {
     ...item,
@@ -42,17 +31,20 @@ function fromApiItem(item) {
     itemName: item.name ?? "",
     itemType: item.item_type === "SERVICE" ? "Service" : "Goods",
     category: item.category_name ?? item.category ?? "",
+    categoryId: item.category_id ?? "",
+    description: item.description ?? "",
     brandName: item.brand_name ?? "",
     manufacturer: item.manufacturer_name ?? "",
     manufacturerPartNumber: item.manufacturer_part_number ?? "",
     baseUnit: item.base_unit ?? "",
-    purchaseCost: item.purchase_cost ?? 0,
-    sellingPrice: item.selling_price ?? 0,
-    mrp: item.mrp ?? 0,
+    purchaseCost: Number(item.purchase_cost ?? 0),
+    sellingPrice: Number(item.selling_price ?? 0),
+    mrp: Number(item.mrp ?? 0),
     currency: item.currency_code ?? "INR",
     verified: item.is_verified ?? false,
     status: item.status ?? "Active",
-    quantity: item.quantity ?? 0,
+    quantity: Number(item.quantity ?? 0),
+    version: item.version,
   };
 }
 
@@ -66,31 +58,38 @@ function toApiItem(formData) {
     Object.assign(customAttributes, formData.customAttributes);
   }
 
-  for (const attribute of [
-    ...(formData.itemAttributes ?? []),
+  const attributes = [
+    ...(Array.isArray(formData.itemAttributes)
+      ? formData.itemAttributes
+      : []),
     ...(Array.isArray(formData.customAttributes)
       ? formData.customAttributes
       : []),
-  ]) {
+  ];
+
+  for (const attribute of attributes) {
     if (attribute.name?.trim()) {
-      customAttributes[attribute.name.trim()] = attribute.value;
+      customAttributes[attribute.name.trim()] = attribute.value ?? "";
     }
   }
 
   const payload = {
-    code: formData.itemCode.trim(),
-    name: formData.itemName.trim(),
-    item_type: formData.itemType === "Service" ? "SERVICE" : "PRODUCT",
-    base_unit: formData.baseUnit.trim(),
+    code: formData.itemCode?.trim(),
+    name: formData.itemName?.trim(),
+    item_type:
+      formData.itemType === "Service" ? "SERVICE" : "PRODUCT",
+    base_unit: formData.baseUnit,
     custom_attributes: customAttributes,
     description: formData.description ?? "",
     brand_name: formData.brandName ?? "",
     manufacturer_name: formData.manufacturer ?? "",
     manufacturer_part_number: formData.manufacturerPartNumber ?? "",
-    purchase_cost: Number(formData.purchaseCost),
-    selling_price: Number(formData.sellingPrice),
-    mrp: Number(formData.mrp),
+    purchase_cost: Number(formData.purchaseCost || 0),
+    selling_price: Number(formData.sellingPrice || 0),
+    mrp: Number(formData.mrp || 0),
     currency_code: formData.currency || "INR",
+    status: "OUT_OF_STOCK",
+    is_active: true,
     is_verified: Boolean(formData.verified),
   };
 
@@ -105,43 +104,12 @@ function toApiItem(formData) {
   return payload;
 }
 
-function validateRequiredFields(formData) {
-  for (const [key, label] of requiredFields) {
-    const value = formData[key];
-
-    if (
-      value === undefined ||
-      value === null ||
-      String(value).trim() === ""
-    ) {
-      return `${label} is required`;
-    }
-  }
-
-  for (const [key, label] of [
-    ["purchaseCost", "Purchase Cost"],
-    ["sellingPrice", "Selling Price"],
-    ["mrp", "MRP"],
-  ]) {
-    const value = Number(formData[key]);
-
-    if (!Number.isFinite(value)) {
-      return `${label} must be a valid number`;
-    }
-
-    if (value < 0) {
-      return `${label} cannot be negative`;
-    }
-  }
-
-  return "";
-}
-
 function Products() {
   const [activeTab, setActiveTab] = useState("All Products");
   const [products, setProducts] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -157,6 +125,7 @@ function Products() {
     { key: "itemCode", label: "Item Code", editable: true },
     { key: "itemName", label: "Item Name", editable: true },
     { key: "category", label: "Category", editable: true },
+    { key: "brandName", label: "Brand", editable: true },
     {
       key: "purchaseCost",
       label: "Purchase Cost",
@@ -165,7 +134,7 @@ function Products() {
     },
     {
       key: "sellingPrice",
-      label: "Price",
+      label: "Selling Price",
       type: "number",
       editable: true,
     },
@@ -205,39 +174,37 @@ function Products() {
     loadProducts();
   }, []);
 
- const handleSave = async (formData) => {
-  if (saving) return;
+  const handleSave = async (formData) => {
+    setSaving(true);
+    setError("");
 
-  const validationError = validateRequiredFields(formData);
+    try {
+      const payload = toApiItem(formData);
 
-  if (validationError) {
-    setError(validationError);
-    return;
-  }
+      if (editingProduct) {
+        await updateItem(editingProduct.id, {
+          ...payload,
+          quantity: Number(
+            formData.quantity ?? editingProduct.quantity ?? 0
+          ),
+        });
+      } else {
+        await createItem({
+          ...payload,
+          quantity: 1,
+        });
+      }
 
-  setSaving(true);
-  setError("");
+      setShowForm(false);
+      setEditingProduct(null);
 
-  try {
-    const payload = toApiItem(formData);
-
-    const result = editingProduct
-      ? await updateItem(editingProduct.id, payload)
-      : await createItem(payload);
-
-    console.log("Save response:", result);
-
-    await loadProducts();
-
-    setShowForm(false);
-    setEditingProduct(null);
-  } catch (err) {
-    console.error("Save product error:", err);
-    setError(err.message || "Unable to save product");
-  } finally {
-    setSaving(false);
-  }
-};
+      await loadProducts();
+    } catch (err) {
+      setError(err.message || "Unable to save product");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleEdit = (product) => {
     setEditingProduct(product);
@@ -249,11 +216,10 @@ function Products() {
     setError("");
 
     try {
-      await updateItem(
-        updatedProduct.id,
-        toApiItem(updatedProduct)
-      );
+      const payload = toApiItem(updatedProduct);
+      payload.quantity = Number(updatedProduct.quantity ?? 0);
 
+      await updateItem(updatedProduct.id, payload);
       await loadProducts();
     } catch (err) {
       setError(err.message || "Unable to update product");
@@ -277,6 +243,9 @@ function Products() {
     setError("");
   };
 
+  // Card calculations
+  const totalProducts = products.length;
+
   const lowStock = products.filter(
     (product) =>
       Number(product.quantity) > 0 &&
@@ -284,7 +253,7 @@ function Products() {
   ).length;
 
   const outOfStock = products.filter(
-    (product) => Number(product.quantity) === 0
+    (product) => Number(product.quantity) <= 0
   ).length;
 
   const totalValue = products.reduce(
@@ -311,14 +280,11 @@ function Products() {
             key={tab}
             type="button"
             className={
-              activeTab === tab ? "product-tab active" : "product-tab"
+              activeTab === tab
+                ? "product-tab active"
+                : "product-tab"
             }
-            onClick={() => {
-              setActiveTab(tab);
-              setShowForm(false);
-              setEditingProduct(null);
-              setError("");
-            }}
+            onClick={() => setActiveTab(tab)}
           >
             {tab}
           </button>
@@ -327,73 +293,76 @@ function Products() {
 
       {error && (
         <div className="product-error" role="alert">
-          {error}
+          <span>{error}</span>
           <button type="button" onClick={loadProducts}>
             Retry
           </button>
         </div>
       )}
 
-      <div className="product-cards">
-        <StatCard
-          title="Total Products"
-          value={products.length}
-          icon={<Package className="stat-icon-image" />}
-        />
-
-        <StatCard
-          title="Low Stock"
-          value={lowStock}
-          icon={<AlertTriangle className="stat-icon-image" />}
-        />
-
-        <StatCard
-          title="Out of Stock"
-          value={outOfStock}
-          icon={<PackageX className="stat-icon-image" />}
-        />
-
-        <StatCard
-          title="Total Value"
-          value={`₹ ${totalValue.toLocaleString("en-IN", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}`}
-          icon={<IndianRupee className="stat-icon-image" />}
-        />
-      </div>
-
       {activeTab === "All Products" && (
-        <div className="all-products-section">
-          <div className="products-table-heading">
-            <h2>All Products</h2>
+        <>
+          <div className="product-cards">
+            <StatCard
+              title="Total Products"
+              value={totalProducts}
+              icon={<Package className="stat-icon-image" />}
+            />
 
-            <Button
-              className="add-button"
-              onClick={() => {
-                setEditingProduct(null);
-                setError("");
-                setShowForm(true);
-              }}
-            >
-              <Plus size={18} />
-              Add Product
-            </Button>
+            <StatCard
+              title="Low Stock"
+              value={lowStock}
+              icon={<AlertTriangle className="stat-icon-image" />}
+            />
+
+            <StatCard
+              title="Out of Stock"
+              value={outOfStock}
+              icon={<PackageX className="stat-icon-image" />}
+            />
+
+            <StatCard
+              title="Total Value"
+              value={`₹ ${totalValue.toLocaleString("en-IN", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}`}
+              icon={<IndianRupee className="stat-icon-image" />}
+            />
           </div>
 
-          {loading ? (
-            <p>Loading products...</p>
-          ) : (
-            <Table
-              data={products}
-              columns={columns}
-              onUpdate={handleUpdate}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-              itemsPerPage={15}
-            />
-          )}
-        </div>
+          <div className="all-products-section">
+            <div className="products-table-heading">
+              <h2>All Products</h2>
+
+              <Button
+                className="add-button"
+                disabled={saving}
+                onClick={() => {
+                  setEditingProduct(null);
+                  setError("");
+                  setShowForm(true);
+                }}
+              >
+                <Plus size={18} />
+                Add Product
+              </Button>
+            </div>
+
+            {loading ? (
+              <p>Loading products...</p>
+            ) : (
+              <Table
+                data={products}
+                columns={columns}
+                onUpdate={handleUpdate}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                itemsPerPage={15}
+              />
+            )}
+          </div>
+        </>
       )}
 
       {activeTab !== "All Products" && (
