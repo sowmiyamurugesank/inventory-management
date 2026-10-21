@@ -1,0 +1,51 @@
+/* Select Dropdown */
+.reusable-select {
+  width: 100%;
+  min-height: 42px;
+  padding: 10px 36px 10px 12px;
+
+  font-size: 14px;
+  font-family: inherit;
+  color: #333;
+
+  background-color: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Focus */
+.reusable-select:focus {
+  border-color: #4b49ed;
+  box-shadow: 0 0 0 3px rgba(75, 73, 237, 0.12);
+}
+
+/* Placeholder option color */
+.reusable-select:invalid {
+  color: #9ca3af;
+}
+
+/* Disabled */
+.reusable-select:disabled {
+  background-color: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* Dropdown options */
+.reusable-select option {
+  padding: 10px;
+  color: #333;
+  background-color: #ffffff;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .reusable-select {
+    min-height: 40px;
+    font-size: 13px;
+  }
+}

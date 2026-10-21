@@ -1,0 +1,71 @@
+
+/* Form field wrapper */
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  margin-bottom: 16px;
+}
+
+/* Input label */
+.form-field label {
+  color: #334155;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+/* Input field */
+.form-field input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 11px 12px;
+  border: 1px solid #d1d9e6;
+  border-radius: 6px;
+  background-color: #ffffff;
+  color: #1e293b;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+/* Placeholder */
+.form-field input::placeholder {
+  color: #94a3b8;
+}
+
+/* Focus state */
+.form-field input:focus {
+  border-color: #4b49ed;
+  box-shadow: 0 0 0 3px rgba(75, 73, 237, 0.12);
+}
+
+/* Disabled state */
+.form-field input:disabled {
+  background-color: #f1f5f9;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+/* Validation error */
+.form-field .field-error {
+  margin: 0;
+  color: #dc2626;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+/* Invalid input */
+.form-field input[aria-invalid="true"] {
+  border-color: #dc2626;
+}
+
+.form-field input[aria-invalid="true"]:focus {
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
