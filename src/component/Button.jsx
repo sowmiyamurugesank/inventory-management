@@ -6,13 +6,16 @@ function Button({
   onClick,
   className = "",
   disabled = false,
-  type="button"
+  type = "button",
+  ...props
 }) {
   return (
     <button
+      type={type}
       className={`button ${className}`}
       onClick={onClick}
       disabled={disabled}
+      {...props}
     >
       {children}
     </button>

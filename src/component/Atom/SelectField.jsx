@@ -1,7 +1,6 @@
-
-import Select from "./Select";
-import Label from "./Label";
-import " ../../styles/SelectField.css"
+import Select from "./Select.jsx";
+import Label from "./Label.jsx";
+import "../../styles/SelectField.css";
 
 function SelectField({
   label,
