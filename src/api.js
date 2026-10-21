@@ -1,63 +1,85 @@
 const API_BASE_URL = "http://localhost:5000/api";
 
-export async function getItems() {
-  const response = await fetch(`${API_BASE_URL}/items`);
-
+async function request(path, options = {}, fallbackError) {
+  const response = await fetch(`${API_BASE_URL}${path}`, options);
   const result = await response.json();
 
   if (!response.ok || result.success === false) {
-    throw new Error(result.error || "Failed to fetch items");
+    throw new Error(result.error || fallbackError);
   }
 
   return result.data;
 }
 
-export async function createItem(itemData) {
-  const response = await fetch(`${API_BASE_URL}/items`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
+// Items
+export function getItems() {
+  return request("/items", {}, "Failed to fetch items");
+}
+
+export function createItem(itemData) {
+  return request(
+    "/items",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(itemData),
     },
-    body: JSON.stringify(itemData),
-  });
-
-  const result = await response.json();
-
-  if (!response.ok || result.success === false) {
-    throw new Error(result.error || "Failed to create item");
-  }
-
-  return result.data;
+    "Failed to create item",
+  );
 }
 
-export async function updateItem(id, itemData) {
-  const response = await fetch(`${API_BASE_URL}/items/${id}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
+export function updateItem(id, itemData) {
+  return request(
+    `/items/${id}`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(itemData),
     },
-    body: JSON.stringify(itemData),
-  });
-
-  const result = await response.json();
-
-  if (!response.ok || result.success === false) {
-    throw new Error(result.error || "Failed to update item");
-  }
-
-  return result.data;
+    "Failed to update item",
+  );
 }
 
-export async function deleteItem(id) {
-  const response = await fetch(`${API_BASE_URL}/items/${id}`, {
-    method: "DELETE",
-  });
+export function deleteItem(id) {
+  return request(`/items/${id}`, { method: "DELETE" }, "Failed to delete item");
+}
 
-  const result = await response.json();
+// Suppliers / Vendors
+export async function getVendors() {
+  const data = await request("/vendors", {}, "Failed to fetch suppliers");
 
-  if (!response.ok || result.success === false) {
-    throw new Error(result.error || "Failed to delete item");
-  }
+  // Supports either `data: []` or the raw `list_vendors()` response.
+  return Array.isArray(data) ? data : data?.data || [];
+}
 
-  return result.data;
+export function createVendor(vendorData) {
+  return request(
+    "/vendors",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(vendorData),
+    },
+    "Failed to create supplier",
+  );
+}
+
+export function updateVendor(id, vendorData) {
+  return request(
+    `/vendors/${id}`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(vendorData),
+    },
+    "Failed to update supplier",
+  );
+}
+
+export function deleteVendor(id) {
+  return request(
+    `/vendors/${id}`,
+    { method: "DELETE" },
+    "Failed to delete supplier",
+  );
 }
