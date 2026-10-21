@@ -158,10 +158,6 @@ function AddWarehouse({ onClose, onSave, saving = false }) {
             <h2 id="warehouse-modal-title">
               Add Warehouse
             </h2>
-            <p>
-              Create a warehouse and configure its location
-              and operations.
-            </p>
           </div>
 
           <button
@@ -171,7 +167,7 @@ function AddWarehouse({ onClose, onSave, saving = false }) {
             disabled={saving}
             aria-label="Close"
           >
-            <X size={20} />
+            <X/>
           </button>
         </header>
 
@@ -199,10 +195,6 @@ function AddWarehouse({ onClose, onSave, saving = false }) {
             {activeTab === 0 && (
               <div className="warehouse-tab-content">
                 <h3>Warehouse Details</h3>
-                <p className="warehouse-section-description">
-                  Enter the basic information for this warehouse.
-                </p>
-
                 <div className="warehouse-form-grid">
                   <label className="warehouse-field">
                     Warehouse Name *
@@ -292,9 +284,6 @@ function AddWarehouse({ onClose, onSave, saving = false }) {
             {activeTab === 1 && (
               <div className="warehouse-tab-content">
                 <h3>Warehouse Address</h3>
-                <p className="warehouse-section-description">
-                  Add the complete address and location details.
-                </p>
 
                 <div className="warehouse-form-grid">
                   <label className="warehouse-field">
@@ -402,9 +391,6 @@ function AddWarehouse({ onClose, onSave, saving = false }) {
             {activeTab === 2 && (
               <div className="warehouse-tab-content">
                 <h3>Warehouse Capacity</h3>
-                <p className="warehouse-section-description">
-                  Set the total storage capacity.
-                </p>
 
                 <div className="warehouse-form-grid">
                   <label className="warehouse-field">
@@ -442,10 +428,6 @@ function AddWarehouse({ onClose, onSave, saving = false }) {
             {activeTab === 3 && (
               <div className="warehouse-tab-content">
                 <h3>Operating Hours</h3>
-                <p className="warehouse-section-description">
-                  Configure working hours and working days.
-                </p>
-
                 <div className="warehouse-form-grid">
                   <label className="warehouse-field">
                     Opening Time *
@@ -500,9 +482,6 @@ function AddWarehouse({ onClose, onSave, saving = false }) {
                 <div className="warehouse-zones-heading">
                   <div>
                     <h3>Warehouse Zones</h3>
-                    <p className="warehouse-section-description">
-                      Add and configure zones inside the warehouse.
-                    </p>
                   </div>
 
                   <button
@@ -510,7 +489,7 @@ function AddWarehouse({ onClose, onSave, saving = false }) {
                     className="warehouse-secondary-btn"
                     onClick={addZone}
                   >
-                    <Plus size={16} />
+                    <Plus/>
                     Add Zone
                   </button>
                 </div>
@@ -526,7 +505,7 @@ function AddWarehouse({ onClose, onSave, saving = false }) {
                           className="warehouse-remove-zone"
                           onClick={() => removeZone(index)}
                         >
-                          <Trash2 size={15} />
+                          <Trash2/>
                           Remove
                         </button>
                       )}

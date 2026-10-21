@@ -404,18 +404,30 @@
 }
 
 .category-modal input {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 10px 12px;
-  margin-bottom: 16px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 14px;
-  outline: none;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    margin-bottom: 16px;
+    background-color: #ffffff !important;
+    color: #20243a !important;
+    color-scheme: light;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+}
+
+.category-modal input::placeholder {
+    color: #697085 !important;
+    opacity: 1;
 }
 
 .category-modal input:focus {
-  border-color: #5b5de6;
+    background-color: #ffffff !important;
+    color: #20243a !important;
+    border-color: #5b5de6;
+    box-shadow: 0 0 0 2px rgba(91, 77, 230, 0.12);
 }
 
 .category-modal-buttons {

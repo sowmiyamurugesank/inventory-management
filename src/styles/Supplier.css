@@ -60,6 +60,7 @@
     color: #444b61;
 }
 
+
 .supplier-section input,
 .supplier-section select,
 .supplier-section textarea {
@@ -67,11 +68,38 @@
     box-sizing: border-box;
     padding: 10px 12px;
     margin-bottom: 14px;
+
+    background-color: #ffffff !important;
+    color: #20243a !important;
+    color-scheme: light;
+
     border: 1px solid #d1d5db;
     border-radius: 6px;
     font-size: 14px;
+    font-family: inherit;
     outline: none;
 }
+
+.supplier-section input::placeholder,
+.supplier-section textarea::placeholder {
+    color: #697085 !important;
+    opacity: 1;
+}
+
+.supplier-section select option {
+    background-color: #ffffff;
+    color: #20243a;
+}
+
+.supplier-section input:focus,
+.supplier-section select:focus,
+.supplier-section textarea:focus {
+    background-color: #ffffff !important;
+    color: #20243a !important;
+    border-color: #5b5de6;
+    box-shadow: 0 0 0 2px rgba(91, 77, 230, 0.12);
+}
+
 
 .supplier-section textarea {
     min-height: 70px;
