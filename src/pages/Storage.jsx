@@ -25,12 +25,7 @@ function Storage() {
   return (
     <div className="storage-page">
       <div className="storage-heading">
-        <div className="storage-heading-icon">
-          <Warehouse />
-        </div>
-
         <div className="storage-heading-text">
-          <h2>Storage Management</h2>
         </div>
       </div>
 

@@ -1,5 +1,6 @@
 
 .storage-page {
+  margin: 0;
   width: 100%;
   min-width: 0;
   padding: 24px;
@@ -15,36 +16,6 @@
   gap: 16px;
   width: 100%;
   margin: 0 0 24px;
-  text-align: left;
-}
-
-.storage-heading-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  color: #6662b3;
-}
-
-.storage-heading-icon svg {
-  width:29px;
-  height:30px;
-  stroke-width: 2;
-}
-
-.storage-heading-text {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 5px;
-}
-
-.storage-heading-text h2 {
-  margin: 0;
-  font-size: 25px;
-  font-weight: 650;
-  line-height: 1.2;
-  color: #616c93;
   text-align: left;
 }
 
