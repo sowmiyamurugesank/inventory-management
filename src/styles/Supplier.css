@@ -155,3 +155,100 @@
 .purchase-order-btn:hover {
     background-color: #1d4ed8;
 }
+/* Supplier Form Tabs */
+.supplier-form-tabs {
+display: flex;
+align-items: center;
+gap: 8px;
+margin-bottom: 24px;
+border-bottom: 1px solid #e5e7eb;
+overflow-x: auto;
+}
+
+.supplier-form-tab {
+flex: 1;
+padding: 12px 8px;
+border: none;
+border-bottom: 3px solid transparent;
+background: transparent;
+color: #697085;
+font-size: 13px;
+font-weight: 500;
+font-family: inherit;
+white-space: nowrap;
+cursor: pointer;
+transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.supplier-form-tab:hover {
+color: #5b5de6;
+}
+
+.supplier-form-tab.active {
+color: #5b5de6;
+border-bottom-color: #5b5de6;
+font-weight: 600;
+}
+
+/* Previous / Next button alignment */
+.supplier-step-navigation {
+display: flex;
+justify-content: flex-end;
+padding-top: 10px;
+border-top: 1px solid #e5e7eb;
+}
+
+.supplier-navigation-buttons {
+display: flex;
+align-items: center;
+justify-content: flex-end;
+gap: 8px;
+}
+
+/* Keep form fields aligned */
+.supplier-section .form-field {
+width: 100%;
+margin-bottom: 14px;
+}
+
+.supplier-section .form-label {
+display: block;
+margin-bottom: 6px;
+font-size: 13px;
+color: #444b61;
+}
+
+/* Mobile responsive tabs */
+@media (max-width: 600px) {
+.supplier-form-tabs {
+gap: 4px;
+}
+
+.supplier-form-tab {
+padding: 10px 6px;
+font-size: 11px;
+}
+
+.supplier-form-row {
+grid-template-columns: 1fr;
+gap: 0;
+}
+}
+.supplier-navigation-buttons button {
+background-color: #2563eb;
+color: #ffffff;
+border: 1px solid #2563eb;
+border-radius: 6px;
+padding: 10px 16px;
+cursor: pointer;
+}
+
+.supplier-navigation-buttons button:hover {
+background-color: #1d4ed8;
+border-color: #1d4ed8;
+}
+
+.supplier-navigation-buttons button:disabled {
+opacity: 0.6;
+cursor: not-allowed;
+}
