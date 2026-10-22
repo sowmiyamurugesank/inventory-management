@@ -1,5 +1,7 @@
+
 import FormField from "./FormField-LIE.jsx";
 import SelectField from "./SelectField.jsx";
+import Textarea from "./Textarea.jsx";
 
 import "../../styles/AttributeField.css";
 
@@ -8,6 +10,7 @@ function AttributeField({
   value,
   onChange,
   error = "",
+  disabled = false,
 }) {
   const commonProps = {
     label: field.label,
@@ -16,6 +19,7 @@ function AttributeField({
     onChange,
     required: field.required,
     error,
+    disabled,
   };
 
   if (field.type === "select") {
@@ -27,7 +31,17 @@ function AttributeField({
       />
     );
   }
-  
+
+  if (field.type === "textarea") {
+    return (
+      <Textarea
+        {...commonProps}
+        placeholder={field.placeholder}
+        rows={4}
+      />
+    );
+  }
+
   return (
     <FormField
       {...commonProps}

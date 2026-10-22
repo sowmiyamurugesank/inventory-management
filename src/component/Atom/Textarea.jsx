@@ -11,6 +11,7 @@ function Textarea({
 }) {
   return (
     <textarea
+      className="form-textarea-field"
       id={name}
       name={name}
       value={value ?? ""}

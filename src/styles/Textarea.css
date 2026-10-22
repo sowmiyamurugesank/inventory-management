@@ -1,15 +1,4 @@
-
-/* Textarea container */
-.form-textarea {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: 100%;
-  margin-bottom: 16px;
-}
-
-/* Textarea field */
-.form-textarea textarea {
+.form-textarea-field {
   width: 100%;
   min-height: 90px;
   box-sizing: border-box;
@@ -17,30 +6,32 @@
   border: 1px solid #d1d9e6;
   border-radius: 6px;
   background-color: #ffffff;
-  color: #1e293b;
+  color: #1e293b !important;
+  -webkit-text-fill-color: #1e293b;
+  caret-color: #4f46e5;
   font-family: inherit;
   font-size: 14px;
   line-height: 1.5;
   resize: vertical;
   outline: none;
-  transition: border-color 0.2s ease,
-              box-shadow 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* Placeholder */
-.form-textarea textarea::placeholder {
+.form-textarea-field::placeholder {
   color: #94a3b8;
+   font-size: 14px;
+  -webkit-text-fill-color: #94a3b8;
+  opacity: 1;
 }
 
-/* Focus */
-.form-textarea textarea:focus {
-  border-color: #4b49ed;
-  box-shadow: 0 0 0 3px rgba(75, 73, 237, 0.12);
+.form-textarea-field:focus {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
 }
 
-/* Disabled */
-.form-textarea textarea:disabled {
+.form-textarea-field:disabled {
   background-color: #f1f5f9;
-  color: #94a3b8;
+  color: #64748b !important;
+  -webkit-text-fill-color: #64748b;
   cursor: not-allowed;
 }

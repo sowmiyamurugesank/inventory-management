@@ -243,7 +243,7 @@ function Products() {
     setError("");
   };
 
-  // Card calculations
+
   const totalProducts = products.length;
 
   const lowStock = products.filter(
@@ -267,11 +267,6 @@ function Products() {
   return (
     <div className="products-page">
       <div className="products-heading">
-        <Package className="products-heading-icon" />
-        <div>
-          <h1>Products</h1>
-          <p>Manage your products, categories, stock and suppliers.</p>
-        </div>
       </div>
 
       <div className="product-tabs">

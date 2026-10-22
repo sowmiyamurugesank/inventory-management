@@ -1,21 +1,12 @@
 .dashboard {
+    margin:0;
     padding: 22px 30px;
     background-color: #f7f9ff;
     min-height: 100vh;
     box-sizing: border-box;
     text-align: left;
 }
-.dashboard h1 {
-    margin: 0 0 4px;
-    color: #102f70;
-    font-size: 32px;
-    font-weight: 700;
-}
-.welcome-text {
-    margin: 0 0 18px;
-    color: #63759b;
-    font-size: 14px;
-}
+
 .dashboard-section {
     margin: 0 0 15px;
 }

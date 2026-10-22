@@ -3,6 +3,7 @@
 ========================= */
 
 .products-page {
+  margin: 0;
   width: 100%;
   min-height: 100%;
   padding: 24px;
@@ -22,34 +23,6 @@
   text-align: left;
 }
 
-.products-heading > div {
-  flex: 0 1 auto;
-  text-align: left;
-}
-
-.products-heading-icon {
-  width: 42px;
-  height: 42px;
-  padding: 10px;
-  flex-shrink: 0;
-  box-sizing: border-box;
-  color: #4b49ed;
-  background: #eeeeff;
-  border-radius: 12px;
-}
-
-.products-heading h1 {
-  margin: 0 0 6px;
-  font-size: 28px;
-  font-weight: 700;
-  color: #172033;
-}
-
-.products-heading p {
-  margin: 0;
-  font-size: 14px;
-  color: #64748b;
-}
 
 /* =========================
    Product Tabs
@@ -64,6 +37,7 @@
   background: #fff;
   border: 1px solid #e1e4f0;
   border-radius: 10px;
+  margin-bottom: 2px;
   overflow-x: auto;
   overflow-y: hidden;
   scrollbar-width: thin;
