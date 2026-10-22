@@ -1,4 +1,3 @@
-
 /* Common Button */
 .button {
   display: inline-flex;
@@ -16,28 +15,20 @@
   font-weight: 500;
   font-family: inherit;
   cursor: pointer;
-  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
-/* Hover */
 .button:hover:not(:disabled) {
   background-color: #4338ca;
   border-color: #4338ca;
 }
 
-/* Focus */
-.button:focus-visible {
-  outline: 2px solid #818cf8;
-  outline-offset: 2px;
-}
-
-/* Disabled */
 .button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-/* Cancel / Secondary Button */
+/* Secondary Button */
 .button.secondary-button {
   background-color: #ffffff;
   color: #374151;
@@ -53,41 +44,22 @@
 .button.danger-button {
   background-color: #dc2626;
   border-color: #dc2626;
-  color: #ffffff;
-}
-
-.button.danger-button:hover:not(:disabled) {
-  background-color: #b91c1c;
-  border-color: #b91c1c;
 }
 
 /* Success Button */
 .button.success-button {
   background-color: #16a34a;
   border-color: #16a34a;
+}
+
+/* Form Navigation */
+.button.form-nav-button {
+  background-color: #4f46e5;
+  border-color: #4f46e5;
   color: #ffffff;
 }
 
-.button.success-button:hover:not(:disabled) {
-  background-color: #15803d;
-  border-color: #15803d;
-}
-
-/* Small Button */
-.button.small-button {
-  padding: 5px 10px;
-  min-height: 30px;
-  font-size: 12px;
-}
-
-/* Large Button */
-.button.large-button {
-  padding: 11px 18px;
-  min-height: 42px;
-  font-size: 14px;
-}
-
-/* Full Width Button */
-.button.full-width {
-  width: 100%;
+.button.form-nav-button:hover:not(:disabled) {
+  background-color: #4338ca;
+  border-color: #4338ca;
 }

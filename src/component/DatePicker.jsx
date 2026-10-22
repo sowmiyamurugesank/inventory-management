@@ -1,5 +1,5 @@
 
-import "../../styles/DatePicker.css";
+import "../styles/DatePicker.css";
 
 function DatePicker({
   label,

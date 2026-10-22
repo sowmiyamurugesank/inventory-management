@@ -70,6 +70,30 @@
   scrollbar-color: #cbd5e1 transparent;
 }
 
+.product-form-heading {
+  margin: 0 0 20px;
+  padding: 0;
+  font-family: inherit;
+}
+
+.product-form-heading h2 {
+  margin: 0 0 8px;
+  color: #1f2937;
+  font-family: inherit;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.product-form-heading p {
+  margin: 0;
+  color: #374151;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
 .product-tabs::-webkit-scrollbar {
   width: 6px;
   height: 6px;
