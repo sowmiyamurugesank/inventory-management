@@ -1,471 +1,520 @@
-/* ================================
-   Purchase Order Modal
-================================ */
+
+/* ==============================
+   PURCHASE ORDER MODAL
+================================= */
 
 .purchase-order-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.45);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    padding: 20px;
-    box-sizing: border-box;
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+  box-sizing: border-box;
 }
-
-
-/* ================================
-   Modal
-================================ */
 
 .purchase-order-modal {
-    width: 95%;
-    max-width: 1000px;
-    max-height: 92vh;
-    background: #ffffff;
-    border-radius: 12px;
-    overflow-y: auto;
-    box-sizing: border-box;
-    padding: 28px;
+  width: 95%;
+  max-width: 1000px;
+  max-height: 92vh;
+  background: #fff;
+  border-radius: 12px;
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding: 28px;
 }
 
-
-/* ================================
-   Header
-================================ */
+/* ==============================
+   HEADER
+================================= */
 
 .purchase-order-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
 }
 
 .purchase-order-header h2 {
-    margin: 0;
-    font-size: 24px;
-    font-weight: 600;
-    color: #111827;
+  margin: 0;
+  font-size: 26px;
+  font-weight: 700;
+  color: #20243a;
 }
 
 .purchase-order-close {
-    border: none;
-    background: transparent;
-    font-size: 26px;
-    color: #6b7280;
-    cursor: pointer;
-    padding: 4px 8px;
+  border: none;
+  background: transparent;
+  font-size: 26px;
+  color: #697085;
+  cursor: pointer;
+  padding: 4px 8px;
 }
 
 .purchase-order-close:hover {
-    color: #111827;
+  color: #111827;
 }
 
+/* ==============================
+   TOP TABS - SUPPLIER FORM STYLE
+================================= */
 
-/* ================================
-   Sections
-================================ */
+.purchase-order-tabs {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 0;
+  width: 100%;
+  padding: 0;
+  margin: 0 0 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.purchase-order-tabs .purchase-order-tab {
+  flex: 1 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 10px;
+  margin: 0 0 -1px;
+  border: none;
+  border-bottom: 3px solid transparent;
+  border-radius: 0;
+  background: transparent !important;
+  color: #555d75;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: none;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.purchase-order-tabs .purchase-order-tab:hover {
+  background: transparent !important;
+  color: #5b5de6;
+  border-bottom-color: transparent;
+  box-shadow: none;
+}
+
+.purchase-order-tabs .purchase-order-tab.active {
+  background: transparent !important;
+  color: #5b5de6;
+  border: none;
+  border-bottom: 3px solid #5b5de6;
+  border-radius: 0;
+  font-weight: 600;
+  box-shadow: none;
+}
+
+/* ==============================
+   SECTIONS
+================================= */
 
 .purchase-order-section {
-    border-top: 1px solid #e5e7eb;
-    padding-top: 24px;
-    margin-top: 24px;
-}
-
-.purchase-order-section:first-of-type {
-    border-top: none;
-    padding-top: 0;
-    margin-top: 0;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 24px;
+  margin-top: 24px;
 }
 
 .purchase-order-section h3 {
-    margin: 0 0 20px;
-    font-size: 21px;
-    font-weight: 600;
-    color: #111827;
+  margin: 0 0 20px;
+  font-size: 21px;
+  font-weight: 600;
+  color: #111827;
 }
 
-
-/* ================================
-   Grid
-================================ */
+/* ==============================
+   FORM GRID
+================================= */
 
 .purchase-order-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 18px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
 }
 
 .purchase-order-full {
-    grid-column: 1 / -1;
+  grid-column: 1 / -1;
 }
 
-
-/* ================================
-   Field
-================================ */
-
 .purchase-order-field {
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
 }
 
 .purchase-order-field label {
-    font-size: 15px;
-    font-weight: 500;
-    color: #374151;
+  font-size: 15px;
+  font-weight: 500;
+  color: #374151;
 }
 
 .purchase-order-field label span {
-    color: #dc2626;
+  color: #dc2626;
 }
-
-
-/* ================================
-   Input / Select / Textarea
-================================ */
 
 .purchase-order-field input,
 .purchase-order-field select,
 .purchase-order-field textarea {
-    width: 100%;
-    box-sizing: border-box;
-    border: 1px solid #d1d5db;
-    border-radius: 12px;
-    padding: 13px 15px;
-    font-size: 15px;
-    font-family: Arial, sans-serif;
-    color: #111827;
-    background: #ffffff;
-    outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  padding: 13px 15px;
+  font-size: 15px;
+  font-family: Arial, sans-serif;
+  color: #111827;
+  background: #fff;
+  outline: none;
 }
 
 .purchase-order-field input,
 .purchase-order-field select {
-    height: 50px;
+  height: 50px;
 }
 
 .purchase-order-field textarea {
-    min-height: 100px;
-    resize: vertical;
+  min-height: 100px;
+  resize: vertical;
 }
 
 .purchase-order-field input::placeholder,
 .purchase-order-field textarea::placeholder {
-    color: #9ca3af;
+  color: #9ca3af;
 }
 
 .purchase-order-field input:focus,
 .purchase-order-field select:focus,
 .purchase-order-field textarea:focus {
-    border-color: #6366f1;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
 }
 
-
-/* ================================
-   Read Only Fields
-================================ */
-
-.purchase-order-readonly {
-    background: #f9fafb !important;
-    color: #6b7280 !important;
-}
-
-
-/* ================================
-   Selected Product
-================================ */
+/* ==============================
+   PRODUCT BOX
+================================= */
 
 .purchase-order-product-box {
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    padding: 20px;
-    background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  background: #fff;
 }
 
 .purchase-order-product-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
 }
 
 .purchase-order-product-name {
-    font-size: 16px;
-    font-weight: 600;
-    color: #111827;
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
 }
 
 .purchase-order-product-subtitle {
-    margin-top: 5px;
-    font-size: 14px;
-    color: #6b7280;
+  margin-top: 5px;
+  font-size: 14px;
+  color: #6b7280;
 }
 
 .purchase-order-item-count {
-    padding: 7px 12px;
-    border-radius: 20px;
-    background: #f3f4f6;
-    color: #111827;
-    font-size: 13px;
-    font-weight: 600;
+  padding: 7px 12px;
+  border-radius: 20px;
+  background: #f3f4f6;
+  color: #111827;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
-
-/* ================================
-   Calculation Fields
-================================ */
+/* ==============================
+   LINE TOTAL
+================================= */
 
 .purchase-order-calculation {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
 }
 
 .purchase-order-calculation-label {
-    font-size: 15px;
-    color: #4b5563;
+  font-size: 15px;
+  color: #4b5563;
 }
 
 .purchase-order-calculation-value {
-    font-size: 20px;
-    font-weight: 600;
-    color: #111827;
+  font-size: 20px;
+  font-weight: 600;
+  color: #111827;
 }
 
+/* ==============================
+   ORDER SUMMARY
+================================= */
 
-/* Order Summary */
 .purchase-order-summary {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    column-gap: 40px;
-    row-gap: 28px;
-    margin-top: 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 40px;
+  row-gap: 28px;
+  margin-top: 20px;
 }
 
 .purchase-order-summary-item {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .purchase-order-summary-label {
-    font-size: 16px;
-    color: #475569;
+  font-size: 16px;
+  color: #475569;
 }
 
 .purchase-order-summary-value {
-    font-size: 20px;
-    font-weight: 500;
-    color: #111827;
+  font-size: 20px;
+  font-weight: 500;
+  color: #111827;
 }
 
-/* Additional Charges */
 .purchase-order-summary-item input {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 10px 12px;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    font-size: 14px;
-    font-family: inherit;
-    outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
 }
 
 .purchase-order-summary-item input:focus {
-    border-color: #2563eb;
+  border-color: #2563eb;
 }
 
-/* Total */
+/* ==============================
+   TOTAL
+================================= */
+
 .purchase-order-total {
-    margin-top: 30px;
-    margin-bottom: 30px;
+  margin-top: 30px;
+  margin-bottom: 30px;
 }
 
 .purchase-order-total-label {
-    font-size: 16px;
-    color: #475569;
+  font-size: 16px;
+  color: #475569;
 }
 
 .purchase-order-total-value {
-    margin-top: 8px;
-    font-size: 28px;
-    font-weight: 600;
-    color: #111827;
+  margin-top: 8px;
+  font-size: 28px;
+  font-weight: 600;
+  color: #111827;
 }
 
 .purchase-order-total-note {
-    margin-top: 4px;
-    font-size: 14px;
-    font-weight: 400;
-    color: #475569;
+  margin-top: 4px;
+  font-size: 14px;
+  font-weight: 400;
+  color: #475569;
 }
 
-/* Internal Notes */
+/* ==============================
+   INTERNAL NOTES
+================================= */
+
 .internal-notes-field {
-    margin-top: 0;
+  margin-top: 0;
 }
 
-/* Submit Button */
-.purchase-order-actions {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 25px;
-}
-
-/* ================================
-   Helper Text
-================================ */
-
-.purchase-order-helper {
-    margin-top: 6px;
-    font-size: 13px;
-    line-height: 1.5;
-    color: #6b7280;
-}
-
-
-/* ================================
-   Error Message
-================================ */
+/* ==============================
+   VALIDATION ERROR
+================================= */
 
 .purchase-order-error {
-    margin-top: 5px;
-    font-size: 13px;
-    color: #dc2626;
+  color: #dc2626;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.6;
+  margin-top: 18px;
+  margin-bottom: 0;
 }
 
+/* ==============================
+   PREVIOUS / NEXT NAVIGATION
+================================= */
 
-/* ================================
-   Buttons
-================================ */
-
-.purchase-order-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-    margin-top: 28px;
-    padding-top: 20px;
-    border-top: 1px solid #e5e7eb;
+.purchase-order-step-navigation {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  width: 100%;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+  box-sizing: border-box;
 }
 
-.purchase-order-cancel {
-    padding: 11px 20px;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    background: #ffffff;
-    color: #374151;
-    font-size: 15px;
-    cursor: pointer;
+.purchase-order-navigation-buttons {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  width: auto;
+  margin-left: auto;
 }
 
-.purchase-order-cancel:hover {
-    background: #f9fafb;
+.purchase-order-prev,
+.purchase-order-next,
+.submit-purchase-order-btn {
+  flex-shrink: 0;
+  min-width: 100px;
+  padding: 11px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  box-sizing: border-box;
 }
 
-.purchase-order-submit {
-    padding: 11px 22px;
-    border: none;
-    border-radius: 8px;
-    background: #2563eb;
-    color: #ffffff;
-    font-size: 15px;
-    font-weight: 500;
-    cursor: pointer;
+.purchase-order-prev,
+.purchase-order-next {
+  border: 1px solid #2563eb;
+  background: #2563eb;
+  color: #fff;
 }
 
-.purchase-order-submit:hover {
-    background: #1d4ed8;
+.purchase-order-prev:hover:not(:disabled),
+.purchase-order-next:hover:not(:disabled) {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
 }
 
-
-/* ================================
-   Scrollbar
-================================ */
-
-.purchase-order-modal::-webkit-scrollbar {
-    width: 8px;
+.purchase-order-prev:disabled,
+.purchase-order-next:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
-.purchase-order-modal::-webkit-scrollbar-track {
-    background: #f3f4f6;
-}
-
-.purchase-order-modal::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 10px;
-}
-
-
-/* ================================
-   Responsive
-================================ */
-
-@media (max-width: 700px) {
-
-    .purchase-order-overlay {
-        padding: 10px;
-    }
-
-    .purchase-order-modal {
-        width: 100%;
-        max-height: 95vh;
-        padding: 20px;
-    }
-
-    .purchase-order-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .purchase-order-full {
-        grid-column: auto;
-    }
-
-    .purchase-order-summary {
-        grid-template-columns: 1fr;
-    }
-
-    .purchase-order-header h2 {
-        font-size: 21px;
-    }
-
-    .purchase-order-section h3 {
-        font-size: 19px;
-    }
-}
-.purchase-order-actions {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 20px;
-}
+/* ==============================
+   SUBMIT BUTTON
+================================= */
 
 .submit-purchase-order-btn {
-    background-color: #2563eb;
-    color: white;
-    border: none;
-    padding: 10px 18px;
-    border-radius: 6px;
-    font-size: 14px;
-    cursor: pointer;
+  border: 1px solid #2563eb;
+  background-color: #2563eb;
+  color: #fff;
 }
 
 .submit-purchase-order-btn:hover {
-    background-color: #1d4ed8;
+  background-color: #1d4ed8;
+  border-color: #1d4ed8;
 }
 
-.purchase-order-total {
-    margin-bottom: 30px;
+/* ==============================
+   SCROLLBAR
+================================= */
+
+.purchase-order-modal::-webkit-scrollbar {
+  width: 8px;
 }
-.purchase-order-error {
-    color: red !important;
-    font-size: 14px;
-    font-weight: 500;
-    margin-top: 15px;
-    margin-bottom: 0;
+
+.purchase-order-modal::-webkit-scrollbar-track {
+  background: #f3f4f6;
 }
+
+.purchase-order-modal::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+/* ==============================
+   RESPONSIVE
+================================= */
+
+@media (max-width: 700px) {
+  .purchase-order-overlay {
+    padding: 10px;
+  }
+
+  .purchase-order-modal {
+    width: 100%;
+    max-height: 95vh;
+    padding: 20px;
+  }
+
+  .purchase-order-tabs {
+    justify-content: flex-start;
+  }
+
+  .purchase-order-tabs .purchase-order-tab {
+    flex: 0 0 auto;
+  }
+
+  .purchase-order-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .purchase-order-full {
+    grid-column: auto;
+  }
+
+  .purchase-order-summary {
+    grid-template-columns: 1fr;
+    row-gap: 20px;
+  }
+
+  .purchase-order-header h2 {
+    font-size: 21px;
+  }
+
+  .purchase-order-section h3 {
+    font-size: 19px;
+  }
+
+  .purchase-order-product-box {
+    padding: 15px;
+  }
+
+  .purchase-order-step-navigation {
+    justify-content: flex-end;
+    gap: 0;
+  }
+
+  .purchase-order-navigation-buttons {
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: 10px;
+    width: auto;
+    margin-left: auto;
+  }
+
+  .purchase-order-prev,
+  .purchase-order-next,
+  .submit-purchase-order-btn {
+    min-width: auto;
+    padding: 10px 14px;
+    white-space: nowrap;
+  }
+
+  .purchase-order-tabs .purchase-order-tab {
+    padding: 10px 8px;
+    font-size: 12px;
+  }
+}
+

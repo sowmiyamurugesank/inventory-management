@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
+
 import {
   Package,
   AlertTriangle,
   PackageX,
   IndianRupee,
   Plus,
+  X,
 } from "lucide-react";
 
 import ProductManagement from "../component/ProductManagement";
@@ -13,6 +15,7 @@ import Table from "../component/Table";
 import ProductForm from "../component/Productform";
 import Button from "../component/Button";
 import Modal from "../component/Modal1";
+import PurchaseOrder from "../component/PurchaseOrder";
 
 import {
   getItems,
@@ -69,7 +72,8 @@ function toApiItem(formData) {
 
   for (const attribute of attributes) {
     if (attribute.name?.trim()) {
-      customAttributes[attribute.name.trim()] = attribute.value ?? "";
+      customAttributes[attribute.name.trim()] =
+        attribute.value ?? "";
     }
   }
 
@@ -83,7 +87,8 @@ function toApiItem(formData) {
     description: formData.description ?? "",
     brand_name: formData.brandName ?? "",
     manufacturer_name: formData.manufacturer ?? "",
-    manufacturer_part_number: formData.manufacturerPartNumber ?? "",
+    manufacturer_part_number:
+      formData.manufacturerPartNumber ?? "",
     purchase_cost: Number(formData.purchaseCost || 0),
     selling_price: Number(formData.sellingPrice || 0),
     mrp: Number(formData.mrp || 0),
@@ -106,9 +111,35 @@ function toApiItem(formData) {
 
 function Products() {
   const [activeTab, setActiveTab] = useState("All Products");
+
   const [products, setProducts] = useState([]);
+
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
+
+  // Existing Purchase Order form
+  const [showPurchaseOrder, setShowPurchaseOrder] =
+    useState(false);
+
+  // Purchase Order workflow popup
+  const [showPurchaseWorkflow, setShowPurchaseWorkflow] =
+    useState(false);
+
+  // Workflow selections
+  const [purchaseMethod, setPurchaseMethod] =
+    useState("direct");
+
+  const [vendorStatus, setVendorStatus] =
+    useState("existing");
+
+  const [productStatus, setProductStatus] =
+    useState("regular");
+
+  const [specialApproval, setSpecialApproval] =
+    useState("no");
+
+  // Purchase Orders table data
+  const [purchaseOrders, setPurchaseOrders] = useState([]);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -119,13 +150,30 @@ function Products() {
     "Categories",
     "Stock Management",
     "Suppliers",
+    "Purchase",
   ];
 
   const columns = [
-    { key: "itemCode", label: "Item Code", editable: true },
-    { key: "itemName", label: "Item Name", editable: true },
-    { key: "category", label: "Category", editable: true },
-    { key: "brandName", label: "Brand", editable: true },
+    {
+      key: "itemCode",
+      label: "Item Code",
+      editable: true,
+    },
+    {
+      key: "itemName",
+      label: "Item Name",
+      editable: true,
+    },
+    {
+      key: "category",
+      label: "Category",
+      editable: true,
+    },
+    {
+      key: "brandName",
+      label: "Brand",
+      editable: true,
+    },
     {
       key: "purchaseCost",
       label: "Purchase Cost",
@@ -144,7 +192,10 @@ function Products() {
       type: "number",
       editable: true,
     },
-    { key: "status", label: "Status" },
+    {
+      key: "status",
+      label: "Status",
+    },
   ];
 
   const loadProducts = async () => {
@@ -156,10 +207,15 @@ function Products() {
 
       const items = Array.isArray(result)
         ? result
-        : result?.items ?? result?.rows ?? result?.data ?? [];
+        : result?.items ??
+          result?.rows ??
+          result?.data ??
+          [];
 
       if (!Array.isArray(items)) {
-        throw new Error("Unexpected item list response from server");
+        throw new Error(
+          "Unexpected item list response from server"
+        );
       }
 
       setProducts(items.map(fromApiItem));
@@ -185,7 +241,9 @@ function Products() {
         await updateItem(editingProduct.id, {
           ...payload,
           quantity: Number(
-            formData.quantity ?? editingProduct.quantity ?? 0
+            formData.quantity ??
+              editingProduct.quantity ??
+              0
           ),
         });
       } else {
@@ -217,9 +275,13 @@ function Products() {
 
     try {
       const payload = toApiItem(updatedProduct);
-      payload.quantity = Number(updatedProduct.quantity ?? 0);
+
+      payload.quantity = Number(
+        updatedProduct.quantity ?? 0
+      );
 
       await updateItem(updatedProduct.id, payload);
+
       await loadProducts();
     } catch (err) {
       setError(err.message || "Unable to update product");
@@ -231,6 +293,7 @@ function Products() {
 
     try {
       await deleteItem(productId);
+
       await loadProducts();
     } catch (err) {
       setError(err.message || "Unable to delete product");
@@ -243,7 +306,56 @@ function Products() {
     setError("");
   };
 
+<<<<<<< HEAD
 
+=======
+  // Purchase Order submit
+  const handlePurchaseOrderSubmit = (orderData) => {
+    setPurchaseOrders((previousOrders) => [
+      ...previousOrders,
+      {
+        id: Date.now(),
+        poNumber: orderData.poNumber,
+        supplier: orderData.supplier,
+        poDate: orderData.poDate,
+        product: orderData.product,
+        quantity: orderData.quantity,
+        amount: orderData.totalPurchaseOrder,
+        currency: orderData.currency,
+        status: "Pending",
+      },
+    ]);
+
+    setShowPurchaseOrder(false);
+  };
+
+  // Open workflow with default selections
+  const handleOpenPurchaseWorkflow = () => {
+    setPurchaseMethod("direct");
+    setVendorStatus("existing");
+    setProductStatus("regular");
+    setSpecialApproval("no");
+
+    setShowPurchaseWorkflow(true);
+  };
+
+  // Workflow Next
+  const handlePurchaseWorkflowNext = () => {
+    const isValidDirectPurchase =
+      purchaseMethod === "direct" &&
+      vendorStatus === "existing" &&
+      productStatus === "regular" &&
+      specialApproval === "no";
+
+    // Only this exact combination should work
+    if (isValidDirectPurchase) {
+      setShowPurchaseWorkflow(false);
+      setShowPurchaseOrder(true);
+    }
+  };
+
+  // Card calculations
+>>>>>>> f8a86795644ce42f7969187e1085c88ae4159853
   const totalProducts = products.length;
 
   const lowStock = products.filter(
@@ -264,10 +376,34 @@ function Products() {
     0
   );
 
+  // Purchase Orders record count
+  const purchaseOrderCount = purchaseOrders.length;
+
+  const purchaseOrderStart =
+    purchaseOrderCount === 0 ? 0 : 1;
+
+  const purchaseOrderEnd = purchaseOrderCount;
+
   return (
     <div className="products-page">
+      {/* PAGE HEADING */}
+
       <div className="products-heading">
+<<<<<<< HEAD
+=======
+        <Package className="products-heading-icon" />
+
+        <div>
+          <h1>Products</h1>
+
+          <p>
+            Manage your products, categories, stock and suppliers.
+          </p>
+        </div>
+>>>>>>> f8a86795644ce42f7969187e1085c88ae4159853
       </div>
+
+      {/* TABS */}
 
       <div className="product-tabs">
         {tabs.map((tab) => (
@@ -279,21 +415,45 @@ function Products() {
                 ? "product-tab active"
                 : "product-tab"
             }
-            onClick={() => setActiveTab(tab)}
+            onClick={() => {
+              if (tab === "Purchase") {
+                setActiveTab("Purchase");
+
+                setShowPurchaseWorkflow(false);
+                setShowPurchaseOrder(false);
+
+                return;
+              }
+
+              setActiveTab(tab);
+
+              setShowPurchaseWorkflow(false);
+              setShowPurchaseOrder(false);
+            }}
           >
             {tab}
           </button>
         ))}
       </div>
 
+      {/* ERROR */}
+
       {error && (
         <div className="product-error" role="alert">
           <span>{error}</span>
-          <button type="button" onClick={loadProducts}>
+
+          <button
+            type="button"
+            onClick={loadProducts}
+          >
             Retry
           </button>
         </div>
       )}
+
+      {/* =========================
+          ALL PRODUCTS
+      ========================= */}
 
       {activeTab === "All Products" && (
         <>
@@ -301,28 +461,39 @@ function Products() {
             <StatCard
               title="Total Products"
               value={totalProducts}
-              icon={<Package className="stat-icon-image" />}
+              icon={
+                <Package className="stat-icon-image" />
+              }
             />
 
             <StatCard
               title="Low Stock"
               value={lowStock}
-              icon={<AlertTriangle className="stat-icon-image" />}
+              icon={
+                <AlertTriangle className="stat-icon-image" />
+              }
             />
 
             <StatCard
               title="Out of Stock"
               value={outOfStock}
-              icon={<PackageX className="stat-icon-image" />}
+              icon={
+                <PackageX className="stat-icon-image" />
+              }
             />
 
             <StatCard
               title="Total Value"
-              value={`₹ ${totalValue.toLocaleString("en-IN", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}`}
-              icon={<IndianRupee className="stat-icon-image" />}
+              value={`₹ ${totalValue.toLocaleString(
+                "en-IN",
+                {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                }
+              )}`}
+              icon={
+                <IndianRupee className="stat-icon-image" />
+              }
             />
           </div>
 
@@ -360,21 +531,381 @@ function Products() {
         </>
       )}
 
-      {activeTab !== "All Products" && (
+      {/* =========================
+          CATEGORIES / STOCK /
+          SUPPLIERS
+      ========================= */}
+
+      {activeTab !== "All Products" &&
+        activeTab !== "Purchase" && (
+          <div className="product-tab-content">
+            <ProductManagement
+              activeTab={activeTab}
+            />
+          </div>
+        )}
+
+      {/* =========================
+          PURCHASE ORDERS
+      ========================= */}
+
+      {activeTab === "Purchase" && (
         <div className="product-tab-content">
-          <ProductManagement activeTab={activeTab} />
+          <div className="all-products-section">
+            <div className="products-table-heading">
+              <h2>Purchase Orders</h2>
+
+              <Button
+                className="add-button"
+                onClick={handleOpenPurchaseWorkflow}
+              >
+                <Plus size={18} />
+                Purchase Order
+              </Button>
+            </div>
+
+            <div className="purchase-table-wrapper">
+              <table className="purchase-orders-table">
+                <thead>
+                  <tr>
+                    <th>PO Number</th>
+                    <th>Supplier</th>
+                    <th>Order Date</th>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {purchaseOrders.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan="7"
+                        className="no-purchase-orders"
+                      >
+                        No purchase orders found
+                      </td>
+                    </tr>
+                  ) : (
+                    purchaseOrders.map((order) => (
+                      <tr key={order.id}>
+                        <td>{order.poNumber}</td>
+
+                        <td>{order.supplier}</td>
+
+                        <td>{order.poDate}</td>
+
+                        <td>{order.product}</td>
+
+                        <td>{order.quantity}</td>
+
+                        <td>
+                          {order.currency}{" "}
+                          {Number(order.amount).toFixed(2)}
+                        </td>
+
+                        <td>{order.status}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="purchase-table-footer">
+              <span>
+                Showing {purchaseOrderStart} -{" "}
+                {purchaseOrderEnd} of{" "}
+                {purchaseOrderCount} records
+              </span>
+            </div>
+          </div>
         </div>
       )}
 
-      <Modal isOpen={showForm} onClose={handleCancel}>
-        <ProductForm
-          key={editingProduct?.id ?? "new-product"}
-          initialData={editingProduct}
-          onSave={handleSave}
-          onCancel={handleCancel}
-          disabled={saving}
+      {/* =========================
+          PRODUCT FORM
+      ========================= */}
+
+     <Modal isOpen={showForm} onClose={handleCancel}>
+  <div className="product-form-heading">
+    <h2>{editingProduct ? "Edit Product" : "Add Product"}</h2>
+
+    <p>
+      {editingProduct
+        ? "Update the existing product details as needed."
+        : "Enter the product details to add a new product to the inventory."}
+    </p>
+  </div>
+
+  <ProductForm
+    key={editingProduct?.id ?? "new-product"}
+    initialData={editingProduct}
+    onSave={handleSave}
+    onCancel={handleCancel}
+    disabled={saving}
+  />
+</Modal>
+
+      {/* =========================
+          PURCHASE WORKFLOW POPUP
+      ========================= */}
+
+      {showPurchaseWorkflow && (
+        <div className="purchase-workflow-overlay">
+          <div className="purchase-workflow-popup">
+
+            {/* HEADER */}
+
+            <div className="purchase-workflow-header">
+              <h2>Purchase Order</h2>
+
+              <button
+                type="button"
+                className="purchase-workflow-close"
+                onClick={() =>
+                  setShowPurchaseWorkflow(false)
+                }
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* CONTENT */}
+
+            <div className="purchase-workflow-content">
+
+              {/* PURCHASE METHOD */}
+
+              <h3>Choose the purchasing method</h3>
+
+              <div className="purchase-method-options">
+
+                <label
+                  className={
+                    purchaseMethod === "direct"
+                      ? "purchase-method-card selected"
+                      : "purchase-method-card"
+                  }
+                >
+                  <input
+                    type="radio"
+                    name="purchaseMethod"
+                    value="direct"
+                    checked={
+                      purchaseMethod === "direct"
+                    }
+                    onChange={() =>
+                      setPurchaseMethod("direct")
+                    }
+                  />
+
+                  <div>
+                    <strong>
+                      Direct Purchase Order
+                    </strong>
+
+                    <p>
+                      Create a purchase order directly
+                      from the selected vendor.
+                    </p>
+                  </div>
+                </label>
+
+                <label
+                  className={
+                    purchaseMethod === "quotation"
+                      ? "purchase-method-card selected"
+                      : "purchase-method-card"
+                  }
+                >
+                  <input
+                    type="radio"
+                    name="purchaseMethod"
+                    value="quotation"
+                    checked={
+                      purchaseMethod === "quotation"
+                    }
+                    onChange={() =>
+                      setPurchaseMethod("quotation")
+                    }
+                  />
+
+                  <div>
+                    <strong>
+                      Quotation → LOI → Purchase Order
+                    </strong>
+
+                    <p>
+                      Follow the quotation and LOI
+                      process before creating the PO.
+                    </p>
+                  </div>
+                </label>
+
+              </div>
+
+              {/* VENDOR + PRODUCT */}
+
+              <h3 className="purchase-selection-title">
+                Select vendor and products
+              </h3>
+
+              {/* VENDOR */}
+
+              <div className="purchase-workflow-section">
+                <h4>Vendor status</h4>
+
+                <label className="purchase-radio-row">
+                  <input
+                    type="radio"
+                    name="vendorStatus"
+                    value="existing"
+                    checked={
+                      vendorStatus === "existing"
+                    }
+                    onChange={() =>
+                      setVendorStatus("existing")
+                    }
+                  />
+
+                  <span>
+                    Existing, approved vendor
+                  </span>
+                </label>
+
+                <label className="purchase-radio-row">
+                  <input
+                    type="radio"
+                    name="vendorStatus"
+                    value="new"
+                    checked={
+                      vendorStatus === "new"
+                    }
+                    onChange={() =>
+                      setVendorStatus("new")
+                    }
+                  />
+
+                  <span>
+                    New vendor / not yet approved
+                  </span>
+                </label>
+              </div>
+
+              {/* PRODUCT */}
+
+              <div className="purchase-workflow-section">
+                <h4>Product status</h4>
+
+                <label className="purchase-radio-row">
+                  <input
+                    type="radio"
+                    name="productStatus"
+                    value="regular"
+                    checked={
+                      productStatus === "regular"
+                    }
+                    onChange={() =>
+                      setProductStatus("regular")
+                    }
+                  />
+
+                  <span>
+                    Regularly purchased product
+                  </span>
+                </label>
+
+                <label className="purchase-radio-row">
+                  <input
+                    type="radio"
+                    name="productStatus"
+                    value="new"
+                    checked={
+                      productStatus === "new"
+                    }
+                    onChange={() =>
+                      setProductStatus("new")
+                    }
+                  />
+
+                  <span>
+                    New product / first-time purchase
+                  </span>
+                </label>
+              </div>
+
+              {/* SPECIAL APPROVAL */}
+
+              <div className="purchase-workflow-section">
+                <h4>Special approval</h4>
+
+                <label className="purchase-radio-row">
+                  <input
+                    type="radio"
+                    name="specialApproval"
+                    value="no"
+                    checked={
+                      specialApproval === "no"
+                    }
+                    onChange={() =>
+                      setSpecialApproval("no")
+                    }
+                  />
+
+                  <span>No</span>
+                </label>
+
+                <label className="purchase-radio-row">
+                  <input
+                    type="radio"
+                    name="specialApproval"
+                    value="yes"
+                    checked={
+                      specialApproval === "yes"
+                    }
+                    onChange={() =>
+                      setSpecialApproval("yes")
+                    }
+                  />
+
+                  <span>Yes</span>
+                </label>
+              </div>
+
+              {/* NEXT */}
+
+              <div className="purchase-workflow-actions">
+                <button
+                  type="button"
+                  className="purchase-workflow-next"
+                  onClick={
+                    handlePurchaseWorkflowNext
+                  }
+                >
+                  Next
+                </button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =========================
+          EXISTING PURCHASE ORDER
+      ========================= */}
+
+      {showPurchaseOrder && (
+        <PurchaseOrder
+          onClose={() =>
+            setShowPurchaseOrder(false)
+          }
+          onSubmit={handlePurchaseOrderSubmit}
         />
-      </Modal>
+      )}
     </div>
   );
 }
