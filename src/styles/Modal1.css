@@ -86,3 +86,15 @@ button.product-modal-cross:active {
   background: transparent;
   box-shadow: none;
 }
+button.product-modal-cross,
+button.product-modal-cross:hover,
+button.product-modal-cross:focus,
+button.product-modal-cross:focus-visible,
+button.product-modal-cross:active {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-tap-highlight-color: transparent;
+}

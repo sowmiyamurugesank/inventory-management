@@ -1,6 +1,9 @@
 .dropdown-wrapper {
   position: relative;
   width: 160px;
+  min-width: 0;
+  flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .reusable-dropdown {
@@ -14,19 +17,39 @@
   background-color: #ffffff;
   border: 1px solid #d1d5db;
   border-radius: 6px;
-  color: #f0f0f0;
+  color: #374151;
   font-size: 12px;
   font-weight: 400;
+  line-height: normal;
+  text-align: left;
   cursor: pointer;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.reusable-dropdown span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #6b7280;
+}
+
+.reusable-dropdown svg {
+  flex-shrink: 0;
+  color: #6b7280;
 }
 
 .reusable-dropdown:hover {
   border-color: #9ca3af;
 }
 
+.reusable-dropdown:focus,
 .reusable-dropdown:focus-visible {
-  outline: 2px solid #93c5fd;
-  outline-offset: 2px;
+  outline: none;
+  border-color: #4b49ed;
+  box-shadow: 0 0 0 2px rgba(75, 73, 237, 0.1);
 }
 
 .dropdown-options {
@@ -37,27 +60,40 @@
   max-height: 180px;
   overflow-y: auto;
   overflow-x: hidden;
+  padding: 4px;
   background-color: #ffffff;
   border: 1px solid #e5e7eb;
   border-radius: 6px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
   z-index: 1000;
+  box-sizing: border-box;
 }
 
 .dropdown-option {
   display: block;
   width: 100%;
-  padding: 9px 10px;
+  min-height: 32px;
+  padding: 8px 10px;
   background-color: #ffffff;
   border: none;
+  border-radius: 4px;
   color: #374151;
   font-size: 12px;
+  font-weight: 400;
+  line-height: 1.4;
   text-align: left;
   cursor: pointer;
+  box-sizing: border-box;
 }
 
 .dropdown-option:hover {
-  background-color: #f3f4f6;
+  background-color: #eeeeff;
+  color: #4b49ed;
+}
+
+.dropdown-option:focus-visible {
+  outline: 2px solid #4b49ed;
+  outline-offset: -2px;
 }
 
 .dropdown-options::-webkit-scrollbar {
@@ -71,4 +107,10 @@
 
 .dropdown-options::-webkit-scrollbar-track {
   background-color: #f8fafc;
+}
+
+@media (max-width: 768px) {
+  .dropdown-wrapper {
+    width: 100%;
+  }
 }

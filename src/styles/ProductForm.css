@@ -1,6 +1,5 @@
-/* ===== Product Form Container ===== */
 
-/* Keep modal size consistent across all tabs */
+/* ===== Product Form Container ===== */
 .product-form {
   width: 100%;
   min-height: 500px;
@@ -9,59 +8,43 @@
   flex-direction: column;
 }
 
-.product-form-content {
-  flex: 1;
-  min-height: 300px;
-  align-content: start;
-}
 /* ===== Form Tabs ===== */
-
 .product-form-tabs {
   display: flex;
-  align-items: stretch;
-  gap: 6px;
-  width: 100%;
-  padding: 12px 16px;
-  background: #ffffff;
-  border-bottom: 1px solid #e5eaf3;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid #e5e7eb;
   overflow-x: auto;
-  box-sizing: border-box;
   scrollbar-width: thin;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .product-form-tab {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-  min-height: 42px;
-  padding: 10px 16px;
-  border: 1px solid transparent;
-  border-radius: 8px;
+  flex: 1 0 auto;
+  padding: 12px 8px;
+  border: none;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -1px;
   background: transparent;
-  color: #64708a;
-  font-family: inherit;
+  color: #697085;
   font-size: 13px;
   font-weight: 500;
+  font-family: inherit;
   white-space: nowrap;
   cursor: pointer;
-  transition:
-    background 0.2s ease,
-    color 0.2s ease,
-    border-color 0.2s ease;
+  transition: color 0.2s ease, border-color 0.2s ease;
 }
 
 .product-form-tab:hover {
-  background: #f3f4ff;
-  color: #5145df;
+  color: #5b5de6;
 }
 
 .product-form-tab.active {
-  background: #5b5de6;
-  color: #ffffff;
+  color: #5b5de6;
+  border-bottom-color: #5b5de6;
   font-weight: 600;
-  box-shadow: 0 2px 5px rgb(91 93 230 / 15%);
 }
 
 .product-form-tab:focus-visible {
@@ -70,8 +53,10 @@
 }
 
 /* ===== Form Content ===== */
-
 .product-form-content {
+  flex: 1;
+  min-height: 300px;
+  align-content: start;
   padding: 24px;
   box-sizing: border-box;
   background: #ffffff;
@@ -79,7 +64,6 @@
 }
 
 /* ===== Input Grid ===== */
-
 .product-form-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -104,7 +88,6 @@
 }
 
 /* ===== Labels ===== */
-
 .product-form-field label {
   color: #344054;
   font-size: 13px;
@@ -113,7 +96,6 @@
 }
 
 /* ===== Inputs, Selects and Textareas ===== */
-
 .product-form-field input:not([type="checkbox"]):not([type="radio"]),
 .product-form-field select,
 .product-form-field textarea {
@@ -130,9 +112,7 @@
   font-size: 13px;
   line-height: 1.4;
   box-sizing: border-box;
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .product-form-field input:focus,
@@ -153,14 +133,12 @@
 }
 
 /* ===== Dropdown Component ===== */
-
 .product-form-field > select,
 .product-form-field > div > select {
   max-width: 100%;
 }
 
 /* ===== Date and Number Inputs ===== */
-
 .product-form-field input[type="date"],
 .product-form-field input[type="datetime-local"],
 .product-form-field input[type="number"] {
@@ -168,13 +146,11 @@
 }
 
 /* ===== Toggle Fields ===== */
-
 .product-form-field:has(input[type="checkbox"]) {
   justify-content: center;
 }
 
 /* ===== Validation Errors ===== */
-
 .field-error {
   margin: 0;
   color: #dc2626;
@@ -182,13 +158,273 @@
   line-height: 1.4;
 }
 
-/* ===== Footer Actions ===== */
+/* ===== Additional Settings ===== */
+.product-additional-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
 
+.product-setting-list {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.product-setting-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.product-setting-item:first-child {
+  padding-top: 0;
+}
+
+.product-setting-item:last-child {
+  border-bottom: none;
+}
+
+.product-setting-item > div:first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.product-setting-item h3 {
+  margin: 0 0 5px;
+  color: #344054;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.product-setting-item p {
+  margin: 0;
+  color: #697085;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.product-setting-item > *:last-child {
+  flex-shrink: 0;
+}
+
+/* ===== Custom Attributes Containers ===== */
+.product-custom-attributes-container {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  align-items: start;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.product-custom-attributes {
+  display: flex;
+  flex-direction: column;
+  align-self: start;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 175px;
+  height: fit-content;
+  padding: 18px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #ffffff;
+  box-sizing: border-box;
+  overflow-wrap: anywhere;
+}
+
+/* ===== Attribute Heading and Add Button ===== */
+.product-attributes-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.product-attributes-header h3 {
+  margin: 0;
+  color: #344054;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.product-attributes-header .button {
+  flex-shrink: 0;
+  min-height: 30px;
+  padding: 6px 10px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+/* ===== Empty Attribute Message ===== */
+.product-attributes-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  min-height: 60px;
+  margin: 0;
+  padding: 12px 0;
+  color: #98a2b3;
+  font-size: 11px;
+  line-height: 1.5;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+/* ===== Individual Attribute Row ===== */
+.product-attribute-row {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  min-width: 0;
+  padding: 14px 0;
+  border-top: 1px solid #e5e7eb;
+  box-sizing: border-box;
+}
+
+.product-attribute-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.product-attribute-field > label {
+  color: #344054;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.product-attribute-field input:not([type="checkbox"]),
+.product-attribute-field select,
+.product-attribute-field textarea {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 40px;
+  padding: 9px 10px;
+  border: 1px solid #d9dfeb;
+  border-radius: 7px;
+  background: #ffffff;
+  color: #20243a;
+  font-family: inherit;
+  font-size: 12px;
+  box-sizing: border-box;
+}
+
+.product-attribute-field input:focus,
+.product-attribute-field select:focus,
+.product-attribute-field textarea:focus {
+  outline: none;
+  border-color: #5b5de6;
+  box-shadow: 0 0 0 3px rgb(91 93 230 / 10%);
+}
+
+.product-attribute-field textarea {
+  min-height: 70px;
+  resize: vertical;
+}
+
+/* ===== Required Checkbox and Delete Button ===== */
+.product-attribute-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 36px;
+}
+
+.product-attribute-actions .reusable-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: #344054;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.product-attribute-actions .reusable-checkbox input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  flex-shrink: 0;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  background-color: #ffffff;
+  accent-color: #5b5de6;
+  cursor: pointer;
+  display: inline-grid;
+  place-content: center;
+}
+
+.product-attribute-actions .reusable-checkbox input[type="checkbox"]:checked {
+  background-color: #5b5de6;
+  border-color: #5b5de6;
+}
+
+.product-attribute-actions .reusable-checkbox input[type="checkbox"]:checked::before {
+  content: "";
+  width: 4px;
+  height: 8px;
+  border: solid #ffffff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  margin-top: -2px;
+}
+
+.product-attribute-actions .reusable-checkbox input[type="checkbox"]:focus-visible {
+  outline: 2px solid rgb(91 93 230 / 25%);
+  outline-offset: 2px;
+}
+
+.product-attribute-delete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: #dc2626;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.product-attribute-delete:hover {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+/* ===== Footer Actions ===== */
 .product-form-actions {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
+  width: 100%;
   padding: 16px 24px;
   border-top: 1px solid #e5eaf3;
   background: #ffffff;
@@ -199,18 +435,19 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 10px;
+  gap: 8px;
   margin-left: auto;
 }
 
-/* Buttons from the reusable Button component */
-
 .product-form-actions button {
-  min-height: 40px;
+  min-height: 34px;
+  padding: 7px 12px;
+  font-size: 12px;
+  border-radius: 7px;
+  flex-shrink: 0;
 }
 
 /* ===== Tablet ===== */
-
 @media (max-width: 1024px) {
   .product-form-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -222,13 +459,17 @@
     padding: 20px;
   }
 
-  .product-form-tabs {
-    padding: 10px 12px;
+  .product-custom-attributes-container {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .product-custom-attributes {
+    padding: 14px;
   }
 }
 
 /* ===== Mobile ===== */
-
 @media (max-width: 600px) {
   .product-form {
     border-radius: 8px;
@@ -244,23 +485,55 @@
   }
 
   .product-form-tabs {
-    gap: 4px;
-    padding: 8px;
+    gap: 8px;
+    margin-bottom: 16px;
   }
 
   .product-form-tab {
-    min-height: 38px;
-    padding: 9px 12px;
+    flex: 0 0 auto;
+    padding: 12px 10px;
     font-size: 12px;
   }
 
+  .product-setting-item {
+    gap: 12px;
+    padding: 16px 0;
+  }
+
+  .product-setting-item h3 {
+    font-size: 13px;
+  }
+
+  .product-setting-item p {
+    font-size: 11px;
+  }
+
+  .product-custom-attributes-container {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .product-custom-attributes {
+    padding: 14px;
+  }
+
+  .product-attributes-header {
+    align-items: flex-start;
+  }
+
   .product-form-actions {
-    flex-wrap: wrap;
-    padding: 14px 16px;
+    padding: 12px 16px;
+    gap: 8px;
   }
 
   .product-form-navigation {
-    gap: 8px;
+    gap: 6px;
+  }
+
+  .product-form-actions button {
+    min-height: 32px;
+    padding: 6px 10px;
+    font-size: 11px;
   }
 
   .product-form-full {

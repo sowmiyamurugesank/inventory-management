@@ -1,4 +1,3 @@
-
 import "../styles/Button.css";
 
 function Button({
@@ -7,11 +6,12 @@ function Button({
   className = "",
   disabled = false,
   type = "button",
+  ...props
 }) {
   return (
     <button
       type={type}
-      className={`button ${className}`}
+      className={`button ${className}`.trim()}
       onClick={onClick}
       disabled={disabled}
       {...props}
