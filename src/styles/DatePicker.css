@@ -1,20 +1,135 @@
 
+/* Date Picker Container */
 .date-picker {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 7px;
+  width: 100%;
+  min-width: 0;
+  color: #1f2937;
+  color-scheme: light;
+  font-family: inherit;
+  box-sizing: border-box;
 }
 
+/* Label */
 .date-picker label {
-  font-size: 14px;
+  display: block;
+  margin: 0;
+  color: #374151;
+  font-size: 13px;
   font-weight: 500;
+  line-height: 1.5;
 }
 
-.date-picker input {
-  padding: 10px;
+/* Date, Time and Datetime Input */
+.date-picker input,
+.date-picker input[type="date"],
+.date-picker input[type="time"],
+.date-picker input[type="datetime-local"] {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  height: 38px;
+  padding: 0 11px;
+  box-sizing: border-box;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  color: #1f2937 !important;
+  -webkit-text-fill-color: #1f2937;
+  color-scheme: light;
   border: 1px solid #d1d5db;
   border-radius: 6px;
-  font-size: 14px;
-  width: 100%;
-  box-sizing: border-box;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: normal;
+  outline: none;
+  box-shadow: none;
+  appearance: auto;
+  -webkit-appearance: auto;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Hover */
+.date-picker input:hover:not(:disabled) {
+  background: #ffffff !important;
+  border-color: #9ca3af;
+}
+
+/* Focus */
+.date-picker input:focus,
+.date-picker input:focus-visible {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  color: #1f2937 !important;
+  -webkit-text-fill-color: #1f2937;
+  border-color: #4f46e5 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12) !important;
+}
+
+/* Disabled */
+.date-picker input:disabled {
+  background: #f3f4f6 !important;
+  background-color: #f3f4f6 !important;
+  color: #9ca3af !important;
+  -webkit-text-fill-color: #9ca3af;
+  border-color: #e5e7eb;
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+/* Calendar Icon */
+.date-picker input::-webkit-calendar-picker-indicator {
+  opacity: 1;
+  filter: none;
+  cursor: pointer;
+}
+
+/* Date and Time Text */
+.date-picker input::-webkit-datetime-edit {
+  color: #1f2937;
+}
+
+.date-picker input::-webkit-datetime-edit-fields-wrapper {
+  color: #1f2937;
+}
+
+.date-picker input::-webkit-datetime-edit-text,
+.date-picker input::-webkit-datetime-edit-month-field,
+.date-picker input::-webkit-datetime-edit-day-field,
+.date-picker input::-webkit-datetime-edit-year-field,
+.date-picker input::-webkit-datetime-edit-hour-field,
+.date-picker input::-webkit-datetime-edit-minute-field,
+.date-picker input::-webkit-datetime-edit-ampm-field {
+  color: #1f2937;
+}
+
+/* Placeholder */
+.date-picker input::placeholder {
+  color: #9ca3af;
+  -webkit-text-fill-color: #9ca3af;
+  opacity: 1;
+}
+
+/* Invalid Input */
+.date-picker input:invalid {
+  box-shadow: none;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .date-picker label {
+    font-size: 12px;
+  }
+
+  .date-picker input,
+  .date-picker input[type="date"],
+  .date-picker input[type="time"],
+  .date-picker input[type="datetime-local"] {
+    height: 36px;
+    padding: 0 9px;
+    font-size: 12px;
+  }
 }

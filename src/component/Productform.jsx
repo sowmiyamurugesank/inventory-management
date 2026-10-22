@@ -1,400 +1,432 @@
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import FormField from "./Atom/FormField-LIE.jsx";
+import Textarea from "./Atom/Textarea.jsx";
+import DatePicker from "./DatePicker.jsx";
+import Dropdown from "./Dropdown.jsx";
+import Toggle from "./Toggle.jsx";
+import Button from "./Button.jsx";
+import Label from "./Atom/Label.jsx";
+import { itemSchema } from "../schema/itemSchema.js";
+import "../styles/Productform.css";
 
-import { itemSchema } from "../schema/itemSchema";
+const tabs = [
+  "Product Information",
+  "Pricing Information",
+  "Incoming Stock",
+  "Supplier & References",
+  "Cost, Receipt & Expiry",
+  "Additional Settings",
+];
 
-
-import Button from "./Button";
-import Toggle from "./Toggle";
-import "../styles/ProductForm.css";
-
-const emptyForm = {
+const initialValues = {
   itemCode: "",
   itemName: "",
-  itemType: "",
-  category: "",
+  itemType: "PRODUCT",
+  categoryId: "",
   description: "",
   brandName: "",
   manufacturer: "",
   manufacturerPartNumber: "",
-  baseUnit: "",
-  purchaseCost: "",
-  sellingPrice: "",
-  mrp: "",
+  baseUnit: "PCS",
+  purchaseCost: 0,
+  sellingPrice: 0,
+  mrp: 0,
   currency: "INR",
+  initialItemStatus: "OUT_OF_STOCK",
+  warehouseId: "",
+  warehouseZoneId: "",
+  incomingStockCode: "",
+  incomingQuantity: "",
+  quantityUnit: "PCS",
+  incomingStockStatus: "PENDING",
+  vendorId: "",
+  vendorItemId: "",
+  sourceDocumentType: "MANUAL",
+  directEntry: true,
+  quotationNumber: "",
+  purchaseOrderNumber: "",
+  goodsReceiptNumber: "",
+  invoiceNumber: "",
+  creditNoteNumber: "",
+  paymentReferenceNumber: "",
+  otherReferenceNumber: "",
+  expiryDate: "",
+  unitCost: 0,
+  totalCost: 0,
+  stockCurrency: "INR",
+  receivedAt: "",
+  notes: "",
+  active: true,
   verified: false,
-  itemAttributes: [{ name: "", value: "" }],
-  customAttributes: [{ name: "", value: "" }],
+  stockVerified: false,
+  itemAttributes: [],
+  customAttributes: [],
 };
 
-const requiredFields = [
-  ["itemCode", "Item Code"],
-  ["itemName", "Item Name"],
-  ["itemType", "Item Type"],
-  ["baseUnit", "Base Unit"],
-  ["purchaseCost", "Purchase Cost"],
-  ["sellingPrice", "Selling Price"],
-  ["mrp", "MRP"],
+const tabFields = [
+  ["itemCode", "itemName", "itemType", "categoryId", "baseUnit"],
+  ["purchaseCost", "sellingPrice", "mrp", "currency"],
+  [
+    "warehouseId",
+    "warehouseZoneId",
+    "incomingStockCode",
+    "incomingQuantity",
+    "quantityUnit",
+    "incomingStockStatus",
+    "receivedAt",
+  ],
+  [
+    "vendorId",
+    "vendorItemId",
+    "sourceDocumentType",
+    "quotationNumber",
+    "purchaseOrderNumber",
+    "goodsReceiptNumber",
+    "invoiceNumber",
+  ],
+  [
+    "unitCost",
+    "totalCost",
+    "stockCurrency",
+    "expiryDate",
+    "creditNoteNumber",
+    "paymentReferenceNumber",
+    "otherReferenceNumber",
+  ],
+  ["notes", "active", "verified", "stockVerified"],
 ];
 
-function ProductForm({ initialData, onSave, onCancel, disabled = false }) {
-  const [formData, setFormData] = useState({ ...emptyForm });
+export default function ProductForm({
+  initialData,
+  onSave,
+  onCancel,
+  categories = [],
+  warehouses = [],
+  warehouseZones = [],
+  vendors = [],
+  units = ["PCS", "KG", "LITRE", "BOX"],
+  statuses = ["PENDING", "RECEIVED", "CANCELLED"],
+}) {
+  const [tab, setTab] = useState(0);
+  const [data, setData] = useState(() => ({
+    ...initialValues,
+    ...(initialData ?? {}),
+    itemAttributes: initialData?.itemAttributes ?? [],
+    customAttributes: initialData?.customAttributes ?? [],
+  }));
   const [errors, setErrors] = useState({});
 
-  useEffect(() => {
-    if (initialData) {
-      setFormData({
-        ...emptyForm,
-        ...initialData,
-        itemCode: initialData.itemCode ?? "",
-        itemName: initialData.itemName ?? "",
-        itemType: initialData.itemType ?? "",
-        baseUnit: initialData.baseUnit ?? "",
-        purchaseCost: initialData.purchaseCost ?? "",
-        sellingPrice: initialData.sellingPrice ?? "",
-        mrp: initialData.mrp ?? "",
-        currency: initialData.currency ?? "INR",
-        itemAttributes: initialData.itemAttributes?.length
-          ? initialData.itemAttributes
-          : [{ name: "", value: "" }],
-        customAttributes: initialData.customAttributes?.length
-          ? initialData.customAttributes
-          : [{ name: "", value: "" }],
-      });
-    } else {
-      setFormData({
-        ...emptyForm,
-        itemAttributes: [{ name: "", value: "" }],
-        customAttributes: [{ name: "", value: "" }],
-      });
-    }
-
-    setErrors({});
-  }, [initialData]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-
-    setErrors((prev) => ({
-      ...prev,
-      [name]: "",
-    }));
+  const update = (name, value) => {
+    setData((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-  const handleAttributeChange = (section, index, field, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      [section]: prev[section].map((item, i) =>
-        i === index ? { ...item, [field]: value } : item
-      ),
-    }));
+  const change = (e) => {
+    const { name, value, type, checked } = e.target;
+    update(name, type === "checkbox" ? checked : value);
   };
 
-  const addAttribute = (section) => {
-    setFormData((prev) => ({
-      ...prev,
-      [section]: [...prev[section], { name: "", value: "" }],
-    }));
-  };
-
-  const removeAttribute = (section, index) => {
-    setFormData((prev) => ({
-      ...prev,
-      [section]: prev[section].filter((_, i) => i !== index),
-    }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (disabled) return;
-
-    const requiredErrors = {};
-
-    requiredFields.forEach(([key, label]) => {
-      const value = formData[key];
-
-      if (value === "" || value === null || value === undefined ||
-          (typeof value === "string" && !value.trim())) {
-        requiredErrors[key] = `${label} is required`;
-      }
-    });
-
-    ["purchaseCost", "sellingPrice", "mrp"].forEach((key) => {
-      const value = formData[key];
-
-      if (value !== "" && value !== null && value !== undefined) {
-        if (!Number.isFinite(Number(value))) {
-          requiredErrors[key] = "Enter a valid number";
-        } else if (Number(value) < 0) {
-          requiredErrors[key] = "Cannot be negative";
-        }
-      }
-    });
-
-    if (Object.keys(requiredErrors).length > 0) {
-      setErrors(requiredErrors);
-      return;
-    }
-
-    const schemaData = {
-      ...formData,
-      purchaseCost: Number(formData.purchaseCost),
-      sellingPrice: Number(formData.sellingPrice),
-      mrp: Number(formData.mrp),
-    };
-
-    const result = itemSchema.safeParse(schemaData);
-
-    if (!result.success) {
-      const fieldErrors = {};
-
-      result.error.issues.forEach((issue) => {
-        const field = issue.path[0];
-
-        if (
-          requiredFields.some(([key]) => key === field) &&
-          !fieldErrors[field]
-        ) {
-          fieldErrors[field] = issue.message;
-        }
-      });
-
-      if (Object.keys(fieldErrors).length > 0) {
-        setErrors(fieldErrors);
-        return;
-      }
-    }
-
-    onSave({
-      ...schemaData,
-      ...(initialData?.id !== undefined && {
-        id: initialData.id,
-      }),
-      quantity: initialData?.quantity ?? 0,
-    });
-  };
-
-  const renderField = (label, name, type = "text", required = false) => (
-    <div className="form-field" key={name}>
-      <label htmlFor={name}>
-        {label} {required && <span className="required-mark">*</span>}
-      </label>
-
-      <input
-        id={name}
-        name={name}
-        type={type}
-        step={type === "number" ? "any" : undefined}
-        min={type === "number" ? "0" : undefined}
-        value={formData[name]}
-        onChange={handleChange}
-        aria-invalid={Boolean(errors[name])}
-      />
-
-      {errors[name] && (
-        <span className="form-error">{errors[name]}</span>
+  const field = (
+    name,
+    label,
+    type = "text",
+    required = false,
+    options = []
+  ) => (
+    <div className="product-form-field" key={name}>
+      {type === "select" ? (
+        <>
+          <Label htmlFor={name} required={required}>
+            {label}
+          </Label>
+          <Dropdown
+            name={name}
+            value={data[name] ?? ""}
+            options={options}
+            onChange={(value) =>
+              update(name, value?.target ? value.target.value : value)
+            }
+          />
+          {errors[name] && <p className="field-error">{errors[name]}</p>}
+        </>
+      ) : (
+        <FormField
+          name={name}
+          label={label}
+          type={type}
+          value={data[name] ?? ""}
+          onChange={change}
+          required={required}
+          placeholder={`Enter ${label}`}
+          error={errors[name] ?? ""}
+        />
       )}
     </div>
   );
 
-  const renderAttributes = (title, section, buttonLabel) => (
-    <section className="form-section attribute-card" key={section}>
-      <h3>{title}</h3>
-      <p className="attribute-description">
-        Add product-specific information below.
-      </p>
-
-      {formData[section].map((attribute, index) => (
-        <div className="attribute-row" key={index}>
-          <div className="form-field">
-            <label htmlFor={`${section}-name-${index}`}>
-              Attribute Name
-            </label>
-            <input
-              id={`${section}-name-${index}`}
-              placeholder="Enter name"
-              value={attribute.name}
-              onChange={(e) =>
-                handleAttributeChange(section, index, "name", e.target.value)
-              }
-            />
-          </div>
-
-          <div className="form-field">
-            <label htmlFor={`${section}-value-${index}`}>
-              Attribute Value
-            </label>
-            <input
-              id={`${section}-value-${index}`}
-              placeholder="Enter value"
-              value={attribute.value}
-              onChange={(e) =>
-                handleAttributeChange(section, index, "value", e.target.value)
-              }
-            />
-          </div>
-
-          {formData[section].length > 1 && (
-            <Button
-              type="button"
-              onClick={() => removeAttribute(section, index)}
-              disabled={disabled}
-            >
-              Remove
-            </Button>
-          )}
-        </div>
-      ))}
-
-      <Button
-        type="button"
-        className="add-attribute-button"
-        onClick={() => addAttribute(section)}
-        disabled={disabled}
-      >
-        + {buttonLabel}
-      </Button>
-    </section>
+  const dropdown = (name, label, options = [], required = false) => (
+    <div className="product-form-field" key={name}>
+      <Label htmlFor={name} required={required}>
+        {label}
+      </Label>
+      <Dropdown
+        name={name}
+        value={data[name] ?? ""}
+        options={options}
+        onChange={(value) =>
+          update(name, value?.target ? value.target.value : value)
+        }
+      />
+      {errors[name] && <p className="field-error">{errors[name]}</p>}
+    </div>
   );
 
+  const textarea = (name, label, placeholder = "") => (
+    <div className="product-form-field product-form-full" key={name}>
+      <Label htmlFor={name}>{label}</Label>
+      <Textarea
+        name={name}
+        value={data[name] ?? ""}
+        placeholder={placeholder}
+        onChange={change}
+      />
+      {errors[name] && <p className="field-error">{errors[name]}</p>}
+    </div>
+  );
+
+  const date = (name, label, type = "date", required = false) => (
+    <div className="product-form-field" key={name}>
+      <Label htmlFor={name} required={required}>
+        {label}
+      </Label>
+      <DatePicker
+        name={name}
+        value={data[name] ?? ""}
+        type={type}
+        onChange={(value) =>
+          update(name, value?.target ? value.target.value : value)
+        }
+      />
+      {errors[name] && <p className="field-error">{errors[name]}</p>}
+    </div>
+  );
+
+  const validateAndSave = () => {
+    const result = itemSchema.safeParse(data);
+
+    if (!result.success) {
+      const nextErrors = {};
+
+      result.error.issues.forEach((issue) => {
+        const key = issue.path[0];
+        if (key && !nextErrors[key]) {
+          nextErrors[key] = issue.message;
+        }
+      });
+
+      setErrors(nextErrors);
+
+      const invalidTab = tabFields.findIndex((fields) =>
+        result.error.issues.some((issue) => fields.includes(issue.path[0]))
+      );
+
+      if (invalidTab >= 0) {
+        setTab(invalidTab);
+      }
+
+      return;
+    }
+
+    setErrors({});
+    onSave?.(result.data);
+  };
+
   return (
-    <form className="product-form" onSubmit={handleSubmit} noValidate>
-      <div className="product-form-header">
-        <h2>{initialData ? "Edit Product" : "Add Product"}</h2>
-        <p>Enter the details to manage your product information.</p>
+    <div className="product-form">
+      <div className="product-form-tabs">
+        {tabs.map((title, index) => (
+          <button
+            key={title}
+            type="button"
+            className={`product-form-tab ${tab === index ? "active" : ""}`}
+            onClick={() => setTab(index)}
+          >
+            <span>{title}</span>
+          </button>
+        ))}
       </div>
 
-      <section className="form-section">
-        <h3>Basic Details</h3>
-
-        <div className="form-grid">
-          {renderField("Item Code", "itemCode", "text", true)}
-          {renderField("Item Name", "itemName", "text", true)}
-
-          <div className="form-field">
-            <label htmlFor="itemType">
-              Item Type <span className="required-mark">*</span>
-            </label>
-
-            <select
-              id="itemType"
-              name="itemType"
-              value={formData.itemType}
-              onChange={handleChange}
-              aria-invalid={Boolean(errors.itemType)}
-            >
-              <option value="">Select Type</option>
-              <option value="Goods">Goods</option>
-              <option value="Service">Service</option>
-            </select>
-
-            {errors.itemType && (
-              <span className="form-error">{errors.itemType}</span>
+      <div className="product-form-content">
+        {tab === 0 && (
+          <section className="product-form-grid">
+            {field("itemCode", "Item Code", "text", true)}
+            {field("itemName", "Item Name", "text", true)}
+            {field("itemType", "Item Type", "select", true, [
+              { label: "Product", value: "PRODUCT" },
+              { label: "Service", value: "SERVICE" },
+            ])}
+            {dropdown("categoryId", "Category", categories)}
+            {field("brandName", "Brand Name")}
+            {field("manufacturer", "Manufacturer Name")}
+            {field("manufacturerPartNumber", "Manufacturer Part Number")}
+            {field(
+              "baseUnit",
+              "Base Unit",
+              "select",
+              true,
+              units.map((unit) => ({ label: unit, value: unit }))
             )}
-          </div>
+            {textarea(
+              "description",
+              "Description",
+              "Enter product description..."
+            )}
+          </section>
+        )}
 
-          {renderField("Category", "category")}
+        {tab === 1 && (
+          <section className="product-form-grid">
+            {field("purchaseCost", "Purchase Cost", "number", true)}
+            {field("sellingPrice", "Selling Price", "number", true)}
+            {field("mrp", "MRP", "number", true)}
+            {field("currency", "Currency", "select", true, [
+              { label: "INR", value: "INR" },
+              { label: "USD", value: "USD" },
+            ])}
+          </section>
+        )}
 
-          <div className="form-field full-width">
-            <label htmlFor="description">Description</label>
-            <textarea
-              id="description"
-              name="description"
-              rows={3}
-              placeholder="Enter product description"
-              value={formData.description}
-              onChange={handleChange}
-            />
-          </div>
-        </div>
-      </section>
+        {tab === 2 && (
+          <section className="product-form-grid">
+            {dropdown("warehouseId", "Warehouse", warehouses, true)}
+            {dropdown("warehouseZoneId", "Warehouse Zone", warehouseZones, true)}
+            {field("incomingStockCode", "Incoming Stock Code", "text", true)}
+            {field("incomingQuantity", "Incoming Quantity", "number", true)}
+            {field(
+              "quantityUnit",
+              "Quantity Unit",
+              "select",
+              true,
+              units.map((unit) => ({ label: unit, value: unit }))
+            )}
+            {field(
+              "incomingStockStatus",
+              "Incoming Stock Status",
+              "select",
+              true,
+              statuses.map((status) => ({ label: status, value: status }))
+            )}
+            {data.incomingStockStatus === "RECEIVED" &&
+              date("receivedAt", "Received At", "datetime-local", true)}
+          </section>
+        )}
 
-      <section className="form-section">
-        <h3>Product Details</h3>
+        {tab === 3 && (
+          <section className="product-form-grid">
+            {dropdown("vendorId", "Supplier", vendors)}
+            {field("vendorItemId", "Supplier Item ID")}
+            {field("sourceDocumentType", "Source Document Type", "select", false, [
+              { label: "Manual", value: "MANUAL" },
+              { label: "Quotation", value: "QUOTATION" },
+              { label: "Purchase Order", value: "PURCHASE_ORDER" },
+              { label: "Invoice", value: "INVOICE" },
+            ])}
 
-        <div className="form-grid">
-          {renderField("Brand Name", "brandName")}
-          {renderField("Manufacturer", "manufacturer")}
-          {renderField("Manufacturer Part Number", "manufacturerPartNumber")}
-        </div>
-      </section>
+            <div className="product-form-field">
+              <Label>Direct Entry</Label>
+              <Toggle
+                checked={data.directEntry}
+                onChange={(value) => update("directEntry", value)}
+              />
+            </div>
 
-      <section className="form-section">
-        <h3>Unit and Pricing</h3>
+            {field("quotationNumber", "Quotation Number")}
+            {field("purchaseOrderNumber", "Purchase Order Number")}
+            {field("goodsReceiptNumber", "Goods Receipt Number")}
+            {field("invoiceNumber", "Invoice Number")}
+          </section>
+        )}
 
-        <div className="form-grid">
-          {renderField("Base Unit", "baseUnit", "text", true)}
+        {tab === 4 && (
+          <section className="product-form-grid">
+            {field("unitCost", "Unit Cost", "number")}
+            {field("totalCost", "Total Cost", "number")}
+            {field("stockCurrency", "Stock Currency", "select", false, [
+              { label: "INR", value: "INR" },
+              { label: "USD", value: "USD" },
+            ])}
+            {field("creditNoteNumber", "Credit Note Number")}
+            {field("paymentReferenceNumber", "Payment Reference Number")}
+            {field("otherReferenceNumber", "Other Reference Number")}
+            {date("expiryDate", "Expiry Date")}
+          </section>
+        )}
 
-          <div className="form-field">
-            <label htmlFor="currency">Currency</label>
-            <select
-              id="currency"
-              name="currency"
-              value={formData.currency}
-              onChange={handleChange}
-            >
-              <option value="INR">INR (₹)</option>
-              <option value="USD">USD ($)</option>
-            </select>
-          </div>
+        {tab === 5 && (
+          <section className="product-form-grid">
+            <div className="product-form-field">
+              <Label>Active</Label>
+              <Toggle
+                checked={data.active}
+                onChange={(value) => update("active", value)}
+              />
+            </div>
 
-          {renderField("Purchase Cost", "purchaseCost", "number", true)}
-          {renderField("Selling Price", "sellingPrice", "number", true)}
-          {renderField("MRP", "mrp", "number", true)}
-        </div>
-      </section>
+            <div className="product-form-field">
+              <Label>Verified</Label>
+              <Toggle
+                checked={data.verified}
+                onChange={(value) => update("verified", value)}
+              />
+            </div>
 
-      <section className="form-section additional-details">
-        <h3>Additional Details</h3>
+            <div className="product-form-field">
+              <Label>Stock Verified</Label>
+              <Toggle
+                checked={data.stockVerified}
+                onChange={(value) => update("stockVerified", value)}
+              />
+            </div>
 
-        <div className="verification-row">
-          <div className="verification-text">
-            <label>Verified</label>
-            <p>Mark as verified after authorised review</p>
-          </div>
-
-          <Toggle
-            label=""
-            checked={formData.verified}
-            onChange={(value) =>
-              setFormData((prev) => ({
-                ...prev,
-                verified: value,
-              }))
-            }
-          />
-        </div>
-      </section>
-
-      <div className="attribute-cards-grid">
-        {renderAttributes("Item Attributes", "itemAttributes", "Add Attribute")}
-        {renderAttributes("Custom Attributes", "customAttributes", "Add Custom Attribute")}
+            {textarea("notes", "Notes", "Enter additional notes...")}
+          </section>
+        )}
       </div>
 
-      <div className="form-actions">
-        <Button type="button" onClick={onCancel} disabled={disabled}>
+      <div className="product-form-actions">
+        <Button
+          type="button"
+          onClick={onCancel}
+          className="secondary-button"
+        >
           Cancel
         </Button>
 
-        <Button
-          type="submit"
-          className="save-product-button"
-          disabled={disabled}
-        >
-          {disabled
-            ? "Saving..."
-            : initialData
-              ? "Update Product"
-              : "Save Product"}
-        </Button>
+        <div className="product-form-navigation">
+          {tab > 0 && (
+            <Button
+              type="button"
+              onClick={() => setTab((current) => current - 1)}
+            >
+              Previous
+            </Button>
+          )}
+
+          {tab < tabs.length - 1 ? (
+            <Button
+              type="button"
+              onClick={() => setTab((current) => current + 1)}
+            >
+              Next
+            </Button>
+          ) : (
+            <Button type="button" onClick={validateAndSave}>
+              Save Product
+            </Button>
+          )}
+        </div>
       </div>
-    </form>
+    </div>
   );
 }
-
-export default ProductForm;

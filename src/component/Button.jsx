@@ -6,10 +6,11 @@ function Button({
   onClick,
   className = "",
   disabled = false,
-  type="button"
+  type = "button",
 }) {
   return (
     <button
+      type={type}
       className={`button ${className}`}
       onClick={onClick}
       disabled={disabled}

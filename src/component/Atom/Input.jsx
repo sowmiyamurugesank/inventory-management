@@ -1,3 +1,4 @@
+
 import "../../styles/Input.css";
 
 function Input({
@@ -12,6 +13,7 @@ function Input({
 }) {
   return (
     <input
+      className="reusable-input"
       id={name}
       name={name}
       type={type}

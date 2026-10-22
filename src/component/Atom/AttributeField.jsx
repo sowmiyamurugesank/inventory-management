@@ -1,5 +1,5 @@
-import FormField from "./FormField";
-import SelectField from "./SelectField";
+import FormField from "./FormField-LIE.jsx";
+import SelectField from "./SelectField.jsx";
 import "../../styles/AttributeField.css";
 
 function AttributeField({
