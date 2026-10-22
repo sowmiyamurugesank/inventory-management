@@ -1,5 +1,5 @@
-import Input from "../Atom/Input";
-import Label from "../Atom/Label";
+import Input from "./Input.jsx";
+import Label from "./Label.jsx";
 import "../../styles/FormField-LIE.css";
 
 function FormField({

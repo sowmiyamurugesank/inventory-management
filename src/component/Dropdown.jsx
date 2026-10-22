@@ -1,6 +1,6 @@
+
 import { useState, useEffect, useRef } from "react";
 import { ChevronDown } from "lucide-react";
-import Button from "./Button";
 import "../styles/Dropdown.css";
 
 function Dropdown({
@@ -56,18 +56,21 @@ function Dropdown({
 
   return (
     <div className="dropdown-wrapper" ref={dropdownRef}>
-      <Button
+      <button
+        type="button"
         className="reusable-dropdown"
         onClick={handleToggle}
+        aria-expanded={dropdownOpen}
       >
         <span>{selectedOption?.label || placeholder}</span>
         <ChevronDown size={16} />
-      </Button>
+      </button>
 
       {dropdownOpen && (
         <div className="dropdown-options">
           {options.map((option) => (
-            <Button
+            <button
+              type="button"
               key={option.value}
               className="dropdown-option"
               onClick={() => {
@@ -76,7 +79,7 @@ function Dropdown({
               }}
             >
               {option.label}
-            </Button>
+            </button>
           ))}
         </div>
       )}

@@ -622,20 +622,25 @@ function Products() {
           PRODUCT FORM
       ========================= */}
 
-      <Modal
-        isOpen={showForm}
-        onClose={handleCancel}
-      >
-        <ProductForm
-          key={
-            editingProduct?.id ?? "new-product"
-          }
-          initialData={editingProduct}
-          onSave={handleSave}
-          onCancel={handleCancel}
-          disabled={saving}
-        />
-      </Modal>
+     <Modal isOpen={showForm} onClose={handleCancel}>
+  <div className="product-form-heading">
+    <h2>{editingProduct ? "Edit Product" : "Add Product"}</h2>
+
+    <p>
+      {editingProduct
+        ? "Update the existing product details as needed."
+        : "Enter the product details to add a new product to the inventory."}
+    </p>
+  </div>
+
+  <ProductForm
+    key={editingProduct?.id ?? "new-product"}
+    initialData={editingProduct}
+    onSave={handleSave}
+    onCancel={handleCancel}
+    disabled={saving}
+  />
+</Modal>
 
       {/* =========================
           PURCHASE WORKFLOW POPUP

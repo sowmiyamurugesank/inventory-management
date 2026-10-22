@@ -12,12 +12,12 @@ function Modal({ isOpen, onClose, children }) {
       <div className="modal">
         <div className="modal-header">
          <Button
-  type="Button"
-  onClick={onClose}
-  className="product-modal-cross"
->
-  ×
-</Button>
+          type="button"
+          onClick={onClose}
+          className="product-modal-cross"
+          >
+            ×
+          </Button>
         </div>
 
         <div className="modal-body">

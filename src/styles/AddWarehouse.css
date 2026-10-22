@@ -1,352 +1,251 @@
 
-.warehouse-modal-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  box-sizing: border-box;
-  background: rgba(205, 208, 223, 0.45);
-}
-
 .warehouse-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1001;
+  width: min(900px, calc(100vw - 32px));
+  height: min(680px, 90vh);
+  max-height: 90vh;
   display: flex;
   flex-direction: column;
-  width: 100%;
-  max-width: 850px;
-  max-height: 90vh;
-  min-height: 0;
-  overflow: hidden;
+
   background: #ffffff;
-  border: 1px solid #e6e8f0;
   border-radius: 14px;
-  box-shadow: 0 18px 60px rgba(197, 200, 214, 0.18);
+  box-shadow: 0 15px 45px rgba(25, 35, 70, 0.2);
+  overflow: hidden;
+  color: #172554;
+  font-family: inherit;
+  box-sizing: border-box;
 }
 
 .warehouse-modal-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 20px;
-  padding: 22px 26px 18px;
-  border-bottom: 1px solid #edf0f6;
+  gap: 16px;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5eaf5;
+  flex-shrink: 0;
 }
 
 .warehouse-modal-header h2 {
   margin: 0;
-  color: #20243a;
-  font-size: 21px;
+  font-size: 22px;
   font-weight: 700;
+  color: #172554;
 }
 
-
-.warehouse-close-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+.warehouse-modal-header .button {
   width: 36px;
   height: 36px;
-  border: 1px solid #e6e8f0;
-  border-radius: 8px;
-  background: #ffffff;
-  color: #596176;
-  cursor: pointer;
-}
-
-.warehouse-close-btn:hover {
-  background: #f5f6fc;
-}
-
-.warehouse-tabs {
+  min-width: 36px;
+  padding: 0;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 14px 26px;
-  overflow-x: auto;
-  border-bottom: 1px solid #edf0f6;
-}
-
-.warehouse-tab {
-  display: inline-flex;
-  align-items: center;
   justify-content: center;
-  gap: 8px;
-  flex: 1 0 auto;
-  min-width: 100px;
-  padding: 10px 12px;
-  border: 1px solid #e6e8f0;
+  background: #f1f5f9;
+  color: #475569;
+  border: none;
   border-radius: 8px;
-  background: #ffffff;
-  color: #737b90;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 24px;
+  line-height: 1;
   cursor: pointer;
-  transition: background 0.2s ease, border-color 0.2s ease;
 }
 
-.warehouse-tab-number {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: #f0f1f7;
-  color: #737b90;
-  font-size: 11px;
-}
-
-.warehouse-tab.active {
-  border-color: #5b5de6;
-  background: #f1f1ff;
-  color: #4b4dcc;
-}
-
-.warehouse-tab.active .warehouse-tab-number,
-.warehouse-tab.completed .warehouse-tab-number {
-  background: #5b5de6;
-  color: #ffffff;
+.warehouse-modal-header .button:hover {
+  background: #e2e8f0;
 }
 
 .warehouse-form {
   display: flex;
-  flex: 1;
   flex-direction: column;
+  flex: 1;
   min-height: 0;
   overflow: hidden;
 }
 
 .warehouse-modal-body {
+  padding: 24px;
+  overflow-y: auto;
   flex: 1;
   min-height: 0;
-  padding: 24px 26px;
-  overflow-y: auto;
-  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.warehouse-modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.warehouse-modal-body::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+.warehouse-tab-content {
+  width: 100%;
 }
 
 .warehouse-tab-content h3 {
-  margin: 0;
-  text-align: left;
-  color: #282d43;
-  font-size: 17px;
+  margin: 0 0 22px;
+  font-size: 18px;
   font-weight: 700;
-  
+  color: #172554;
+  text-align: left;
 }
 
 .warehouse-form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 20px;
+  column-gap: 22px;
+  row-gap: 20px;
   align-items: start;
 }
 
-.warehouse-field {
+.warehouse-form-grid > * {
+  min-width: 0;
+  width: 100%;
+}
+
+.warehouse-form-grid .form-field {
   display: flex;
   flex-direction: column;
   gap: 8px;
   min-width: 0;
-  color: #454c62;
+  width: 100%;
+}
+
+.warehouse-form-grid .form-field label {
   font-size: 13px;
   font-weight: 600;
-  text-align: left;
+  line-height: 1.5;
+  color: #334155;
 }
 
-.warehouse-field input,
-.warehouse-field select,
-.warehouse-field textarea {
-  display: block;
+.warehouse-form-grid .form-field input,
+.warehouse-form-grid .form-field select,
+.warehouse-form-grid .form-field textarea {
+  box-sizing: border-box;
   width: 100%;
   min-width: 0;
-  min-height: 42px;
+  min-height: 43px;
   padding: 10px 12px;
-  box-sizing: border-box;
-  border: 1px solid #dfe3ee;
+  border: 1px solid #d8e0ef;
   border-radius: 7px;
-  outline: none;
   background: #ffffff;
-  color: #282d43;
+  color: #1e293b;
   font-family: inherit;
   font-size: 13px;
-  font-weight: 400;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.warehouse-field textarea {
-  min-height: 86px;
+.warehouse-form-grid .form-field textarea {
+  min-height: 90px;
   resize: vertical;
 }
 
-.warehouse-field input:focus,
-.warehouse-field select:focus,
-.warehouse-field textarea:focus {
-  border-color: #5b5de6;
-  box-shadow: 0 0 0 3px rgb(91 93 230 / 10%);
+.warehouse-form-grid .form-field input:focus,
+.warehouse-form-grid .form-field select:focus,
+.warehouse-form-grid .form-field textarea:focus {
+  border-color: #5850ec;
+  box-shadow: 0 0 0 3px rgba(88, 80, 236, 0.1);
 }
 
-.warehouse-field input::placeholder,
-.warehouse-field textarea::placeholder {
-  color: #a0a6b7;
+.warehouse-form-grid .form-field input:disabled,
+.warehouse-form-grid .form-field select:disabled,
+.warehouse-form-grid .form-field textarea:disabled {
+  background: #f1f5f9;
+  cursor: not-allowed;
 }
 
-.warehouse-full-width {
-  grid-column: 1 / -1;
+.warehouse-form-grid .form-field input[aria-invalid="true"],
+.warehouse-form-grid .form-field select[aria-invalid="true"],
+.warehouse-form-grid .form-field textarea[aria-invalid="true"] {
+  border-color: #dc2626;
+}
+
+.warehouse-form-grid .field-error {
+  margin: 0;
+  color: #dc2626;
+  font-size: 12px;
 }
 
 .warehouse-active-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
+  gap: 16px;
   margin-top: 24px;
-  padding: 17px 18px;
-  border: 1px solid #e8eaf2;
+  padding: 16px;
+  border: 1px solid #e2e8f0;
   border-radius: 9px;
-  background: #fafbff;
+  background: #f8faff;
 }
 
 .warehouse-active-row strong {
-  color: #30364c;
+  display: block;
+  margin-bottom: 5px;
   font-size: 14px;
+  color: #1e293b;
 }
 
 .warehouse-active-row p {
-  margin: 5px 0 0;
-  color: #858ca0;
+  margin: 0;
   font-size: 12px;
-}
-
-.warehouse-switch {
-  position: relative;
-  display: inline-flex;
-  flex-shrink: 0;
-  width: 44px;
-  height: 24px;
-  cursor: pointer;
-}
-
-.warehouse-switch input {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  opacity: 0;
-}
-
-.warehouse-switch-slider {
-  position: absolute;
-  inset: 0;
-  border-radius: 30px;
-  background: #c9cedb;
-  transition: background 0.2s ease;
-}
-
-.warehouse-switch-slider::before {
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #ffffff;
-  box-shadow: 0 1px 3px rgb(0 0 0 / 15%);
-  content: "";
-  transition: transform 0.2s ease;
-}
-
-.warehouse-switch input:checked + .warehouse-switch-slider {
-  background: #5b5de6;
-}
-
-.warehouse-switch input:checked + .warehouse-switch-slider::before {
-  transform: translateX(20px);
-}
-
-.warehouse-switch input:focus-visible + .warehouse-switch-slider {
-  outline: 3px solid #c7c8ff;
-  outline-offset: 3px;
-}
-
-.warehouse-working-days {
-  margin-top: 26px;
-}
-
-.warehouse-working-days h4 {
-  margin: 0 0 14px;
-  color: #454c62;
-  font-size: 13px;
+  line-height: 1.5;
+  color: #64748b;
 }
 
 .warehouse-day-options {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 10px;
+  margin-top: 12px;
 }
 
-.warehouse-day-option {
-  display: flex;
+.warehouse-day-options .reusable-checkbox {
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  min-width: 0;
-  padding: 11px;
-  border: 1px solid #e3e6ef;
+  gap: 7px;
+  padding: 9px 12px;
+  border: 1px solid #dbe3f1;
   border-radius: 7px;
   background: #ffffff;
-  color: #687087;
+  color: #334155;
   font-size: 12px;
   cursor: pointer;
 }
 
-.warehouse-day-option.selected {
-  border-color: #b9baff;
-  background: #f3f3ff;
-  color: #4b4dcc;
-}
-
-.warehouse-day-option input {
-  accent-color: #5b5de6;
+.warehouse-day-options .reusable-checkbox input {
+  margin: 0;
+  accent-color: #5850ec;
 }
 
 .warehouse-zones-heading {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 14px;
   margin-bottom: 20px;
 }
 
-.warehouse-zones-heading .warehouse-section-description {
-  margin-bottom: 0;
+.warehouse-zones-heading h3 {
+  margin: 0;
 }
 
-.warehouse-secondary-btn {
-  display: inline-flex;
+.warehouse-zones-heading > .button {
   flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  min-height: 38px;
-  padding: 0 12px;
-  border: 1px solid #5b5de6;
-  border-radius: 7px;
-  background: #ffffff;
-  color: #4b4dcc;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.warehouse-secondary-btn:hover {
-  background: #f3f3ff;
 }
 
 .warehouse-zone-card {
-  margin-bottom: 18px;
   padding: 18px;
-  border: 1px solid #e3e6ef;
+  margin-bottom: 18px;
+  border: 1px solid #e0e7f3;
   border-radius: 10px;
-  background: #ffffff;
+  background: #fafbff;
 }
 
 .warehouse-zone-title {
@@ -355,43 +254,62 @@
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 20px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #edf0f6;
 }
 
 .warehouse-zone-title h4 {
   margin: 0;
-  color: #343a50;
-  font-size: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #172554;
 }
 
-.warehouse-remove-zone {
+.warehouse-zone-title > .button {
+  flex-shrink: 0;
+}
+
+.warehouse-modal .button {
+  box-sizing: border-box;
+  min-height: 38px;
+  padding: 9px 15px;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 8px;
-  border: 1px solid #f0d9dc;
-  border-radius: 6px;
-  background: #fff7f7;
-  color: #c54c5b;
-  font-size: 10px;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid #d8e0ef;
+  border-radius: 7px;
+  background: #ffffff;
+  color: #334155;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.warehouse-modal .button:hover:not(:disabled) {
+  background: #f1f5f9;
+}
+
+.warehouse-modal .button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .warehouse-modal-footer {
   display: flex;
-  flex-shrink: 0;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 16px 26px;
-  border-top: 1px solid #e8eaf2;
+  padding: 17px 24px;
+  border-top: 1px solid #e5eaf5;
   background: #ffffff;
+  flex-shrink: 0;
 }
 
-.warehouse-step-count {
-  color: #8a91a4;
-  font-size: 12px;
+.warehouse-modal-footer > span {
+  color: #64748b;
+  font-size: 13px;
+  white-space: nowrap;
 }
 
 .warehouse-footer-actions {
@@ -402,107 +320,81 @@
   gap: 10px;
 }
 
-.warehouse-cancel-btn,
-.warehouse-previous-btn,
-.warehouse-next-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 40px;
-  padding: 0 16px;
-  border: 1px solid #dfe3ee;
-  border-radius: 7px;
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-.warehouse-cancel-btn {
-  background: #ffffff;
-  color: #626a80;
-}
-
-.warehouse-cancel-btn:hover,
-.warehouse-previous-btn:hover {
-  background: #f5f6fb;
-}
-
-.warehouse-previous-btn {
-  background: #ffffff;
-  color: #4b5268;
-}
-
-.warehouse-next-btn {
-  border-color: #5b5de6;
-  background: #5b5de6;
+.warehouse-footer-actions .button[type="submit"] {
+  background: #5850ec;
+  border-color: #5850ec;
   color: #ffffff;
 }
 
-.warehouse-next-btn:hover {
-  border-color: #484acb;
-  background: #484acb;
+.warehouse-footer-actions .button[type="submit"]:hover:not(:disabled) {
+  background: #4338ca;
+  border-color: #4338ca;
 }
 
-.warehouse-cancel-btn:disabled,
-.warehouse-previous-btn:disabled,
-.warehouse-next-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
 
-@media (max-width: 640px) {
-  .warehouse-modal-overlay {
-    align-items: center;
-    padding: 10px;
-  }
-
+@media (max-width: 700px) {
   .warehouse-modal {
+    width: calc(100vw - 24px);
     max-height: 94vh;
-    border-radius: 10px;
   }
 
   .warehouse-modal-header {
-    padding: 17px;
+    padding: 16px 18px;
   }
 
   .warehouse-modal-header h2 {
-    font-size: 18px;
-  }
-
-  .warehouse-tabs {
-    padding: 12px 16px;
-  }
-
-  .warehouse-tab {
-    min-width: 95px;
-    padding: 9px;
+    font-size: 19px;
   }
 
   .warehouse-modal-body {
-    padding: 20px 16px;
+    padding: 18px;
+  }
+
+  .warehouse-form-grid {
+    column-gap: 14px;
+    row-gap: 17px;
+  }
+
+  .warehouse-modal-footer {
+    padding: 14px 18px;
+  }
+}
+
+@media (max-width: 520px) {
+  .warehouse-modal {
+    width: calc(100vw - 20px);
+    max-height: 95vh;
+    border-radius: 10px;
   }
 
   .warehouse-form-grid {
     grid-template-columns: minmax(0, 1fr);
-    gap: 16px;
+    gap: 17px;
   }
 
-  .warehouse-full-width {
-    grid-column: auto;
+  .warehouse-modal-header {
+    padding: 14px 16px;
   }
 
-  .warehouse-day-options {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .warehouse-modal-body {
+    padding: 16px;
+  }
+
+  .warehouse-tab-content h3 {
+    margin-bottom: 18px;
+    font-size: 17px;
+  }
+
+  .warehouse-active-row {
+    padding: 12px;
   }
 
   .warehouse-zones-heading {
-    flex-direction: column;
+    align-items: flex-start;
   }
 
   .warehouse-zone-card {
-    padding: 14px;
+    padding: 13px;
   }
 
   .warehouse-modal-footer {
@@ -513,12 +405,15 @@
 
   .warehouse-footer-actions {
     width: 100%;
+    justify-content: flex-end;
+    gap: 8px;
   }
 
-  .warehouse-cancel-btn,
-  .warehouse-previous-btn,
-  .warehouse-next-btn {
-    flex: 1;
-    padding: 0 10px;
+  .warehouse-footer-actions .button {
+    padding: 9px 11px;
+  }
+
+  .warehouse-day-options {
+    gap: 8px;
   }
 }
