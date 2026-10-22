@@ -16,38 +16,69 @@ function WarehouseLocation() {
   const [loading, setLoading] = useState(true);
   const [showAddWarehouse, setShowAddWarehouse] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
-  async function fetchWarehouses() {
-    try {
-      const response = await fetch(API_URL);
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch warehouses");
-      }
-
-      const data = await response.json();
-
-      setWarehouses(
-        Array.isArray(data) ? data : data.warehouses || []
-      );
-    } catch (error) {
-      console.error("Warehouse fetch error:", error);
-      setWarehouses([]);
-    } finally {
-      setLoading(false);
-    }
-  }
 
   useEffect(() => {
+    const controller = new AbortController();
+
+    async function fetchWarehouses() {
+      try {
+        setLoading(true);
+        setError("");
+
+        const response = await fetch(API_URL, {
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to load warehouses. Server status: ${response.status}`
+          );
+        }
+
+        const data = await response.json();
+
+        const list = Array.isArray(data)
+          ? data
+          : data.warehouses;
+
+        if (!Array.isArray(list)) {
+          throw new Error("Backend did not return a warehouse array.");
+        }
+
+        setWarehouses(list);
+      } catch (err) {
+        if (err.name !== "AbortError") {
+          console.error("Warehouse fetch error:", err);
+          setError(
+            err.message || "Unable to load warehouses."
+          );
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
+      }
+    }
+
     fetchWarehouses();
+
+    return () => controller.abort();
   }, []);
 
   const filteredWarehouses = warehouses.filter((warehouse) => {
-    const text = `${warehouse.name || ""} ${
-      warehouse.code || ""
-    } ${warehouse.location || ""}`.toLowerCase();
+    const searchableText = [
+      warehouse.name,
+      warehouse.code,
+      warehouse.location,
+      warehouse.city,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
 
-    return text.includes(search.toLowerCase());
+    return searchableText.includes(search.trim().toLowerCase());
   });
 
   function handleAddWarehouse() {
@@ -57,6 +88,7 @@ function WarehouseLocation() {
   async function handleSaveWarehouse(formData) {
     try {
       setSaving(true);
+      setError("");
 
       const response = await fetch(API_URL, {
         method: "POST",
@@ -66,12 +98,15 @@ function WarehouseLocation() {
         body: JSON.stringify(formData),
       });
 
+      const result = await response.json().catch(() => ({}));
+
       if (!response.ok) {
-        throw new Error("Failed to add warehouse");
+        throw new Error(
+          result.message || `Failed to add warehouse (${response.status})`
+        );
       }
 
-      const data = await response.json();
-      const newWarehouse = data.warehouse || data;
+      const newWarehouse = result.warehouse || result;
 
       setWarehouses((previous) => [
         ...previous,
@@ -80,45 +115,61 @@ function WarehouseLocation() {
 
       setShowAddWarehouse(false);
       window.alert("Warehouse added successfully!");
-    } catch (error) {
-      console.error("Add warehouse error:", error);
-      window.alert("Unable to add warehouse. Please try again.");
+    } catch (err) {
+      console.error("Add warehouse error:", err);
+      setError(err.message || "Unable to add warehouse.");
     } finally {
       setSaving(false);
     }
   }
 
   async function handleDelete(id) {
-    const confirmDelete = window.confirm(
+    if (id === undefined || id === null || id === "") {
+      setError("Warehouse ID is missing.");
+      return;
+    }
+
+    const confirmed = window.confirm(
       "Are you sure you want to delete this warehouse?"
     );
 
-    if (!confirmDelete) return;
+    if (!confirmed) return;
 
     try {
-      const response = await fetch(`${API_URL}/${id}`, {
-        method: "DELETE",
-      });
+      setError("");
+
+      const response = await fetch(
+        `${API_URL}/${encodeURIComponent(id)}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      const result = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        throw new Error("Delete failed");
+        throw new Error(
+          result.message ||
+            `Failed to delete warehouse (${response.status})`
+        );
       }
 
       setWarehouses((previous) =>
-        previous.filter((warehouse) => warehouse.id !== id)
+        previous.filter(
+          (warehouse) =>
+            String(warehouse.id ?? warehouse._id) !== String(id)
+        )
       );
-    } catch (error) {
-      console.error("Delete error:", error);
-      window.alert("Unable to delete warehouse.");
+    } catch (err) {
+      console.error("Delete warehouse error:", err);
+      setError(err.message || "Unable to delete warehouse.");
     }
   }
 
   return (
     <main className="warehouse-page">
       <section className="warehouse-section">
-        <h2 className="warehouse-heading">
-          Warehouse
-        </h2>
+        <h2 className="warehouse-heading">Warehouse</h2>
 
         <div className="warehouse-toolbar">
           <div className="warehouse-search">
@@ -138,6 +189,12 @@ function WarehouseLocation() {
           </Button>
         </div>
 
+        {error && (
+          <p className="warehouse-message" role="alert">
+            {error}
+          </p>
+        )}
+
         {loading ? (
           <p className="warehouse-message">
             Loading warehouses...
@@ -151,7 +208,11 @@ function WarehouseLocation() {
 
         {showAddWarehouse && (
           <AddWarehouse
-            onClose={() => setShowAddWarehouse(false)}
+            onClose={() => {
+              if (!saving) {
+                setShowAddWarehouse(false);
+              }
+            }}
             onSave={handleSaveWarehouse}
             saving={saving}
           />

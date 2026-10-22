@@ -14,6 +14,7 @@ function Button({
       className={`button ${className}`}
       onClick={onClick}
       disabled={disabled}
+      {...props}
     >
       {children}
     </button>

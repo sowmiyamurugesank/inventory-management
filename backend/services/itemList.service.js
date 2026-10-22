@@ -1,4 +1,4 @@
-import { crud } from "../utils/crud.js";
+import { crud } from "../utils/Product.js";
 
 export const itemListService = {
   async list(filters, page, pageSize) {
