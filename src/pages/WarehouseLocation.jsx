@@ -4,8 +4,6 @@ import { useEffect, useState } from "react";
 import StorageTable from "../component/StorageTable.jsx";
 import SearchBox from "../component/SearchBox.jsx";
 import Button from "../component/Button.jsx";
-import AddWarehouse from "../component/AddWarehouse.jsx";
-
 import "../styles/WarehouseLocation.css";
 
 const API_URL = "http://localhost:5000/api/warehouses";

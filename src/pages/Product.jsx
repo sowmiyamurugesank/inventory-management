@@ -306,9 +306,6 @@ function Products() {
     setError("");
   };
 
-<<<<<<< HEAD
-
-=======
   // Purchase Order submit
   const handlePurchaseOrderSubmit = (orderData) => {
     setPurchaseOrders((previousOrders) => [
@@ -355,7 +352,6 @@ function Products() {
   };
 
   // Card calculations
->>>>>>> f8a86795644ce42f7969187e1085c88ae4159853
   const totalProducts = products.length;
 
   const lowStock = products.filter(
@@ -389,8 +385,6 @@ function Products() {
       {/* PAGE HEADING */}
 
       <div className="products-heading">
-<<<<<<< HEAD
-=======
         <Package className="products-heading-icon" />
 
         <div>
@@ -400,7 +394,6 @@ function Products() {
             Manage your products, categories, stock and suppliers.
           </p>
         </div>
->>>>>>> f8a86795644ce42f7969187e1085c88ae4159853
       </div>
 
       {/* TABS */}
