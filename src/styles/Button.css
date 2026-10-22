@@ -1,86 +1,93 @@
 
 /* Common Button */
-
 .button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 7px;
-
-  padding: 8px 14px;
+  padding: 6px 14px;
   min-height: 36px;
   box-sizing: border-box;
-
-  border: 1px solid transparent;
+  border: 1px solid #4f46e5;
   border-radius: 7px;
-
+  background-color: #4f46e5;
+  color: #ffffff;
   font-size: 13px;
   font-weight: 500;
   font-family: inherit;
-  line-height: 1.4;
-
   cursor: pointer;
-  white-space: nowrap;
-
-  transition: background-color 0.2s ease,
-              border-color 0.2s ease,
-              box-shadow 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* Add Button */
-
-.add-button {
-  background-color: #5b4de6;
-  color: #ffffff;
+/* Hover */
+.button:hover:not(:disabled) {
+  background-color: #4338ca;
+  border-color: #4338ca;
 }
 
-.add-button:hover {
-  background-color: #493bd0;
-}
-
-.add-button:focus-visible {
-  outline: 2px solid #5b4de6;
+/* Focus */
+.button:focus-visible {
+  outline: 2px solid #818cf8;
   outline-offset: 2px;
 }
 
-/* Cancel Button */
-
-.cancel-button {
-  background-color: #f3f4f6;
-  color: #374151;
-  border-color: #e5e7eb;
+/* Disabled */
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
-.cancel-button:hover {
-  background-color: #e5e7eb;
+/* Cancel / Secondary Button */
+.button.secondary-button {
+  background-color: #ffffff;
+  color: #374151;
   border-color: #d1d5db;
 }
 
-/* Delete Button */
+.button.secondary-button:hover:not(:disabled) {
+  background-color: #f3f4f6;
+  border-color: #9ca3af;
+}
 
-.delete-button {
+/* Danger Button */
+.button.danger-button {
   background-color: #dc2626;
+  border-color: #dc2626;
   color: #ffffff;
 }
 
-.delete-button:hover {
+.button.danger-button:hover:not(:disabled) {
   background-color: #b91c1c;
+  border-color: #b91c1c;
 }
 
-/* Disabled Button */
-
-.button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  box-shadow: none;
+/* Success Button */
+.button.success-button {
+  background-color: #16a34a;
+  border-color: #16a34a;
+  color: #ffffff;
 }
 
-/* Small Screens */
+.button.success-button:hover:not(:disabled) {
+  background-color: #15803d;
+  border-color: #15803d;
+}
 
-@media (max-width: 600px) {
-  .button {
-    padding: 7px 11px;
-    min-height: 34px;
-    font-size: 12px;
-  }
+/* Small Button */
+.button.small-button {
+  padding: 5px 10px;
+  min-height: 30px;
+  font-size: 12px;
+}
+
+/* Large Button */
+.button.large-button {
+  padding: 11px 18px;
+  min-height: 42px;
+  font-size: 14px;
+}
+
+/* Full Width Button */
+.button.full-width {
+  width: 100%;
 }

@@ -1,17 +1,26 @@
 
-import "../styles/DatePicker.css";
+import "../../styles/DatePicker.css";
 
-function DatePicker({ label, name, value, onChange }) {
+function DatePicker({
+  label,
+  name,
+  value,
+  onChange,
+  type = "date",
+  required = false,
+  disabled = false,
+}) {
   return (
     <div className="date-picker">
       <label htmlFor={name}>{label}</label>
-
       <input
-        type="date"
+        type={type}
         id={name}
         name={name}
-        value={value}
+        value={value ?? ""}
         onChange={onChange}
+        required={required}
+        disabled={disabled}
       />
     </div>
   );

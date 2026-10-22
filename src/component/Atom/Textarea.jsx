@@ -1,3 +1,4 @@
+
 import "../../styles/Textarea.css";
 
 function Textarea({
@@ -11,6 +12,7 @@ function Textarea({
 }) {
   return (
     <textarea
+      className="form-textarea-field"
       id={name}
       name={name}
       value={value ?? ""}

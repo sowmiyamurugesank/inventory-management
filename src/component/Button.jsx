@@ -7,7 +7,6 @@ function Button({
   className = "",
   disabled = false,
   type = "button",
-  ...props
 }) {
   return (
     <button
