@@ -7,7 +7,8 @@ import {
   PackageX,
   IndianRupee,
   Plus,
-  X,
+  X
+
 } from "lucide-react";
 
 import ProductManagement from "../component/ProductManagement";
@@ -17,6 +18,7 @@ import ProductForm from "../component/Productform";
 import Button from "../component/Button";
 import Modal from "../component/Modal1";
 import PurchaseOrder from "../component/PurchaseOrder";
+import ProductDetails from "./ProductDetails";
 
 import {
   getItems,
@@ -50,46 +52,19 @@ function fromApiItem(item) {
     status: item.status ?? "OUT_OF_STOCK",
     quantity: Number(item.quantity ?? 0),
     version: item.version,
-    itemAttributes: item.itemAttributes ?? [],
-    customAttributes: item.custom_attributes ?? [],
   };
 }
 
 function toApiItem(formData) {
-  const customAttributes = {};
-
-  if (
-    formData.customAttributes &&
-    !Array.isArray(formData.customAttributes)
-  ) {
-    Object.assign(customAttributes, formData.customAttributes);
-  }
-
-  const attributes = [
-    ...(Array.isArray(formData.itemAttributes)
-      ? formData.itemAttributes
-      : []),
-    ...(Array.isArray(formData.customAttributes)
-      ? formData.customAttributes
-      : []),
-  ];
-
-  for (const attribute of attributes) {
-    if (attribute.name?.trim()) {
-      customAttributes[attribute.name.trim()] = attribute.value ?? "";
-    }
-  }
-
   const payload = {
     code: formData.itemCode?.trim(),
     name: formData.itemName?.trim(),
     item_type:
-      formData.itemType === "Service" ||
-      formData.itemType === "SERVICE"
+      formData.itemType === "SERVICE" ||
+      formData.itemType === "Service"
         ? "SERVICE"
         : "PRODUCT",
     base_unit: formData.baseUnit,
-    custom_attributes: customAttributes,
     description: formData.description ?? "",
     brand_name: formData.brandName ?? "",
     manufacturer_name: formData.manufacturer ?? "",
@@ -99,8 +74,8 @@ function toApiItem(formData) {
     selling_price: Number(formData.sellingPrice || 0),
     mrp: Number(formData.mrp || 0),
     currency_code: formData.currency || "INR",
-    status: "OUT_OF_STOCK",
-    is_active: true,
+    status: formData.status ?? "OUT_OF_STOCK",
+    is_active: Boolean(formData.active),
     is_verified: Boolean(formData.verified),
   };
 
@@ -129,9 +104,10 @@ function Products() {
 
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
-
-  // Purchase Order form
-  const [showPurchaseOrder, setShowPurchaseOrder] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  // Existing Purchase Order form
+  const [showPurchaseOrder, setShowPurchaseOrder] =
+    useState(false);
 
   // Purchase Order workflow popup
   const [showPurchaseWorkflow, setShowPurchaseWorkflow] = useState(false);
@@ -171,23 +147,6 @@ function Products() {
     {
       key: "category",
       label: "Category",
-      editable: true,
-    },
-    {
-      key: "brandName",
-      label: "Brand",
-      editable: true,
-    },
-    {
-      key: "purchaseCost",
-      label: "Purchase Cost",
-      type: "number",
-      editable: true,
-    },
-    {
-      key: "sellingPrice",
-      label: "Selling Price",
-      type: "number",
       editable: true,
     },
     {
@@ -383,7 +342,10 @@ function Products() {
   return (
     <div className="products-page">
       {/* PAGE HEADING */}
-      
+
+      <div className="products-heading">
+      </div>
+
       {/* TABS */}
       <div className="product-tabs">
         {tabs.map((tab) => (
@@ -476,6 +438,7 @@ function Products() {
                 onUpdate={handleUpdate}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
+                onView={(product) => setSelectedProduct(product)}
                 itemsPerPage={15}
               />
             )}
@@ -568,27 +531,31 @@ function Products() {
             {editingProduct ? "Edit Product" : "Add Product"}
           </h2>
 
-          <p>
-            {editingProduct
-              ? "Update the existing product details as needed."
-              : "Enter the product details to add a new product to the inventory."}
-          </p>
-        </div>
+    <ProductForm
+      key={editingProduct?.id ?? "new-product"}
+      initialData={editingProduct}
+      categories={categories}
+      warehouses={warehouses}
+      warehouseZones={warehouseZones}
+      vendors={vendors}
+      units={units}
+      statuses={statuses}
+      onSave={handleSave}
+      onCancel={handleCancel}
+      disabled={saving}
+    />
+  </Modal>
+   
+  {/* PRODUCT DETAILS MODAL */}
+  <ProductDetails
+    product={selectedProduct}
+    onClose={() => setSelectedProduct(null)}
+  />
 
-        <ProductForm
-          key={editingProduct?.id ?? "new-product"}
-          initialData={editingProduct}
-          categories={categories}
-          warehouses={warehouses}
-          warehouseZones={warehouseZones}
-          vendors={vendors}
-          units={units}
-          statuses={statuses}
-          onSave={handleSave}
-          onCancel={handleCancel}
-          disabled={saving}
-        />
-      </Modal>
+
+      {/* =========================
+          PURCHASE WORKFLOW POPUP
+      ========================= */}
 
       {/* PURCHASE WORKFLOW POPUP */}
       {showPurchaseWorkflow && (
