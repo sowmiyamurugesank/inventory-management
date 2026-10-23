@@ -1,3 +1,4 @@
+
 import Input from "./Input.jsx";
 import Label from "./Label.jsx";
 import "../../styles/FormField-LIE.css";
@@ -12,6 +13,8 @@ function FormField({
   required = false,
   error = "",
   disabled = false,
+  min,
+  step,
 }) {
   return (
     <div className="form-field">
@@ -28,6 +31,8 @@ function FormField({
         required={required}
         disabled={disabled}
         aria-invalid={Boolean(error)}
+        min={min}
+        step={step}
       />
 
       {error && (

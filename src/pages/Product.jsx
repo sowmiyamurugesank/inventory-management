@@ -26,57 +26,54 @@ import {
 
 import "../styles/Product.css";
 
+
 function fromApiItem(item) {
   return {
     ...item,
     id: item.id,
     itemCode: item.code ?? "",
     itemName: item.name ?? "",
-    itemType: item.item_type === "SERVICE" ? "Service" : "Goods",
+    itemType: item.item_type === "SERVICE" ? "SERVICE" : "PRODUCT",
     category: item.category_name ?? item.category ?? "",
     categoryId: item.category_id ?? "",
     description: item.description ?? "",
     brandName: item.brand_name ?? "",
     manufacturer: item.manufacturer_name ?? "",
     manufacturerPartNumber: item.manufacturer_part_number ?? "",
-    baseUnit: item.base_unit ?? "",
+    baseUnit: item.base_unit ?? "PCS",
     purchaseCost: Number(item.purchase_cost ?? 0),
     sellingPrice: Number(item.selling_price ?? 0),
     mrp: Number(item.mrp ?? 0),
     currency: item.currency_code ?? "INR",
     verified: item.is_verified ?? false,
-    status: item.status ?? "Active",
+    active: item.is_active ?? true,
+    status: item.status ?? "OUT_OF_STOCK",
     quantity: Number(item.quantity ?? 0),
     version: item.version,
+    itemAttributes: item.itemAttributes ?? [],
+    customAttributes: item.custom_attributes ?? [],
   };
 }
 
 function toApiItem(formData) {
   const customAttributes = {};
 
-  if (
-    formData.customAttributes &&
-    !Array.isArray(formData.customAttributes)
-  ) {
+  if (formData.customAttributes && !Array.isArray(formData.customAttributes)) {
     Object.assign(customAttributes, formData.customAttributes);
   }
 
   const attributes = [
-    ...(Array.isArray(formData.itemAttributes)
-      ? formData.itemAttributes
-      : []),
-    ...(Array.isArray(formData.customAttributes)
-      ? formData.customAttributes
-      : []),
+    ...(Array.isArray(formData.itemAttributes) ? formData.itemAttributes : []),
+    ...(Array.isArray(formData.customAttributes) ? formData.customAttributes : []),
   ];
 
   for (const attribute of attributes) {
     if (attribute.name?.trim()) {
-      customAttributes[attribute.name.trim()] =
-        attribute.value ?? "";
+      customAttributes[attribute.name.trim()] = attribute.value ?? "";
     }
   }
 
+ 
   const payload = {
     code: formData.itemCode?.trim(),
     name: formData.itemName?.trim(),
@@ -113,7 +110,12 @@ function Products() {
   const [activeTab, setActiveTab] = useState("All Products");
 
   const [products, setProducts] = useState([]);
-
+  const [categories, setCategories] = useState([]);
+  const [warehouses, setWarehouses] = useState([]);
+  const [warehouseZones, setWarehouseZones] = useState([]);
+  const [vendors, setVendors] = useState([]);
+  const [units, setUnits] = useState(["PCS", "KG", "LITRE", "BOX"]);
+  const [statuses] = useState(["PENDING", "RECEIVED", "CANCELLED"]);
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
 
@@ -249,7 +251,7 @@ function Products() {
       } else {
         await createItem({
           ...payload,
-          quantity: 1,
+          quantity: Number(formData.incomingQuantity ?? 0),
         });
       }
 
@@ -621,26 +623,31 @@ function Products() {
       {/* =========================
           PRODUCT FORM
       ========================= */}
+  <Modal isOpen={showForm} onClose={handleCancel}>
+    <div className="product-form-heading">
+      <h2>{editingProduct ? "Edit Product" : "Add Product"}</h2>
+      <p>
+        {editingProduct
+          ? "Update the existing product details as needed."
+          : "Enter the product details to add a new product to the inventory."}
+      </p>
+    </div>
 
-     <Modal isOpen={showForm} onClose={handleCancel}>
-  <div className="product-form-heading">
-    <h2>{editingProduct ? "Edit Product" : "Add Product"}</h2>
-
-    <p>
-      {editingProduct
-        ? "Update the existing product details as needed."
-        : "Enter the product details to add a new product to the inventory."}
-    </p>
-  </div>
-
-  <ProductForm
-    key={editingProduct?.id ?? "new-product"}
-    initialData={editingProduct}
-    onSave={handleSave}
-    onCancel={handleCancel}
-    disabled={saving}
-  />
-</Modal>
+    <ProductForm
+      key={editingProduct?.id ?? "new-product"}
+      initialData={editingProduct}
+      categories={categories}
+      warehouses={warehouses}
+      warehouseZones={warehouseZones}
+      vendors={vendors}
+      units={units}
+      statuses={statuses}
+      onSave={handleSave}
+      onCancel={handleCancel}
+      disabled={saving}
+    />
+  </Modal>
+   
 
       {/* =========================
           PURCHASE WORKFLOW POPUP
