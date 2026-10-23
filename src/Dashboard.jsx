@@ -5,10 +5,6 @@ import "./Dashboard.css";
 function Dashboard() {
     return (
         <div className="dashboard">
-            <h1>Dashboard</h1>
-            <p className="welcome-text">
-                Welcome back! Here's what's happening with your inventory.
-            </p>
             <section className="dashboard-section overview-section">
                 <h2>Overview</h2>
                 <div className="card-container">
