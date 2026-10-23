@@ -1,8 +1,11 @@
+
 .attribute-field {
   display: flex;
   flex-direction: column;
   width: 100%;
+  min-width: 0;
   gap: 8px;
+  box-sizing: border-box;
 }
 
 .attribute-field-row {
@@ -10,15 +13,29 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 20px;
   width: 100%;
+  min-width: 0;
 }
 
 .attribute-field-full {
   grid-column: 1 / -1;
+  width: 100%;
+  min-width: 0;
+}
+
+.warehouse-description-field {
+  grid-column: 1 / -1;
+  width: 100%;
+  min-width: 0;
+}
+
+.warehouse-description-field > * {
+  width: 100%;
+  min-width: 0;
 }
 
 @media (max-width: 768px) {
   .attribute-field-row {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 16px;
   }
 }

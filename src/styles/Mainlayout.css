@@ -1,23 +1,27 @@
+
 .main-layout {
   display: flex;
-  width: 100%;
   min-height: 100vh;
-  background-color: #f5f7fc;
+  width: 100%;
 }
 
 .main-area {
-  display: flex;
   flex: 1;
-  flex-direction: column;
   min-width: 0;
-  min-height: 100vh;
-  background-color: #f5f7fc;
+  display: flex;
+  flex-direction: column;
 }
 
 .main-content {
   flex: 1;
   min-width: 0;
-  min-height: calc(100vh - 76px);
-  padding: 24px;
-  background-color: #f5f7fc;
+  padding: 28px 32px;
+  box-sizing: border-box;
+  background: #f5f6fc;
+}
+
+@media (max-width: 600px) {
+  .main-content {
+    padding: 20px 16px;
+  }
 }
