@@ -6,7 +6,8 @@ import {
   PackageX,
   IndianRupee,
   Plus,
-  X,
+  X
+
 } from "lucide-react";
 
 import ProductManagement from "../component/ProductManagement";
@@ -16,6 +17,7 @@ import ProductForm from "../component/Productform";
 import Button from "../component/Button";
 import Modal from "../component/Modal1";
 import PurchaseOrder from "../component/PurchaseOrder";
+import ProductDetails from "./ProductDetails";
 
 import {
   getItems,
@@ -25,7 +27,6 @@ import {
 } from "../api";
 
 import "../styles/Product.css";
-
 
 function fromApiItem(item) {
   return {
@@ -50,37 +51,19 @@ function fromApiItem(item) {
     status: item.status ?? "OUT_OF_STOCK",
     quantity: Number(item.quantity ?? 0),
     version: item.version,
-    itemAttributes: item.itemAttributes ?? [],
-    customAttributes: item.custom_attributes ?? [],
   };
 }
 
 function toApiItem(formData) {
-  const customAttributes = {};
-
-  if (formData.customAttributes && !Array.isArray(formData.customAttributes)) {
-    Object.assign(customAttributes, formData.customAttributes);
-  }
-
-  const attributes = [
-    ...(Array.isArray(formData.itemAttributes) ? formData.itemAttributes : []),
-    ...(Array.isArray(formData.customAttributes) ? formData.customAttributes : []),
-  ];
-
-  for (const attribute of attributes) {
-    if (attribute.name?.trim()) {
-      customAttributes[attribute.name.trim()] = attribute.value ?? "";
-    }
-  }
-
- 
   const payload = {
     code: formData.itemCode?.trim(),
     name: formData.itemName?.trim(),
     item_type:
-      formData.itemType === "Service" ? "SERVICE" : "PRODUCT",
+      formData.itemType === "SERVICE" ||
+      formData.itemType === "Service"
+        ? "SERVICE"
+        : "PRODUCT",
     base_unit: formData.baseUnit,
-    custom_attributes: customAttributes,
     description: formData.description ?? "",
     brand_name: formData.brandName ?? "",
     manufacturer_name: formData.manufacturer ?? "",
@@ -90,8 +73,8 @@ function toApiItem(formData) {
     selling_price: Number(formData.sellingPrice || 0),
     mrp: Number(formData.mrp || 0),
     currency_code: formData.currency || "INR",
-    status: "OUT_OF_STOCK",
-    is_active: true,
+    status: formData.status ?? "OUT_OF_STOCK",
+    is_active: Boolean(formData.active),
     is_verified: Boolean(formData.verified),
   };
 
@@ -118,7 +101,7 @@ function Products() {
   const [statuses] = useState(["PENDING", "RECEIVED", "CANCELLED"]);
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
-
+  const [selectedProduct, setSelectedProduct] = useState(null);
   // Existing Purchase Order form
   const [showPurchaseOrder, setShowPurchaseOrder] =
     useState(false);
@@ -169,23 +152,6 @@ function Products() {
     {
       key: "category",
       label: "Category",
-      editable: true,
-    },
-    {
-      key: "brandName",
-      label: "Brand",
-      editable: true,
-    },
-    {
-      key: "purchaseCost",
-      label: "Purchase Cost",
-      type: "number",
-      editable: true,
-    },
-    {
-      key: "sellingPrice",
-      label: "Selling Price",
-      type: "number",
       editable: true,
     },
     {
@@ -308,9 +274,6 @@ function Products() {
     setError("");
   };
 
-<<<<<<< HEAD
-
-=======
   // Purchase Order submit
   const handlePurchaseOrderSubmit = (orderData) => {
     setPurchaseOrders((previousOrders) => [
@@ -357,7 +320,6 @@ function Products() {
   };
 
   // Card calculations
->>>>>>> f8a86795644ce42f7969187e1085c88ae4159853
   const totalProducts = products.length;
 
   const lowStock = products.filter(
@@ -391,18 +353,6 @@ function Products() {
       {/* PAGE HEADING */}
 
       <div className="products-heading">
-<<<<<<< HEAD
-=======
-        <Package className="products-heading-icon" />
-
-        <div>
-          <h1>Products</h1>
-
-          <p>
-            Manage your products, categories, stock and suppliers.
-          </p>
-        </div>
->>>>>>> f8a86795644ce42f7969187e1085c88ae4159853
       </div>
 
       {/* TABS */}
@@ -526,6 +476,7 @@ function Products() {
                 onUpdate={handleUpdate}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
+                onView={(product) => setSelectedProduct(product)}
                 itemsPerPage={15}
               />
             )}
@@ -655,6 +606,12 @@ function Products() {
     />
   </Modal>
    
+  {/* PRODUCT DETAILS MODAL */}
+  <ProductDetails
+    product={selectedProduct}
+    onClose={() => setSelectedProduct(null)}
+  />
+
 
       {/* =========================
           PURCHASE WORKFLOW POPUP
