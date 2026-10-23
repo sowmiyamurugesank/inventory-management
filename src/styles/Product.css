@@ -354,10 +354,10 @@
 
 .category-modal {
   width: 100%;
-  max-width: 400px;
+  max-width: 550px;
   max-height: 90vh;
   overflow-y: auto;
-  padding: 24px;
+  padding: 30px;
   box-sizing: border-box;
   background: #ffffff;
   border-radius: 10px;
@@ -395,25 +395,26 @@
 
 .category-modal label {
   display: block;
-  margin-bottom: 6px;
-  font-size: 13px;
+  margin-bottom: 8px;
+  font-size: 14px;
   font-weight: 500;
   color: #444b61;
 }
 
 .category-modal input {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 10px 12px;
-    margin-bottom: 16px;
-    background-color: #ffffff !important;
-    color: #20243a !important;
-    color-scheme: light;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    font-size: 14px;
-    font-family: inherit;
-    outline: none;
+  width: 100%;
+  min-height: 44px;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  margin-bottom: 18px;
+  background-color: #ffffff !important;
+  color: #20243a !important;
+  color-scheme: light;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 15px;
+  font-family: inherit;
+  outline: none;
 }
 
 .category-modal input::placeholder {
@@ -1021,3 +1022,83 @@
     padding: 20px;
   }
 }
+
+/* Category Form Tabs */
+.category-form-tabs {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  width: 100%;
+  border-bottom: 1px solid #e2e5ec;
+  margin-bottom: 24px;
+}
+
+/* Remove button appearance */
+.category-form-tabs button {
+  appearance: none;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  box-shadow: none;
+  outline: none;
+
+  padding: 12px 4px;
+  margin: 0 0 -1px;
+
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: #697085;
+
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Hover */
+.category-form-tabs button:hover {
+  background: transparent;
+  color: #5b5de6;
+}
+
+/* Active tab */
+.category-form-tabs button.active {
+  background: transparent;
+  color: #5b5de6;
+  border-bottom: 2px solid #5b5de6;
+  border-radius: 0;
+  box-shadow: none;
+  font-weight: 600;
+}
+
+/* Prevent global button styles from affecting tabs */
+.category-form-tabs button:focus,
+.category-form-tabs button:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Description, Status and Verification - match Integer Code input */
+
+.category-form-section textarea,
+.category-form-section select {
+  width: 100% !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  box-sizing: border-box !important;
+  padding: 10px 12px !important;
+  margin-bottom: 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background-color: #ffffff;
+  color: #20243a;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+/* Description text should fit inside the same-height box */
+.category-form-section textarea {
+  resize: vertical;
+}
+
+
