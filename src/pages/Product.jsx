@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 
 import {
@@ -6,17 +7,18 @@ import {
   PackageX,
   IndianRupee,
   Plus,
-  X,
+  X
+
 } from "lucide-react";
 
-import ProductManagement from "../component/ProductManagement";
-import StatCard from "../StatCard";
-import Table from "../component/Table";
-import ProductForm from "../component/Productform";
-import Button from "../component/Button";
-import Modal from "../component/Modal1";
-import PurchaseOrder from "../component/PurchaseOrder";
-
+import ProductManagement from "../component/ProductManagement.jsx";
+import StatCard from "../StatCard.jsx";
+import Table from "../component/Table.jsx";
+import ProductForm from "../component/Productform.jsx";
+import Button from "../component/Button.jsx";
+import Modal from "../component/Modal1.jsx";
+import PurchaseOrder from "../component/PurchaseOrder.jsx";
+import ProductDetails from "./ProductDetail.jsx";
 import {
   getItems,
   createItem,
@@ -32,58 +34,36 @@ function fromApiItem(item) {
     id: item.id,
     itemCode: item.code ?? "",
     itemName: item.name ?? "",
-    itemType: item.item_type === "SERVICE" ? "Service" : "Goods",
+    itemType: item.item_type === "SERVICE" ? "SERVICE" : "PRODUCT",
     category: item.category_name ?? item.category ?? "",
     categoryId: item.category_id ?? "",
     description: item.description ?? "",
     brandName: item.brand_name ?? "",
     manufacturer: item.manufacturer_name ?? "",
     manufacturerPartNumber: item.manufacturer_part_number ?? "",
-    baseUnit: item.base_unit ?? "",
+    baseUnit: item.base_unit ?? "PCS",
     purchaseCost: Number(item.purchase_cost ?? 0),
     sellingPrice: Number(item.selling_price ?? 0),
     mrp: Number(item.mrp ?? 0),
     currency: item.currency_code ?? "INR",
     verified: item.is_verified ?? false,
-    status: item.status ?? "Active",
+    active: item.is_active ?? true,
+    status: item.status ?? "OUT_OF_STOCK",
     quantity: Number(item.quantity ?? 0),
     version: item.version,
   };
 }
 
 function toApiItem(formData) {
-  const customAttributes = {};
-
-  if (
-    formData.customAttributes &&
-    !Array.isArray(formData.customAttributes)
-  ) {
-    Object.assign(customAttributes, formData.customAttributes);
-  }
-
-  const attributes = [
-    ...(Array.isArray(formData.itemAttributes)
-      ? formData.itemAttributes
-      : []),
-    ...(Array.isArray(formData.customAttributes)
-      ? formData.customAttributes
-      : []),
-  ];
-
-  for (const attribute of attributes) {
-    if (attribute.name?.trim()) {
-      customAttributes[attribute.name.trim()] =
-        attribute.value ?? "";
-    }
-  }
-
   const payload = {
     code: formData.itemCode?.trim(),
     name: formData.itemName?.trim(),
     item_type:
-      formData.itemType === "Service" ? "SERVICE" : "PRODUCT",
+      formData.itemType === "SERVICE" ||
+      formData.itemType === "Service"
+        ? "SERVICE"
+        : "PRODUCT",
     base_unit: formData.baseUnit,
-    custom_attributes: customAttributes,
     description: formData.description ?? "",
     brand_name: formData.brandName ?? "",
     manufacturer_name: formData.manufacturer ?? "",
@@ -93,8 +73,8 @@ function toApiItem(formData) {
     selling_price: Number(formData.sellingPrice || 0),
     mrp: Number(formData.mrp || 0),
     currency_code: formData.currency || "INR",
-    status: "OUT_OF_STOCK",
-    is_active: true,
+    status: formData.status ?? "OUT_OF_STOCK",
+    is_active: Boolean(formData.active),
     is_verified: Boolean(formData.verified),
   };
 
@@ -113,30 +93,29 @@ function Products() {
   const [activeTab, setActiveTab] = useState("All Products");
 
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [warehouses, setWarehouses] = useState([]);
+  const [warehouseZones, setWarehouseZones] = useState([]);
+  const [vendors, setVendors] = useState([]);
+
+  const [units] = useState(["PCS", "KG", "LITRE", "BOX"]);
+  const [statuses] = useState(["PENDING", "RECEIVED", "CANCELLED"]);
 
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
-
+  const [selectedProduct, setSelectedProduct] = useState(null);
   // Existing Purchase Order form
   const [showPurchaseOrder, setShowPurchaseOrder] =
     useState(false);
 
   // Purchase Order workflow popup
-  const [showPurchaseWorkflow, setShowPurchaseWorkflow] =
-    useState(false);
+  const [showPurchaseWorkflow, setShowPurchaseWorkflow] = useState(false);
 
-  // Workflow selections
-  const [purchaseMethod, setPurchaseMethod] =
-    useState("direct");
-
-  const [vendorStatus, setVendorStatus] =
-    useState("existing");
-
-  const [productStatus, setProductStatus] =
-    useState("regular");
-
-  const [specialApproval, setSpecialApproval] =
-    useState("no");
+  // Purchase workflow selections
+  const [purchaseMethod, setPurchaseMethod] = useState("direct");
+  const [vendorStatus, setVendorStatus] = useState("existing");
+  const [productStatus, setProductStatus] = useState("regular");
+  const [specialApproval, setSpecialApproval] = useState("no");
 
   // Purchase Orders table data
   const [purchaseOrders, setPurchaseOrders] = useState([]);
@@ -170,23 +149,6 @@ function Products() {
       editable: true,
     },
     {
-      key: "brandName",
-      label: "Brand",
-      editable: true,
-    },
-    {
-      key: "purchaseCost",
-      label: "Purchase Cost",
-      type: "number",
-      editable: true,
-    },
-    {
-      key: "sellingPrice",
-      label: "Selling Price",
-      type: "number",
-      editable: true,
-    },
-    {
       key: "quantity",
       label: "Quantity",
       type: "number",
@@ -198,6 +160,7 @@ function Products() {
     },
   ];
 
+  // Load products from API
   const loadProducts = async () => {
     setLoading(true);
     setError("");
@@ -213,9 +176,7 @@ function Products() {
           [];
 
       if (!Array.isArray(items)) {
-        throw new Error(
-          "Unexpected item list response from server"
-        );
+        throw new Error("Unexpected item list response from server");
       }
 
       setProducts(items.map(fromApiItem));
@@ -230,6 +191,7 @@ function Products() {
     loadProducts();
   }, []);
 
+  // Save new or edited product
   const handleSave = async (formData) => {
     setSaving(true);
     setError("");
@@ -249,7 +211,7 @@ function Products() {
       } else {
         await createItem({
           ...payload,
-          quantity: 1,
+          quantity: Number(formData.incomingQuantity ?? 0),
         });
       }
 
@@ -264,21 +226,21 @@ function Products() {
     }
   };
 
+  // Edit product
   const handleEdit = (product) => {
     setEditingProduct(product);
     setShowForm(true);
     setError("");
   };
 
+  // Update product
   const handleUpdate = async (updatedProduct) => {
     setError("");
 
     try {
       const payload = toApiItem(updatedProduct);
 
-      payload.quantity = Number(
-        updatedProduct.quantity ?? 0
-      );
+      payload.quantity = Number(updatedProduct.quantity ?? 0);
 
       await updateItem(updatedProduct.id, payload);
 
@@ -288,18 +250,19 @@ function Products() {
     }
   };
 
+  // Delete product
   const handleDelete = async (productId) => {
     setError("");
 
     try {
       await deleteItem(productId);
-
       await loadProducts();
     } catch (err) {
       setError(err.message || "Unable to delete product");
     }
   };
 
+  // Cancel product form
   const handleCancel = () => {
     setShowForm(false);
     setEditingProduct(null);
@@ -332,11 +295,10 @@ function Products() {
     setVendorStatus("existing");
     setProductStatus("regular");
     setSpecialApproval("no");
-
     setShowPurchaseWorkflow(true);
   };
 
-  // Workflow Next
+  // Next works only for the exact permitted combination
   const handlePurchaseWorkflowNext = () => {
     const isValidDirectPurchase =
       purchaseMethod === "direct" &&
@@ -344,7 +306,6 @@ function Products() {
       productStatus === "regular" &&
       specialApproval === "no";
 
-    // Only this exact combination should work
     if (isValidDirectPurchase) {
       setShowPurchaseWorkflow(false);
       setShowPurchaseOrder(true);
@@ -372,12 +333,9 @@ function Products() {
     0
   );
 
-  // Purchase Orders record count
+  // Purchase Order record count
   const purchaseOrderCount = purchaseOrders.length;
-
-  const purchaseOrderStart =
-    purchaseOrderCount === 0 ? 0 : 1;
-
+  const purchaseOrderStart = purchaseOrderCount === 0 ? 0 : 1;
   const purchaseOrderEnd = purchaseOrderCount;
 
   return (
@@ -397,7 +355,6 @@ function Products() {
       </div>
 
       {/* TABS */}
-
       <div className="product-tabs">
         {tabs.map((tab) => (
           <button
@@ -409,17 +366,7 @@ function Products() {
                 : "product-tab"
             }
             onClick={() => {
-              if (tab === "Purchase") {
-                setActiveTab("Purchase");
-
-                setShowPurchaseWorkflow(false);
-                setShowPurchaseOrder(false);
-
-                return;
-              }
-
               setActiveTab(tab);
-
               setShowPurchaseWorkflow(false);
               setShowPurchaseOrder(false);
             }}
@@ -430,63 +377,45 @@ function Products() {
       </div>
 
       {/* ERROR */}
-
       {error && (
         <div className="product-error" role="alert">
           <span>{error}</span>
 
-          <button
-            type="button"
-            onClick={loadProducts}
-          >
+          <button type="button" onClick={loadProducts}>
             Retry
           </button>
         </div>
       )}
 
-      {/* =========================
-          ALL PRODUCTS
-      ========================= */}
-
+      {/* ALL PRODUCTS */}
       {activeTab === "All Products" && (
         <>
           <div className="product-cards">
             <StatCard
               title="Total Products"
               value={totalProducts}
-              icon={
-                <Package className="stat-icon-image" />
-              }
+              icon={<Package className="stat-icon-image" />}
             />
 
             <StatCard
               title="Low Stock"
               value={lowStock}
-              icon={
-                <AlertTriangle className="stat-icon-image" />
-              }
+              icon={<AlertTriangle className="stat-icon-image" />}
             />
 
             <StatCard
               title="Out of Stock"
               value={outOfStock}
-              icon={
-                <PackageX className="stat-icon-image" />
-              }
+              icon={<PackageX className="stat-icon-image" />}
             />
 
             <StatCard
               title="Total Value"
-              value={`₹ ${totalValue.toLocaleString(
-                "en-IN",
-                {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                }
-              )}`}
-              icon={
-                <IndianRupee className="stat-icon-image" />
-              }
+              value={`₹ ${totalValue.toLocaleString("en-IN", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}`}
+              icon={<IndianRupee className="stat-icon-image" />}
             />
           </div>
 
@@ -517,6 +446,7 @@ function Products() {
                 onUpdate={handleUpdate}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
+                onView={(product) => setSelectedProduct(product)}
                 itemsPerPage={15}
               />
             )}
@@ -524,24 +454,15 @@ function Products() {
         </>
       )}
 
-      {/* =========================
-          CATEGORIES / STOCK /
-          SUPPLIERS
-      ========================= */}
-
+      {/* CATEGORIES / STOCK / SUPPLIERS */}
       {activeTab !== "All Products" &&
         activeTab !== "Purchase" && (
           <div className="product-tab-content">
-            <ProductManagement
-              activeTab={activeTab}
-            />
+            <ProductManagement activeTab={activeTab} />
           </div>
         )}
 
-      {/* =========================
-          PURCHASE ORDERS
-      ========================= */}
-
+      {/* PURCHASE ORDERS */}
       {activeTab === "Purchase" && (
         <div className="product-tab-content">
           <div className="all-products-section">
@@ -585,20 +506,14 @@ function Products() {
                     purchaseOrders.map((order) => (
                       <tr key={order.id}>
                         <td>{order.poNumber}</td>
-
                         <td>{order.supplier}</td>
-
                         <td>{order.poDate}</td>
-
                         <td>{order.product}</td>
-
                         <td>{order.quantity}</td>
-
                         <td>
                           {order.currency}{" "}
                           {Number(order.amount).toFixed(2)}
                         </td>
-
                         <td>{order.status}</td>
                       </tr>
                     ))
@@ -609,8 +524,7 @@ function Products() {
 
             <div className="purchase-table-footer">
               <span>
-                Showing {purchaseOrderStart} -{" "}
-                {purchaseOrderEnd} of{" "}
+                Showing {purchaseOrderStart} - {purchaseOrderEnd} of{" "}
                 {purchaseOrderCount} records
               </span>
             </div>
@@ -618,64 +532,61 @@ function Products() {
         </div>
       )}
 
-      {/* =========================
-          PRODUCT FORM
-      ========================= */}
+      {/* PRODUCT FORM */}
+     
 
-     <Modal isOpen={showForm} onClose={handleCancel}>
+      <Modal isOpen={showForm} onClose={handleCancel}>
   <div className="product-form-heading">
     <h2>{editingProduct ? "Edit Product" : "Add Product"}</h2>
-
-    <p>
-      {editingProduct
-        ? "Update the existing product details as needed."
-        : "Enter the product details to add a new product to the inventory."}
-    </p>
   </div>
 
   <ProductForm
     key={editingProduct?.id ?? "new-product"}
     initialData={editingProduct}
+    categories={categories}
+    warehouses={warehouses}
+    warehouseZones={warehouseZones}
+    vendors={vendors}
+    units={units}
+    statuses={statuses}
     onSave={handleSave}
     onCancel={handleCancel}
     disabled={saving}
   />
 </Modal>
 
+{/* PRODUCT DETAILS MODAL */}
+<ProductDetails
+  product={selectedProduct}
+  onClose={() => setSelectedProduct(null)}
+/>
       {/* =========================
           PURCHASE WORKFLOW POPUP
       ========================= */}
 
+      {/* PURCHASE WORKFLOW POPUP */}
       {showPurchaseWorkflow && (
         <div className="purchase-workflow-overlay">
           <div className="purchase-workflow-popup">
-
             {/* HEADER */}
-
             <div className="purchase-workflow-header">
               <h2>Purchase Order</h2>
 
               <button
                 type="button"
                 className="purchase-workflow-close"
-                onClick={() =>
-                  setShowPurchaseWorkflow(false)
-                }
+                onClick={() => setShowPurchaseWorkflow(false)}
               >
                 <X size={20} />
               </button>
             </div>
 
             {/* CONTENT */}
-
             <div className="purchase-workflow-content">
-
               {/* PURCHASE METHOD */}
-
               <h3>Choose the purchasing method</h3>
 
               <div className="purchase-method-options">
-
                 <label
                   className={
                     purchaseMethod === "direct"
@@ -687,22 +598,15 @@ function Products() {
                     type="radio"
                     name="purchaseMethod"
                     value="direct"
-                    checked={
-                      purchaseMethod === "direct"
-                    }
-                    onChange={() =>
-                      setPurchaseMethod("direct")
-                    }
+                    checked={purchaseMethod === "direct"}
+                    onChange={() => setPurchaseMethod("direct")}
                   />
 
                   <div>
-                    <strong>
-                      Direct Purchase Order
-                    </strong>
-
+                    <strong>Direct Purchase Order</strong>
                     <p>
-                      Create a purchase order directly
-                      from the selected vendor.
+                      Create a purchase order directly from the
+                      selected vendor.
                     </p>
                   </div>
                 </label>
@@ -718,36 +622,28 @@ function Products() {
                     type="radio"
                     name="purchaseMethod"
                     value="quotation"
-                    checked={
-                      purchaseMethod === "quotation"
-                    }
-                    onChange={() =>
-                      setPurchaseMethod("quotation")
-                    }
+                    checked={purchaseMethod === "quotation"}
+                    onChange={() => setPurchaseMethod("quotation")}
                   />
 
                   <div>
                     <strong>
                       Quotation → LOI → Purchase Order
                     </strong>
-
                     <p>
-                      Follow the quotation and LOI
-                      process before creating the PO.
+                      Follow the quotation and LOI process before
+                      creating the PO.
                     </p>
                   </div>
                 </label>
-
               </div>
 
               {/* VENDOR + PRODUCT */}
-
               <h3 className="purchase-selection-title">
                 Select vendor and products
               </h3>
 
               {/* VENDOR */}
-
               <div className="purchase-workflow-section">
                 <h4>Vendor status</h4>
 
@@ -756,17 +652,10 @@ function Products() {
                     type="radio"
                     name="vendorStatus"
                     value="existing"
-                    checked={
-                      vendorStatus === "existing"
-                    }
-                    onChange={() =>
-                      setVendorStatus("existing")
-                    }
+                    checked={vendorStatus === "existing"}
+                    onChange={() => setVendorStatus("existing")}
                   />
-
-                  <span>
-                    Existing, approved vendor
-                  </span>
+                  <span>Existing, approved vendor</span>
                 </label>
 
                 <label className="purchase-radio-row">
@@ -774,22 +663,14 @@ function Products() {
                     type="radio"
                     name="vendorStatus"
                     value="new"
-                    checked={
-                      vendorStatus === "new"
-                    }
-                    onChange={() =>
-                      setVendorStatus("new")
-                    }
+                    checked={vendorStatus === "new"}
+                    onChange={() => setVendorStatus("new")}
                   />
-
-                  <span>
-                    New vendor / not yet approved
-                  </span>
+                  <span>New vendor / not yet approved</span>
                 </label>
               </div>
 
               {/* PRODUCT */}
-
               <div className="purchase-workflow-section">
                 <h4>Product status</h4>
 
@@ -798,17 +679,10 @@ function Products() {
                     type="radio"
                     name="productStatus"
                     value="regular"
-                    checked={
-                      productStatus === "regular"
-                    }
-                    onChange={() =>
-                      setProductStatus("regular")
-                    }
+                    checked={productStatus === "regular"}
+                    onChange={() => setProductStatus("regular")}
                   />
-
-                  <span>
-                    Regularly purchased product
-                  </span>
+                  <span>Regularly purchased product</span>
                 </label>
 
                 <label className="purchase-radio-row">
@@ -816,22 +690,14 @@ function Products() {
                     type="radio"
                     name="productStatus"
                     value="new"
-                    checked={
-                      productStatus === "new"
-                    }
-                    onChange={() =>
-                      setProductStatus("new")
-                    }
+                    checked={productStatus === "new"}
+                    onChange={() => setProductStatus("new")}
                   />
-
-                  <span>
-                    New product / first-time purchase
-                  </span>
+                  <span>New product / first-time purchase</span>
                 </label>
               </div>
 
               {/* SPECIAL APPROVAL */}
-
               <div className="purchase-workflow-section">
                 <h4>Special approval</h4>
 
@@ -840,14 +706,9 @@ function Products() {
                     type="radio"
                     name="specialApproval"
                     value="no"
-                    checked={
-                      specialApproval === "no"
-                    }
-                    onChange={() =>
-                      setSpecialApproval("no")
-                    }
+                    checked={specialApproval === "no"}
+                    onChange={() => setSpecialApproval("no")}
                   />
-
                   <span>No</span>
                 </label>
 
@@ -856,46 +717,32 @@ function Products() {
                     type="radio"
                     name="specialApproval"
                     value="yes"
-                    checked={
-                      specialApproval === "yes"
-                    }
-                    onChange={() =>
-                      setSpecialApproval("yes")
-                    }
+                    checked={specialApproval === "yes"}
+                    onChange={() => setSpecialApproval("yes")}
                   />
-
                   <span>Yes</span>
                 </label>
               </div>
 
               {/* NEXT */}
-
               <div className="purchase-workflow-actions">
                 <button
                   type="button"
                   className="purchase-workflow-next"
-                  onClick={
-                    handlePurchaseWorkflowNext
-                  }
+                  onClick={handlePurchaseWorkflowNext}
                 >
                   Next
                 </button>
               </div>
-
             </div>
           </div>
         </div>
       )}
 
-      {/* =========================
-          EXISTING PURCHASE ORDER
-      ========================= */}
-
+      {/* PURCHASE ORDER FORM */}
       {showPurchaseOrder && (
         <PurchaseOrder
-          onClose={() =>
-            setShowPurchaseOrder(false)
-          }
+          onClose={() => setShowPurchaseOrder(false)}
           onSubmit={handlePurchaseOrderSubmit}
         />
       )}
@@ -904,3 +751,4 @@ function Products() {
 }
 
 export default Products;
+

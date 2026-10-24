@@ -29,14 +29,12 @@ const CRUD_OPERATIONS = {
 
   CREATE: {
     sql: `
-            SELECT create_item_list(
-                $1::jsonb,
-                $2::uuid
-            ) AS result
-        `,
-    params: (data) => [JSON.stringify(data.data), data.userId ?? null],
+    SELECT public.create_item_list(
+      $1::jsonb
+    ) AS result
+  `,
+    params: (data) => [JSON.stringify(data.data)],
   },
-
   UPDATE: {
     sql: `
             SELECT update_item_list(

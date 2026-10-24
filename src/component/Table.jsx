@@ -1,6 +1,6 @@
+
 import { useState } from "react";
 import { Pencil, Trash2, Eye } from "lucide-react";
-
 import Button from "./Button";
 import Dropdown from "./Dropdown";
 import Pagination from "./Pagination";
@@ -12,6 +12,7 @@ function Table({
   onUpdate,
   onEdit,
   onDelete,
+  onView,
   itemsPerPage = 15,
 }) {
   const [search, setSearch] = useState("");
@@ -28,14 +29,10 @@ function Table({
       return "";
     }
 
-    if (Number(item.quantity) === 0) {
-      return "Out of Stock";
-    }
+    const quantity = Number(item.quantity) || 0;
 
-    if (Number(item.quantity) <=5) {
-      return "Low Stock";
-    }
-
+    if (quantity <= 0) return "Out of Stock";
+    if (quantity <= 5) return "Low Stock";
     return "In Stock";
   };
 
@@ -61,9 +58,7 @@ function Table({
 
     return columns.some((column) => {
       const value =
-        column.key === "status"
-          ? getStatus(item)
-          : item[column.key];
+        column.key === "status" ? getStatus(item) : item[column.key];
 
       return String(value ?? "")
         .toLowerCase()
@@ -71,13 +66,13 @@ function Table({
     });
   });
 
-  const categoryData = data.filter((item) => {
-    return category === "all" || item.category === category;
-  });
+  const categoryData = data.filter(
+    (item) => category === "all" || item.category === category
+  );
 
-  const statusData = data.filter((item) => {
-    return status === "all" || getStatus(item) === status;
-  });
+  const statusData = data.filter(
+    (item) => status === "all" || getStatus(item) === status
+  );
 
   const filteredData =
     activeFilter === "search"
@@ -101,23 +96,26 @@ function Table({
   const startEditing = (item, column) => {
     if (!column.editable || !onUpdate) return;
 
-    setEditingCell({
-      id: item.id,
-      key: column.key,
-    });
-
+    setEditingCell({ id: item.id, key: column.key });
     setEditValue(item[column.key] ?? "");
   };
 
   const saveCell = (item, column) => {
-    if (!onUpdate) return;
+    if (!onUpdate || !editingCell) return;
+
+    const value =
+      column.type === "number" && editValue !== ""
+        ? Number(editValue)
+        : editValue;
+
+    if (String(item[column.key] ?? "") === String(value)) {
+      setEditingCell(null);
+      return;
+    }
 
     const updatedItem = {
       ...item,
-      [column.key]:
-        column.type === "number" && editValue !== ""
-          ? Number(editValue)
-          : editValue,
+      [column.key]: value,
     };
 
     onUpdate(updatedItem);
@@ -143,7 +141,7 @@ function Table({
           }}
         />
 
-          <Dropdown
+        <Dropdown
           options={categoryOptions}
           value={category}
           isOpen={openDropdown === "category"}
@@ -184,7 +182,7 @@ function Table({
                 <th key={column.key}>{column.label}</th>
               ))}
 
-              {(onEdit || onDelete) && <th>Actions</th>}
+              {(onView || onEdit || onDelete) && <th>Actions</th>}
             </tr>
           </thead>
 
@@ -209,6 +207,7 @@ function Table({
                             className="cell-input"
                             type={column.type || "text"}
                             step={column.step}
+                            min={column.type === "number" ? 0 : undefined}
                             value={editValue}
                             autoFocus
                             onChange={(e) =>
@@ -217,6 +216,7 @@ function Table({
                             onBlur={() => saveCell(item, column)}
                             onKeyDown={(e) => {
                               if (e.key === "Enter") {
+                                e.preventDefault();
                                 saveCell(item, column);
                               }
 
@@ -231,16 +231,19 @@ function Table({
                               .toLowerCase()
                               .replaceAll(" ", "-")}`}
                           >
-                            {getStatus(item)}
+                            {getStatus(item) || "-"}
                           </span>
                         ) : (
                           <span
-                            className={column.editable ? "editable-cell" : ""}
+                            className={
+                              column.editable ? "editable-cell" : ""
+                            }
                             onDoubleClick={() =>
                               startEditing(item, column)
                             }
-                            title={column.editable ? "Click to edit" : ""}
-
+                            title={
+                              column.editable ? "Double-click to edit" : ""
+                            }
                           >
                             {cellValue ?? "-"}
                           </span>
@@ -249,17 +252,32 @@ function Table({
                     );
                   })}
 
-                  {(onEdit || onDelete) && (
+                  {(onView || onEdit || onDelete) && (
                     <td>
                       <div className="table-actions">
+                        {onView && (
+                          <Button
+                            onClick={() => onView(item)}
+                            title="View Product"
+                          >
+                            <Eye size={16} />
+                          </Button>
+                        )}
+
                         {onEdit && (
-                          <Button onClick={() => onEdit(item)}>
+                          <Button
+                            onClick={() => onEdit(item)}
+                            title="Edit Product"
+                          >
                             <Pencil size={16} />
                           </Button>
                         )}
 
                         {onDelete && (
-                          <Button onClick={() => onDelete(item.id)}>
+                          <Button
+                            onClick={() => onDelete(item.id)}
+                            title="Delete Product"
+                          >
                             <Trash2 size={16} />
                           </Button>
                         )}
@@ -272,7 +290,8 @@ function Table({
               <tr>
                 <td
                   colSpan={
-                    columns.length +1
+                    columns.length +
+                    ((onView || onEdit || onDelete) ? 1 : 0)
                   }
                   className="empty-table"
                 >
