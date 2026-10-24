@@ -1,3 +1,4 @@
+
 import { ArrowLeft, SlidersHorizontal } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -20,10 +21,10 @@ const TABS = [
 ];
 
 const COLUMNS = [
-  { key: "name", label: "Zone Name" },
-  { key: "zoneCode", label: "Zone Code" },
-  { key: "zoneType", label: "Zone Type" },
-  { key: "status", label: "Status" },
+  { key: "zoneCode", label: "Zone Code", editable: true },
+  { key: "name", label: "Zone Name", editable: true },
+  { key: "zoneType", label: "Zone Type", editable: true },
+  { key: "status", label: "Status", editable: false },
 ];
 
 const FILTER_FIELDS = [
@@ -35,10 +36,11 @@ const FILTER_FIELDS = [
 function normalizeZone(row) {
   return {
     ...row,
+    id: row.id ?? row._id,
     name: row.name ?? row.zoneName ?? row.zone_name ?? "",
     zoneCode: row.zoneCode ?? row.zone_code ?? row.code ?? "",
     zoneType: row.zoneType ?? row.zone_type ?? "",
-    status: row.status ?? true,
+    status: row.status ?? "Active",
   };
 }
 
@@ -67,7 +69,9 @@ function Zone() {
     }
 
     const data = await response.json();
-    const rows = Array.isArray(data) ? data : data.zones;
+    const rows = Array.isArray(data)
+      ? data
+      : data.zones ?? data.data;
 
     if (!Array.isArray(rows)) {
       throw new Error("Invalid zone data.");
@@ -162,6 +166,53 @@ function Zone() {
     }
   }
 
+  async function handleUpdateZone(id, updatedRow) {
+    if (id == null || id === "") {
+      throw new Error("Zone ID is missing.");
+    }
+
+    const response = await fetch(
+      `${API_URL}/${encodeURIComponent(id)}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          zoneCode: updatedRow.zoneCode,
+          name: updatedRow.name,
+          zoneType: updatedRow.zoneType,
+        }),
+      }
+    );
+
+    const result = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(result.message || "Unable to update zone.");
+    }
+
+    const updatedRecord = result.zone ?? result.data ?? result;
+
+    setZones((previous) =>
+      previous.map((row) => {
+        const rowId = row.id ?? row._id;
+        const responseId = updatedRecord.id ?? updatedRecord._id ?? id;
+
+        if (String(rowId) !== String(responseId)) {
+          return row;
+        }
+
+        return normalizeZone({
+          ...row,
+          ...updatedRecord,
+          ...updatedRow,
+          id: rowId,
+        });
+      })
+    );
+  }
+
   function handleTabChange(index) {
     const paths = [
       "/storage/warehouse",
@@ -178,18 +229,17 @@ function Zone() {
   return (
     <main className="zone-page">
       <section className="zone-section">
+        <button
+          type="button"
+          className="zone-back-arrow"
+          onClick={() => navigate("/storage")}
+          aria-label="Back to Storage"
+          title="Back to Storage"
+        >
+          <ArrowLeft />
+        </button>
 
-    <button
-      type="button"
-      className="zone-back-arrow"
-      onClick={() => navigate("/storage")}
-      aria-label="Back to Storage"
-      title="Back to Storage"
-    >
-      <ArrowLeft/>
-    </button>
-
-    <h2 className="zone-heading">Warehouse Management</h2>
+        <h2 className="zone-heading">Warehouse Management</h2>
 
         <WarehouseTabs
           tabs={TABS}
@@ -266,6 +316,7 @@ function Zone() {
           <StorageTable
             warehouses={filteredZones}
             columns={COLUMNS}
+            onUpdate={handleUpdateZone}
             showSerial
             emptyMessage="No zones found"
           />

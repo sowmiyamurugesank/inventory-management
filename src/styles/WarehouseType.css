@@ -1,4 +1,3 @@
-
 .warehouse-type-page {
   width: 100%;
   min-width: 0;
@@ -6,11 +5,33 @@
   padding: 24px;
   box-sizing: border-box;
   background: #f5f7fc;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.warehouse-type-page::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.warehouse-type-page::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.warehouse-type-page::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+.warehouse-type-page::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 .warehouse-type-section {
   width: 100%;
   max-width: 1200px;
+  min-width: 0;
   margin: 0 auto;
   padding: 24px;
   box-sizing: border-box;
@@ -19,12 +40,12 @@
   border-radius: 12px;
 }
 
-
 .warehouse-type-heading {
-  margin: 0 0 22px;
-  color: #202b3c;
-  font-size: 24px;
-  font-weight: 700;
+  margin: 10px 0 24px;
+  text-align: center;
+  color: #3f4fa9;
+  font-size: 20px;
+  font-weight: bold;
 }
 
 
@@ -33,15 +54,16 @@
   align-items: center;
   gap: 12px;
   width: 100%;
-  margin-bottom: 15px;
+  min-width: 0;
   margin-top: 30px;
-  
+  margin-bottom: 15px;
 }
 
 .warehouse-type-back-arrow {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
   width: fit-content;
   padding: 0;
   margin: 0 0 12px;
@@ -64,7 +86,7 @@
 
 .warehouse-type-search {
   flex: 1;
-  min-width: 220px;
+  min-width: 0;
 }
 
 .warehouse-type-toolbar button {
@@ -75,7 +97,7 @@
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: background 0.2s ease, border-color 0.2s ease;
 }
 
 .warehouse-filter-btn {
@@ -83,19 +105,20 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: #fff;
+  flex-shrink: 0;
+  background: #ffffff;
   color: #344054;
 }
 
-.warehouse-filter-btn:hover,
-.warehouse-filter-btn.active {
-  background: #eef2ff;
-  border-color: #6878db;
+.warehouse-filter-btn:hover {
+  color: #eef2ff;
+  background-color: #6878db;
 }
 
 .add-warehouse-type-btn {
+  flex-shrink: 0;
   background: #4055c5;
-  color: #fff;
+  color: #ffffff;
   border-color: #4055c5;
   white-space: nowrap;
 }
@@ -111,9 +134,10 @@
   gap: 16px;
   padding: 18px;
   margin-bottom: 20px;
-  background: #fff;
+  background: #ffffff;
   border: 1px solid #e1e6ef;
   border-radius: 10px;
+  box-sizing: border-box;
 }
 
 .warehouse-type-filter-field {
@@ -131,12 +155,13 @@
 
 .warehouse-type-filter-field input {
   width: 100%;
+  min-width: 0;
   height: 40px;
   padding: 0 12px;
   box-sizing: border-box;
   border: 1px solid #d5dce7;
   border-radius: 6px;
-  background: #fff;
+  background: #ffffff;
   color: #344054;
   font-size: 14px;
   outline: none;
@@ -156,9 +181,10 @@
   padding: 0 18px;
   border: 1px solid #d5dce7;
   border-radius: 6px;
-  background: #fff;
+  background: #ffffff;
   color: #344054;
   cursor: pointer;
+  transition: background 0.2s ease;
 }
 
 .warehouse-type-filter-panel button:hover {
@@ -171,7 +197,6 @@
   font-size: 14px;
 }
 
-/* Table container */
 .warehouse-type-section table {
   width: 100%;
   border-collapse: collapse;
@@ -202,6 +227,14 @@
 }
 
 @media (max-width: 900px) {
+  .warehouse-type-page {
+    padding: 18px;
+  }
+
+  .warehouse-type-section {
+    padding: 20px;
+  }
+
   .warehouse-type-filter-panel {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -209,26 +242,52 @@
 
 @media (max-width: 600px) {
   .warehouse-type-page {
-    padding: 14px;
+    padding: 12px;
+  }
+
+  .warehouse-type-section {
+    padding: 16px;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+  }
+
+  .warehouse-type-section::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .warehouse-type-section::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .warehouse-type-section::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
   }
 
   .warehouse-type-heading {
     font-size: 21px;
   }
 
-  .warehouse-type-search {
-    flex-basis: 100%;
+  .warehouse-type-toolbar {
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
   }
 
-  .warehouse-type-toolbar {
-    gap: 10px;
+  .warehouse-type-search {
+    flex: 1 1 100%;
+    min-width: 0;
   }
 
   .warehouse-type-filter-panel {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    padding: 14px;
   }
 
-  .warehouse-type-section {
-    overflow-x: auto;
+  .warehouse-type-section table {
+    min-width: 600px;
   }
 }

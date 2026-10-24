@@ -11,30 +11,43 @@
 .zone-type-section {
   width: 100%;
   max-width: 1200px;
+  min-width: 0;
+  min-height: 300px;
   margin: 0 auto;
   padding: 24px;
   box-sizing: border-box;
   background: #ffffff;
   border: 1px solid #e4e8f2;
   border-radius: 12px;
+
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.zone-type-section::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.zone-type-section::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.zone-type-section::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+.zone-type-section::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 .zone-type-heading {
-  margin: 0 0 22px;
-  color: #202939;
-  font-size: 24px;
-  font-weight: 600;
-}
-
-
-.zone-type-toolbar {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  margin-bottom: 14px;
-  margin-top: 30px;
-  
+  margin: 10px 0 24px;
+  text-align: center;
+  color: #3f4fa9;
+  font-size: 20px;
+  font-weight: bold;
 }
 
 .zone-type-back-arrow {
@@ -59,6 +72,15 @@
   outline: 2px solid #2563eb;
   outline-offset: 4px;
   border-radius: 4px;
+}
+
+.zone-type-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin-top: 30px;
+  margin-bottom: 14px;
 }
 
 .zone-type-search {
@@ -91,6 +113,7 @@
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   background: #ffffff;
+  box-sizing: border-box;
 }
 
 .zone-type-filter-field {
@@ -137,12 +160,18 @@
     padding: 16px;
   }
 
+  .zone-type-section {
+    padding: 18px;
+  }
+
   .zone-type-toolbar {
     flex-wrap: wrap;
+    margin-top: 24px;
   }
 
   .zone-type-search {
     flex-basis: 100%;
+    min-width: 0;
   }
 
   .zone-type-filter-panel {
@@ -151,11 +180,24 @@
 }
 
 @media (max-width: 480px) {
+  .zone-type-page {
+    padding: 10px;
+  }
+
+  .zone-type-section {
+    padding: 14px;
+  }
+
   .zone-type-heading {
     font-size: 21px;
   }
 
   .zone-type-filter-panel {
     grid-template-columns: 1fr;
+    padding: 14px;
+  }
+
+  .zone-type-toolbar {
+    gap: 8px;
   }
 }
