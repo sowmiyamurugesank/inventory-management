@@ -6,6 +6,7 @@ import StatCard from "../StatCard.jsx";
 import DetailsSection from "../component/Atom/DetailsSection.jsx";
 import DetailsAccordion from "../component/Atom/DetailsAccordin.jsx";
 import "../styles/ProductDetails.css";
+import Badge from "../component/Atom/Badge";
 function ProductDetails({ product, onClose }) {
   if (!product) return null;
 
@@ -112,39 +113,35 @@ function ProductDetails({ product, onClose }) {
               {category}
             </p>
 
-            <div className="product-details-badges">
-              <span
-                className={`details-badge ${
-                  quantity <= 0
-                    ? "badge-danger"
-                    : quantity <= 5
-                      ? "badge-warning"
-                      : "badge-success"
-                }`}
-              >
-                {stockStatus}
-              </span>
+          <div className="product-details-badges">
+          <Badge
+            type={
+              quantity <= 0
+                ? "danger"
+                : quantity <= 5
+                  ? "warning"
+                  : "success"
+            }
+          >
+            {stockStatus}
+          </Badge>
 
-              {(product.is_verified === true ||
-                product.verified === true) && (
-                <span className="details-badge badge-verified">
-                  Verified
-                </span>
-              )}
+          {(product.is_verified === true || product.verified === true) && (
+            <Badge type="verified">Verified</Badge>
+          )}
 
-              <span
-                className={`details-badge ${
-                  product.is_active === false ||
-                  product.active === false
-                    ? "badge-danger"
-                    : "badge-success"
-                }`}
-              >
-                {product.is_active === false || product.active === false
-                  ? "Inactive"
-                  : "Active"}
-              </span>
-            </div>
+          <Badge
+            type={
+              product.is_active === false || product.active === false
+                ? "danger"
+                : "success"
+            }
+          >
+            {product.is_active === false || product.active === false
+              ? "Inactive"
+              : "Active"}
+          </Badge>
+        </div>
           </div>
         </header>
 

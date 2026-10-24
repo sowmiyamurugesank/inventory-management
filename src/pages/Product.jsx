@@ -560,9 +560,7 @@ function Products() {
   product={selectedProduct}
   onClose={() => setSelectedProduct(null)}
 />
-      {/* =========================
-          PURCHASE WORKFLOW POPUP
-      ========================= */}
+      {/* PURCHASE WORKFLOW POPUP */}
 
       {/* PURCHASE WORKFLOW POPUP */}
       {showPurchaseWorkflow && (
