@@ -1,28 +1,49 @@
 
+import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { ArrowLeft, SlidersHorizontal } from "lucide-react";
 
 import StorageTable from "../component/StorageTable.jsx";
 import SearchBox from "../component/SearchBox.jsx";
 import Button from "../component/Button.jsx";
+import WarehouseTabs from "../component/WarehouseTabs.jsx";
 import AddWarehouse from "../component/AddWarehouse.jsx";
 
 import "../styles/WarehouseLocation.css";
 
 const API_URL = "http://localhost:5000/api/warehouses";
 
+const TABS = [
+  "Warehouse",
+  "Warehouse Type",
+  "Zone",
+  "Zone Type",
+];
+
+const COLUMNS = [
+  { key: "name", label: "Warehouse" },
+  { key: "location", label: "Location" },
+  { key: "capacity", label: "Capacity" },
+  { key: "status", label: "Status" },
+];
+
 function WarehouseLocation() {
+  const navigate = useNavigate();
+
   const [warehouses, setWarehouses] = useState([]);
   const [search, setSearch] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+  const [filterWarehouseName, setFilterWarehouseName] = useState("");
+  const [filterCapacity, setFilterCapacity] = useState("");
   const [loading, setLoading] = useState(true);
   const [showAddWarehouse, setShowAddWarehouse] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-
   useEffect(() => {
     const controller = new AbortController();
 
-    async function fetchWarehouses() {
+    async function loadWarehouses() {
       try {
         setLoading(true);
         setError("");
@@ -32,27 +53,21 @@ function WarehouseLocation() {
         });
 
         if (!response.ok) {
-          throw new Error(
-            `Failed to load warehouses. Server status: ${response.status}`
-          );
+          throw new Error(`Server status: ${response.status}`);
         }
 
         const data = await response.json();
-
-        const list = Array.isArray(data)
-          ? data
-          : data.warehouses;
+        const list = Array.isArray(data) ? data : data.warehouses;
 
         if (!Array.isArray(list)) {
-          throw new Error("Backend did not return a warehouse array.");
+          throw new Error("Invalid warehouse data.");
         }
 
         setWarehouses(list);
       } catch (err) {
         if (err.name !== "AbortError") {
-          console.error("Warehouse fetch error:", err);
           setError(
-            err.message || "Unable to load warehouses."
+            "Unable to load warehouses. Check your backend connection."
           );
         }
       } finally {
@@ -62,27 +77,76 @@ function WarehouseLocation() {
       }
     }
 
-    fetchWarehouses();
+    loadWarehouses();
 
     return () => controller.abort();
   }, []);
 
+  function handleTabChange(index) {
+    const paths = [
+      "/storage/warehouse",
+      "/storage/warehouse-type",
+      "/storage/zone",
+      "/storage/zone-type",
+    ];
+
+    if (paths[index]) {
+      navigate(paths[index]);
+    }
+  }
+
   const filteredWarehouses = warehouses.filter((warehouse) => {
+    const capacity =
+      warehouse.capacity ??
+      warehouse.capacityPercentage ??
+      warehouse.capacity_percentage ??
+      warehouse.maxCapacity ??
+      warehouse.max_capacity ??
+      "";
+
     const searchableText = [
       warehouse.name,
       warehouse.code,
       warehouse.location,
       warehouse.city,
+      warehouse.locationCode,
+      capacity,
+      warehouse.status,
     ]
-      .filter(Boolean)
+      .filter((value) => value != null && value !== "")
       .join(" ")
       .toLowerCase();
 
-    return searchableText.includes(search.trim().toLowerCase());
+    const matchesSearch = searchableText.includes(
+      search.trim().toLowerCase()
+    );
+
+    const matchesName = String(warehouse.name ?? "")
+      .toLowerCase()
+      .includes(filterWarehouseName.trim().toLowerCase());
+
+    const matchesCapacity = String(capacity)
+      .toLowerCase()
+      .includes(filterCapacity.trim().toLowerCase());
+
+    return matchesSearch && matchesName && matchesCapacity;
   });
 
-  function handleAddWarehouse() {
-    setShowAddWarehouse(true);
+  async function reloadWarehouses() {
+    const response = await fetch(API_URL);
+
+    if (!response.ok) {
+      throw new Error("Unable to refresh warehouse data.");
+    }
+
+    const data = await response.json();
+    const list = Array.isArray(data) ? data : data.warehouses;
+
+    if (!Array.isArray(list)) {
+      throw new Error("Invalid warehouse data.");
+    }
+
+    setWarehouses(list);
   }
 
   async function handleSaveWarehouse(formData) {
@@ -102,21 +166,13 @@ function WarehouseLocation() {
 
       if (!response.ok) {
         throw new Error(
-          result.message || `Failed to add warehouse (${response.status})`
+          result.message || `Server status: ${response.status}`
         );
       }
 
-      const newWarehouse = result.warehouse || result;
-
-      setWarehouses((previous) => [
-        ...previous,
-        newWarehouse,
-      ]);
-
+      await reloadWarehouses();
       setShowAddWarehouse(false);
-      window.alert("Warehouse added successfully!");
     } catch (err) {
-      console.error("Add warehouse error:", err);
       setError(err.message || "Unable to add warehouse.");
     } finally {
       setSaving(false);
@@ -124,33 +180,28 @@ function WarehouseLocation() {
   }
 
   async function handleDelete(id) {
-    if (id === undefined || id === null || id === "") {
+    if (id == null || id === "") {
       setError("Warehouse ID is missing.");
       return;
     }
 
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this warehouse?"
-    );
-
-    if (!confirmed) return;
+    if (!window.confirm("Are you sure you want to delete this warehouse?")) {
+      return;
+    }
 
     try {
       setError("");
 
       const response = await fetch(
         `${API_URL}/${encodeURIComponent(id)}`,
-        {
-          method: "DELETE",
-        }
+        { method: "DELETE" }
       );
 
       const result = await response.json().catch(() => ({}));
 
       if (!response.ok) {
         throw new Error(
-          result.message ||
-            `Failed to delete warehouse (${response.status})`
+          result.message || "Unable to delete warehouse."
         );
       }
 
@@ -161,15 +212,39 @@ function WarehouseLocation() {
         )
       );
     } catch (err) {
-      console.error("Delete warehouse error:", err);
       setError(err.message || "Unable to delete warehouse.");
     }
   }
 
-  return (
-    <main className="warehouse-page">
-      <section className="warehouse-section">
-        <h2 className="warehouse-heading">Warehouse</h2>
+  function clearFilters() {
+    setSearch("");
+    setFilterWarehouseName("");
+    setFilterCapacity("");
+  }
+
+return (
+  <main className="warehouse-page">
+    <section className="warehouse-section">
+
+      <button
+        type="button"
+        className="warehouse-back-arrow"
+        onClick={() => navigate("/storage")}
+        aria-label="Back to Storage"
+        title="Back to Storage"
+      >
+        <ArrowLeft/>
+      </button>
+
+      <h2 className="warehouse-heading">
+        Warehouse Management
+      </h2>
+
+        <WarehouseTabs
+          tabs={TABS}
+          activeTab={0}
+          setActiveTab={handleTabChange}
+        />
 
         <div className="warehouse-toolbar">
           <div className="warehouse-search">
@@ -182,12 +257,68 @@ function WarehouseLocation() {
 
           <Button
             type="button"
+            className={`filter-btn ${showFilters ? "active" : ""}`}
+            onClick={() => setShowFilters((previous) => !previous)}
+          >
+            <SlidersHorizontal size={16} />
+            Filter
+          </Button>
+
+          <Button
+            type="button"
             className="add-warehouse-btn"
-            onClick={handleAddWarehouse}
+            onClick={() => {
+              setError("");
+              setShowAddWarehouse(true);
+            }}
           >
             + Add Warehouse
           </Button>
         </div>
+
+        {showFilters && (
+          <div className="warehouse-filter-panel">
+            <div className="warehouse-filter-field">
+              <label htmlFor="filter-warehouse-name">
+                Warehouse Name
+              </label>
+
+              <input
+                id="filter-warehouse-name"
+                type="text"
+                value={filterWarehouseName}
+                onChange={(event) =>
+                  setFilterWarehouseName(event.target.value)
+                }
+                placeholder="Enter warehouse name"
+                className="warehouse-filter-input"
+              />
+            </div>
+
+            <div className="warehouse-filter-field">
+              <label htmlFor="filter-capacity">Capacity</label>
+
+              <input
+                id="filter-capacity"
+                type="text"
+                value={filterCapacity}
+                onChange={(event) =>
+                  setFilterCapacity(event.target.value)
+                }
+                placeholder="Enter capacity"
+                className="warehouse-filter-input"
+              />
+            </div>
+
+            <Button
+              type="button"
+              className="clear-filter-btn"
+              onClick={clearFilters}
+            >
+              Clear
+            </Button>
+          </div>
+        )}
 
         {error && (
           <p className="warehouse-message" role="alert">
@@ -202,6 +333,10 @@ function WarehouseLocation() {
         ) : (
           <StorageTable
             warehouses={filteredWarehouses}
+            columns={COLUMNS}
+            onView={(warehouse) => {
+              console.log("View warehouse:", warehouse);
+            }}
             onDelete={handleDelete}
           />
         )}
@@ -209,9 +344,7 @@ function WarehouseLocation() {
         {showAddWarehouse && (
           <AddWarehouse
             onClose={() => {
-              if (!saving) {
-                setShowAddWarehouse(false);
-              }
+              if (!saving) setShowAddWarehouse(false);
             }}
             onSave={handleSaveWarehouse}
             saving={saving}

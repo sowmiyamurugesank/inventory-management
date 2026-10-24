@@ -26,6 +26,11 @@ function App() {
           <Route path="products" element={<Product />} />
           <Route path="storage" element={<Storage />} />
           <Route path="storage/warehouse" element={<WarehouseLocation />} />
+          <Route
+          path="storage/warehouse-type"element={<WarehouseType />}/>
+          <Route path="storage/zone" element={<Zone />}  />
+          <Route path="storage/zone-type"  element={<ZoneType />} />
+          
           <Route path="storage/incoming-stock" element={<IncomingStock />} />
           <Route path="storage/outgoing-stock" element={<OutgoingStock />} />
          <Route path="billing" element={<Billing />} />

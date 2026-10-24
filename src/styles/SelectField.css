@@ -1,5 +1,4 @@
 
-/* Select Field Container */
 .form-field {
   display: flex;
   flex-direction: column;
@@ -8,54 +7,51 @@
   margin-bottom: 16px;
 }
 
-/* Label */
 .form-label {
   font-size: 14px;
   font-weight: 500;
   color: #333333;
 }
 
-/* Required Mark */
 .required-mark {
   color: #dc2626;
 }
 
-/* Select Dropdown */
 .reusable-select {
+  display: block;
   width: 100%;
-  min-height: 42px;
-  padding: 10px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
+  height: 38px;
+  box-sizing: border-box;
+  padding: 0 12px;
+  border: 1px solid #cbd5e0;
+  border-radius: 8px;
   background-color: #ffffff;
-  color: #333333;
+  color: #20243a;
+  font-family: inherit;
   font-size: 14px;
   outline: none;
   cursor: pointer;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
 }
 
-/* Focus */
 .reusable-select:focus {
-  border-color: #4f46e5;
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+  border-color: #5b5de6;
+  box-shadow: 0 0 0 3px rgba(91, 93, 230, 0.1);
 }
 
-/* Disabled */
 .reusable-select:disabled {
-  background-color: #f3f4f6;
+  background-color: #f8fafc;
   color: #9ca3af;
   cursor: not-allowed;
 }
 
-/* Validation Error */
 .field-error {
   margin: 0;
   color: #dc2626;
   font-size: 12px;
 }
 
-/* Invalid Select */
 .reusable-select[aria-invalid="true"] {
   border-color: #dc2626;
 }
