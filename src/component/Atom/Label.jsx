@@ -1,4 +1,4 @@
-import "../../styles/Label.css"
+import "../../styles/Label.css";
 
 function Label({ htmlFor, children, required = false }) {
   return (
