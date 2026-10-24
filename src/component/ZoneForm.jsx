@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Button from "./Button.jsx";
 import "../styles/ZoneForm.css";
 
@@ -37,6 +37,21 @@ function ZoneForm({ onSave, onClose, saving = false }) {
   const [form, setForm] = useState({ ...INITIAL_FORM });
   const [error, setError] = useState("");
 
+  // Escape key press pannina modal close aagum
+  useEffect(() => {
+    function handleEscape(event) {
+      if (event.key === "Escape" && !saving) {
+        onClose();
+      }
+    }
+
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [onClose, saving]);
+
   function handleChange(event) {
     const { name, value } = event.target;
 
@@ -65,7 +80,9 @@ function ZoneForm({ onSave, onClose, saving = false }) {
         ...form,
         floorLevel: Number(form.floorLevel),
         maxCapacity:
-          form.maxCapacity === "" ? null : Number(form.maxCapacity),
+          form.maxCapacity === ""
+            ? null
+            : Number(form.maxCapacity),
       });
     } catch (err) {
       setError(err.message || "Unable to save zone.");
@@ -76,16 +93,21 @@ function ZoneForm({ onSave, onClose, saving = false }) {
     <div
       className="zone-modal-backdrop"
       onMouseDown={(event) => {
-        if (event.target === event.currentTarget && !saving) {
+        if (
+          event.target === event.currentTarget &&
+          !saving
+        ) {
           onClose();
         }
       }}
     >
-      <form className="zone-modal" onSubmit={handleSubmit}>
+      <form
+        className="zone-modal"
+        onSubmit={handleSubmit}
+      >
         <div className="zone-modal-header">
           <div>
             <h3>Zone Details</h3>
-            <p>Add and manage warehouse zone information</p>
           </div>
 
           <button
@@ -105,6 +127,7 @@ function ZoneForm({ onSave, onClose, saving = false }) {
               <label htmlFor="zoneCode">
                 Zone Code <span>*</span>
               </label>
+
               <input
                 id="zoneCode"
                 name="zoneCode"
@@ -113,6 +136,7 @@ function ZoneForm({ onSave, onClose, saving = false }) {
                 value={form.zoneCode}
                 onChange={handleChange}
                 required
+                disabled={saving}
               />
             </div>
 
@@ -120,6 +144,7 @@ function ZoneForm({ onSave, onClose, saving = false }) {
               <label htmlFor="zoneName">
                 Zone Name <span>*</span>
               </label>
+
               <input
                 id="zoneName"
                 name="zoneName"
@@ -128,6 +153,7 @@ function ZoneForm({ onSave, onClose, saving = false }) {
                 value={form.zoneName}
                 onChange={handleChange}
                 required
+                disabled={saving}
               />
             </div>
 
@@ -135,12 +161,14 @@ function ZoneForm({ onSave, onClose, saving = false }) {
               <label htmlFor="zoneType">
                 Zone Type <span>*</span>
               </label>
+
               <select
                 id="zoneType"
                 name="zoneType"
                 value={form.zoneType}
                 onChange={handleChange}
                 required
+                disabled={saving}
               >
                 <option value="" disabled>
                   Select zone type
@@ -155,7 +183,10 @@ function ZoneForm({ onSave, onClose, saving = false }) {
             </div>
 
             <div className="zone-field">
-              <label htmlFor="floorLevel">Floor Level</label>
+              <label htmlFor="floorLevel">
+                Floor Level
+              </label>
+
               <input
                 id="floorLevel"
                 name="floorLevel"
@@ -163,11 +194,15 @@ function ZoneForm({ onSave, onClose, saving = false }) {
                 step="1"
                 value={form.floorLevel}
                 onChange={handleChange}
+                disabled={saving}
               />
             </div>
 
             <div className="zone-field">
-              <label htmlFor="maxCapacity">Maximum Capacity</label>
+              <label htmlFor="maxCapacity">
+                Maximum Capacity
+              </label>
+
               <input
                 id="maxCapacity"
                 name="maxCapacity"
@@ -177,16 +212,21 @@ function ZoneForm({ onSave, onClose, saving = false }) {
                 placeholder="Enter maximum capacity"
                 value={form.maxCapacity}
                 onChange={handleChange}
+                disabled={saving}
               />
             </div>
 
             <div className="zone-field">
-              <label htmlFor="capacityUnit">Capacity Unit</label>
+              <label htmlFor="capacityUnit">
+                Capacity Unit
+              </label>
+
               <select
                 id="capacityUnit"
                 name="capacityUnit"
                 value={form.capacityUnit}
                 onChange={handleChange}
+                disabled={saving}
               >
                 {CAPACITY_UNITS.map((unit) => (
                   <option key={unit} value={unit}>
@@ -204,7 +244,9 @@ function ZoneForm({ onSave, onClose, saving = false }) {
               <input
                 type="checkbox"
                 checked={form.allowPicking}
-                onChange={() => handleCheckboxToggle("allowPicking")}
+                onChange={() =>
+                  handleCheckboxToggle("allowPicking")
+                }
                 disabled={saving}
               />
               <span>Allow picking</span>
@@ -214,7 +256,9 @@ function ZoneForm({ onSave, onClose, saving = false }) {
               <input
                 type="checkbox"
                 checked={form.allowReceiving}
-                onChange={() => handleCheckboxToggle("allowReceiving")}
+                onChange={() =>
+                  handleCheckboxToggle("allowReceiving")
+                }
                 disabled={saving}
               />
               <span>Allow receiving</span>
@@ -224,7 +268,9 @@ function ZoneForm({ onSave, onClose, saving = false }) {
               <input
                 type="checkbox"
                 checked={form.requireInspection}
-                onChange={() => handleCheckboxToggle("requireInspection")}
+                onChange={() =>
+                  handleCheckboxToggle("requireInspection")
+                }
                 disabled={saving}
               />
               <span>Require inspection</span>
@@ -247,7 +293,10 @@ function ZoneForm({ onSave, onClose, saving = false }) {
             Cancel
           </Button>
 
-          <Button type="submit" disabled={saving}>
+          <Button
+            type="submit"
+            disabled={saving}
+          >
             {saving ? "Saving..." : "Save"}
           </Button>
         </div>

@@ -8,19 +8,23 @@ import SearchBox from "../component/SearchBox.jsx";
 import Button from "../component/Button.jsx";
 import WarehouseTabs from "../component/WarehouseTabs.jsx";
 import WarehouseTypeForm from "../component/WarehouseTypeForm.jsx";
-import "../styles/WarehouseType.css";
 
+import "../styles/WarehouseType.css";
 
 const API_URL = "http://localhost:5000/api/warehouses";
 
-const TABS = ["Warehouse", "Warehouse Type", "Zone", "Zone Type"];
+const TABS = [
+  "Warehouse",
+  "Warehouse Type",
+  "Zone",
+  "Zone Type",
+];
 
 const COLUMNS = [
-  { key: "name", label: "Warehouse Name" },
-  { key: "warehouseType", label: "Warehouse Type" },
-  { key: "typeCode", label: "Type Code" },
-  { key: "category", label: "Category" },
-  { key: "status", label: "Status" },
+  { key: "warehouseType", label: "Warehouse Type", editable: true },
+  { key: "typeCode", label: "Type Code", editable: true },
+  { key: "category", label: "Category", editable: true },
+  { key: "status", label: "Status", editable: false },
 ];
 
 const FILTER_FIELDS = [
@@ -30,22 +34,42 @@ const FILTER_FIELDS = [
 ];
 
 function normalizeWarehouse(row) {
-  const type = row.warehouseType ?? row.warehouse_type ?? row.type;
+  const type =
+    row.warehouseType ??
+    row.warehouse_type ??
+    row.type;
+
   const typeObject =
-    typeof type === "object" && type !== null ? type : {};
+    typeof type === "object" && type !== null
+      ? type
+      : {};
 
   return {
     ...row,
-    name: row.name ?? row.warehouseName ?? row.warehouse_name ?? "",
-    status: row.status ?? row.warehouseStatus ?? "",
+    name:
+      row.name ??
+      row.warehouseName ??
+      row.warehouse_name ??
+      "",
+    status:
+      row.status ??
+      row.warehouseStatus ??
+      "",
     warehouseType:
       (typeof type === "string" ? type : "") ||
       typeObject.name ||
       typeObject.typeName ||
       row.typeName ||
       "",
-    typeCode: row.typeCode ?? row.type_code ?? typeObject.code ?? "",
-    category: row.category ?? typeObject.category ?? "",
+    typeCode:
+      row.typeCode ??
+      row.type_code ??
+      typeObject.code ??
+      "",
+    category:
+      row.category ??
+      typeObject.category ??
+      "",
   };
 }
 
@@ -74,7 +98,10 @@ function WarehouseType() {
     }
 
     const data = await response.json();
-    const rows = Array.isArray(data) ? data : data.warehouses;
+
+    const rows = Array.isArray(data)
+      ? data
+      : data.warehouses;
 
     if (!Array.isArray(rows)) {
       throw new Error("Invalid warehouse data.");
@@ -114,7 +141,9 @@ function WarehouseType() {
       const matchesSearch =
         !query ||
         COLUMNS.some(({ key }) =>
-          String(row[key] ?? "").toLowerCase().includes(query)
+          String(row[key] ?? "")
+            .toLowerCase()
+            .includes(query)
         );
 
       const matchesFilters = FILTER_FIELDS.every(({ key }) =>
@@ -169,6 +198,61 @@ function WarehouseType() {
     }
   }
 
+  async function handleUpdateWarehouseType(id, updatedRow) {
+    if (id == null || id === "") {
+      throw new Error("Warehouse ID is missing.");
+    }
+
+    setError("");
+
+    const response = await fetch(
+      `${API_URL}/${encodeURIComponent(id)}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          warehouseType: updatedRow.warehouseType,
+          typeCode: updatedRow.typeCode,
+          category: updatedRow.category,
+        }),
+      }
+    );
+
+    const result = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(
+        result.message || "Unable to update warehouse type."
+      );
+    }
+
+    const updatedRecord = result.warehouse ?? result;
+
+    setWarehouses((previous) =>
+      previous.map((row) =>
+        String(row.id ?? row._id) === String(id)
+          ? normalizeWarehouse({
+              ...row,
+              ...updatedRecord,
+              warehouseType:
+                updatedRecord.warehouseType ??
+                updatedRecord.warehouse_type ??
+                updatedRow.warehouseType,
+              typeCode:
+                updatedRecord.typeCode ??
+                updatedRecord.type_code ??
+                updatedRow.typeCode,
+              category:
+                updatedRecord.category ??
+                updatedRow.category,
+            })
+          : row
+      )
+    );
+  }
+
   function handleTabChange(index) {
     const paths = [
       "/storage/warehouse",
@@ -182,23 +266,22 @@ function WarehouseType() {
     }
   }
 
-return (
-  <main className="warehouse-type-page">
-    <section className="warehouse-type-section">
+  return (
+    <main className="warehouse-type-page">
+      <section className="warehouse-type-section">
+        <button
+          type="button"
+          className="warehouse-type-back-arrow"
+          onClick={() => navigate("/storage")}
+          aria-label="Back to Storage"
+          title="Back to Storage"
+        >
+          <ArrowLeft />
+        </button>
 
-      <button
-        type="button"
-        className="warehouse-type-back-arrow"
-        onClick={() => navigate("/storage")}
-        aria-label="Back to Storage"
-        title="Back to Storage"
-      >
-        <ArrowLeft/>
-      </button>
-
-      <h2 className="warehouse-type-heading">
-        Warehouse Management
-      </h2>
+        <h2 className="warehouse-type-heading">
+          Warehouse Management
+        </h2>
 
         <WarehouseTabs
           tabs={TABS}
@@ -220,7 +303,9 @@ return (
             className={`warehouse-filter-btn ${
               showFilters ? "active" : ""
             }`}
-            onClick={() => setShowFilters((value) => !value)}
+            onClick={() =>
+              setShowFilters((value) => !value)
+            }
           >
             <SlidersHorizontal size={16} />
             Filter
@@ -235,7 +320,7 @@ return (
             }}
           >
             + Add Warehouse Type
-          </Button>
+          </Button> 
         </div>
 
         {showFilters && (
@@ -245,7 +330,9 @@ return (
                 className="warehouse-type-filter-field"
                 key={key}
               >
-                <label htmlFor={`filter-${key}`}>{label}</label>
+                <label htmlFor={`filter-${key}`}>
+                  {label}
+                </label>
 
                 <input
                   id={`filter-${key}`}
@@ -261,7 +348,10 @@ return (
               </div>
             ))}
 
-            <Button type="button" onClick={clearFilters}>
+            <Button
+              type="button"
+              onClick={clearFilters}
+            >
               Clear
             </Button>
           </div>
@@ -281,6 +371,7 @@ return (
           <StorageTable
             warehouses={filteredWarehouses}
             columns={COLUMNS}
+            onUpdate={handleUpdateWarehouseType}
             showSerial
           />
         )}
@@ -289,7 +380,9 @@ return (
           <WarehouseTypeForm
             onSave={saveWarehouseType}
             onClose={() => {
-              if (!saving) setShowForm(false);
+              if (!saving) {
+                setShowForm(false);
+              }
             }}
             saving={saving}
           />
