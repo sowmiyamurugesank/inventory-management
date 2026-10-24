@@ -1,69 +1,103 @@
 
-import { Trash2 } from "lucide-react";
 import "../styles/StorageTable.css";
 
-function StorageTable({ warehouses = [], onDelete }) {
+function StorageTable({
+  warehouses = [],
+  columns = [],
+  onView,
+  onDelete,
+  showSerial = false,
+  emptyMessage = "No records found",
+}) {
+  const hasActions = Boolean(onView || onDelete);
+  const totalColumns =
+    columns.length + (showSerial ? 1 : 0) + (hasActions ? 1 : 0);
+
   return (
     <div className="storage-table-container">
       <table className="storage-table">
         <thead>
           <tr>
-            <th>Warehouse</th>
-            <th>Location</th>
-            <th>Capacity</th>
-            <th>Status</th>
-            <th>Actions</th>
+            {showSerial && <th>S.No</th>}
+
+            {columns.map((column) => (
+              <th key={column.key}>{column.label}</th>
+            ))}
+
+            {hasActions && <th>Actions</th>}
           </tr>
         </thead>
 
         <tbody>
           {warehouses.length === 0 ? (
             <tr>
-              <td colSpan={5} className="empty-message">
-                No warehouses found
+              <td colSpan={Math.max(totalColumns, 1)} className="empty-message">
+                {emptyMessage}
               </td>
             </tr>
           ) : (
-            warehouses.map((warehouse) => (
-              <tr key={warehouse.id}>
-                <td>
-                  <div className="warehouse-name">
-                    {warehouse.name || "-"}
-                  </div>
+            warehouses.map((row, index) => {
+              const rowId = row.id ?? row._id ?? index;
 
-                  <div className="warehouse-code">
-                    {warehouse.code || "-"}
-                  </div>
-                </td>
+              return (
+                <tr key={rowId}>
+                  {showSerial && <td>{index + 1}</td>}
 
-                <td>{warehouse.location || "-"}</td>
-                <td>{warehouse.capacity ?? "-"}</td>
+                  {columns.map((column) => {
+                    const value = row[column.key];
 
-                <td>
-                  <span
-                    className={`warehouse-status ${
-                      warehouse.status?.toLowerCase() === "active"
-                        ? "status-active"
-                        : "status-inactive"
-                    }`}
-                  >
-                    {warehouse.status || "Unknown"}
-                  </span>
-                </td>
+                    return (
+                      <td key={column.key}>
+                        {column.key === "status" ? (
+                          <span
+                            className={`warehouse-status ${
+                              String(value).toLowerCase() === "active" ||
+                              value === true
+                                ? "status-active"
+                                : "status-inactive"
+                            }`}
+                          >
+                            {value === true
+                              ? "Active"
+                              : value === false
+                                ? "Inactive"
+                                : value ?? "-"}
+                          </span>
+                        ) : (
+                          value ?? "-"
+                        )}
+                      </td>
+                    );
+                  })}
 
-                <td>
-                  <button
-                    type="button"
-                    className="delete-icon-btn"
-                    onClick={() => onDelete?.(warehouse.id)}
-                    aria-label={`Delete ${warehouse.name || "warehouse"}`}
-                    title="Delete warehouse"
-                  >
-                    <Trash2 />
-                  </button>
-                </td>
-              </tr>
-            ))
+                  {hasActions && (
+                    <td>
+                      <div className="warehouse-actions">
+                        {onView && (
+                          <button
+                            type="button"
+                            className="view-btn"
+                            onClick={() => onView(row)}
+                          >
+                            View
+                          </button>
+                        )}
+
+                        {onDelete && (
+                          <button
+                            type="button"
+                            className="delete-btn"
+                            onClick={() => onDelete(rowId)}
+                          >
+                            Delete
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  )}
+                </tr>
+              );
+            })
           )}
         </tbody>
       </table>

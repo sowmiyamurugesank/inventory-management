@@ -16,7 +16,7 @@
   grid-column: 1 / -1;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 768 ) {
   .attribute-field-row {
     grid-template-columns: 1fr;
     gap: 16px;

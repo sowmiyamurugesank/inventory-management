@@ -1,121 +1,183 @@
+
 import { useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { Ruler, Box } from "lucide-react";
+
 import WarehouseTabs from "./WarehouseTabs.jsx";
 import AttributeField from "./Atom/AttributeField.jsx";
-import Checkbox from "./Checkbox.jsx";
-import Toggle from "./Toggle.jsx";
 import Button from "./Button.jsx";
+import StatCard from "../StatCard.jsx";
 
 import "../styles/AddWarehouse.css";
 
-const warehouseTabs = [
-  "Warehouse Type",
-  "Details",
-  "Address",
-  "Capacity",
-  "Hours",
-  "Zone Type",
-  "Zones",
+const warehouseTabs = ["Details", "Address", "Capacity", "Hours"];
+
+const warehouseTypes = [
+  "General",
+  "Distribution",
+  "Cold Storage",
+  "Raw Materials",
+  "Finished Goods",
+].map((value) => ({ label: value, value }));
+
+const capacityOptions = [
+  "Sacks",
+  "Pallets",
+  "Units",
+  "Boxes",
+  "Cubic Meters",
+  "Square Feet",
+].map((value) => ({ label: value, value }));
+
+const dimensionUnits = [
+  { label: "Metres (m)", value: "Meters", symbol: "m" },
+  { label: "Feet (ft)", value: "Feet", symbol: "ft" },
+  { label: "Centimetres (cm)", value: "Centimeters", symbol: "cm" },
+  { label: "Inches (in)", value: "Inches", symbol: "in" },
 ];
 
-const facilityCategories = ["General Warehouse","Distribution Center","Cold Storage",]
-   .map((value) => ({ label: value, value }));
-
-const warehouseTypes = ["General","Distribution","Cold Storage","Raw Materials","Finished Goods",]
-   .map((value) => ({ label: value, value }));
-
-const zonePurposes = ["Receiving","Storage","Picking","Packing","Dispatch",]
-   .map((value) => ({ label: value, value }));
-
-const storageTypes = ["Ambient","Refrigerated","Frozen","Hazardous",]
-   .map((value) => ({ label: value, value }));
-
-const capacityOptions = ["Pallets","Units","Boxes","Cubic Meters","Square Feet",]
-    .map((value) => ({ label: value, value }));
-
-const weekdays = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday",];
-
-const fields = {
- warehouseType: [
-  { name: "typeCode", label: "Type Code", required: true, placeholder: "Enter type code" },
-  { name: "typeNumericCode", label: "Numeric Code", type: "number", placeholder: "Enter numeric code" },
-  { name: "typeName", label: "Warehouse Type Name", required: true, placeholder: "Enter warehouse type name" },
-  { name: "facilityCategory", label: "Facility Category", type: "select", required: true, options: facilityCategories, placeholder: "Select facility category" },
-],
-
-zoneType: [
-  { name: "zoneTypeCode", label: "Zone Type Code", required: true, placeholder: "Enter zone type code" },
-  { name: "zoneTypeNumericCode", label: "Numeric Code", type: "number", placeholder: "Enter numeric code" },
-  { name: "zoneTypeName", label: "Zone Type Name", required: true, placeholder: "Enter zone type name" },
-  { name: "zonePurpose", label: "Zone Purpose", type: "select", required: true, options: zonePurposes, placeholder: "Select zone purpose" },
-  { name: "storageType", label: "Storage Type", type: "select", required: true, options: storageTypes, placeholder: "Select storage type" },
-],
-
-details: [
-  { name: "name", label: "Warehouse Name", required: true, placeholder: "Enter warehouse name" },
-  { name: "code", label: "Warehouse Code", required: true, placeholder: "e.g. WH-001" },
-  { name: "warehouseType", label: "Warehouse Type", type: "select", required: true, options: warehouseTypes, placeholder: "Select warehouse type" },
-  { name: "managerName", label: "Warehouse Manager", placeholder: "Enter manager name" },
-  { name: "contactNumber", label: "Contact Number", type: "tel", placeholder: "Enter contact number" },
-  { name: "email", label: "Email Address", type: "email", placeholder: "Enter email address" },
-],
-
-address: [
-  { name: "locationCode", label: "Location Code", required: true, placeholder: "Enter location code" },
-  { name: "addressLine1", label: "Address Line 1", required: true, placeholder: "Enter address line 1" },
-  { name: "addressLine2", label: "Address Line 2", placeholder: "Enter address line 2" },
-  { name: "city", label: "City", required: true, placeholder: "Enter city" },
-  { name: "state", label: "State", required: true, placeholder: "Enter state" },
-  { name: "country", label: "Country", required: true, placeholder: "Enter country" },
-  { name: "postalCode", label: "Postal Code", required: true, placeholder: "Enter postal code" },
-],
-
-capacity: [
-  { name: "totalCapacity", label: "Total Capacity", type: "number", required: true, placeholder: "Enter total capacity" },
-  { name: "capacityUnit", label: "Capacity Unit", type: "select", required: true, options: capacityOptions },
-],
-
-hours: [
-  { name: "openingTime", label: "Opening Time", type: "time", required: true },
-  { name: "closingTime", label: "Closing Time", type: "time", required: true },
-],
+const unitToMeters = {
+  Meters: 1,
+  Feet: 0.3048,
+  Centimeters: 0.01,
+  Inches: 0.0254,
 };
 
-const emptyZone = () => ({
-  zoneCode: "",
-  zoneName: "",
-  zoneType: "",
-  floorLevel: "",
-  maximumCapacity: "",
-  capacityUnit: "Pallets",
-});
+const weekdays = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+];
+
+const fields = {
+  details: [
+    {
+      name: "name",
+      label: "Warehouse Name",
+      required: true,
+      placeholder: "Enter warehouse name",
+    },
+    {
+      name: "code",
+      label: "Warehouse Code",
+      required: true,
+      placeholder: "e.g. WH-001",
+    },
+    {
+      name: "warehouseType",
+      label: "Warehouse Type",
+      type: "select",
+      required: true,
+      options: warehouseTypes,
+      placeholder: "Select warehouse type",
+    },
+    {
+      name: "managerName",
+      label: "Warehouse Manager",
+      placeholder: "Enter manager name",
+    },
+    {
+      name: "contactNumber",
+      label: "Contact Number",
+      type: "tel",
+      placeholder: "Enter contact number",
+    },
+    {
+      name: "email",
+      label: "Email Address",
+      type: "email",
+      placeholder: "Enter email address",
+    },
+    {
+      name: "description",
+      label: "Description",
+      type: "textarea",
+      placeholder: "Enter description",
+    },
+  ],
+
+  address: [
+    {
+      name: "locationCode",
+      label: "Location Code",
+      required: true,
+      placeholder: "Enter location code",
+    },
+    {
+      name: "addressLine1",
+      label: "Address Line 1",
+      required: true,
+      placeholder: "Enter address",
+    },
+    {
+      name: "addressLine2",
+      label: "Address Line 2",
+      placeholder: "Enter address line 2",
+    },
+    {
+      name: "city",
+      label: "City",
+      required: true,
+      placeholder: "Enter city",
+    },
+    {
+      name: "state",
+      label: "State",
+      required: true,
+      placeholder: "Enter state",
+    },
+    {
+      name: "country",
+      label: "Country",
+      required: true,
+      placeholder: "Enter country",
+    },
+    {
+      name: "postalCode",
+      label: "Postal Code",
+      required: true,
+      placeholder: "Enter postal code",
+    },
+  ],
+
+  capacity: [
+    {
+      name: "totalCapacity",
+      label: "Total Capacity",
+      type: "number",
+      required: true,
+      placeholder: "Enter total capacity",
+    },
+    {
+      name: "capacityUnit",
+      label: "Capacity Unit",
+      type: "select",
+      required: true,
+      options: capacityOptions,
+      placeholder: "Select capacity unit",
+    },
+  ],
+
+  hours: [
+    {
+      name: "openingTime",
+      label: "Opening Time",
+      type: "time",
+      required: true,
+    },
+    {
+      name: "closingTime",
+      label: "Closing Time",
+      type: "time",
+      required: true,
+    },
+  ],
+};
 
 const initialForm = {
-  typeCode: "",
-  typeNumericCode: "",
-  typeName: "",
-  facilityCategory: "",
-  typeDescription: "",
-  typeActive: true,
-  typeAvailable: true,
-
-  zoneTypeCode: "",
-  zoneTypeNumericCode: "",
-  zoneTypeName: "",
-  zonePurpose: "Storage",
-  storageType: "Ambient",
-  zoneTypeDescription: "",
-  temperatureControl: false,
-  minimumTemperature: "-18",
-  maximumTemperature: "-10",
-  temperatureUnit: "Celsius",
-  humidityControl: false,
-  minimumHumidity: "30",
-  maximumHumidity: "60",
-  specialHandling: false,
-  zoneTypeActive: true,
-  zoneTypeAvailable: true,
-
   name: "",
   code: "",
   warehouseType: "",
@@ -134,67 +196,78 @@ const initialForm = {
   active: true,
 
   totalCapacity: "",
-  capacityUnit: "Pallets",
+  capacityUnit: "Sacks",
 
   openingTime: "09:00",
   closingTime: "18:00",
-  workingDays: [
-    "Sunday",
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-  ],
+  workingDays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
 
-  zones: [emptyZone()],
+  length: "50",
+  width: "30",
+  height: "10",
+  dimensionUnit: "Meters",
 };
+
+function formatNumber(value) {
+  return Number(value).toLocaleString("en-US", {
+    maximumFractionDigits: 3,
+  });
+}
 
 function AddWarehouse({ onClose, onSave, saving = false }) {
   const [activeTab, setActiveTab] = useState(0);
-  const [form, setForm] = useState(initialForm);
+
+  const [form, setForm] = useState({
+    ...initialForm,
+    workingDays: [...initialForm.workingDays],
+  });
+
+  const selectedUnit = dimensionUnits.find(
+    (unit) => unit.value === form.dimensionUnit
+  );
+
+  const length = Number(form.length) || 0;
+  const width = Number(form.width) || 0;
+  const height = Number(form.height) || 0;
+
+  const floorArea = length * width;
+  const buildingVolume = length * width * height;
+
+  const floorAreaSqFt =
+    (floorArea * Math.pow(unitToMeters[form.dimensionUnit], 2)) /
+    0.092903;
+
+  const buildingVolumeCuFt =
+    (buildingVolume * Math.pow(unitToMeters[form.dimensionUnit], 3)) /
+    0.0283168;
 
   function changeField(event) {
     const { name, value } = event.target;
 
-    setForm((prev) => ({
-      ...prev,
+    setForm((previous) => ({
+      ...previous,
       [name]: value,
-    }));
-  }
-
-  function changeValue(name, value) {
-    setForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  }
-
-  function changeZone(index, name, value) {
-    setForm((prev) => ({
-      ...prev,
-      zones: prev.zones.map((zone, i) =>
-        i === index ? { ...zone, [name]: value } : zone
-      ),
     }));
   }
 
   function changeDay(day, checked) {
-    setForm((prev) => ({
-      ...prev,
+    setForm((previous) => ({
+      ...previous,
       workingDays: checked
-        ? [...prev.workingDays, day]
-        : prev.workingDays.filter((item) => item !== day),
+        ? previous.workingDays.includes(day)
+          ? previous.workingDays
+          : [...previous.workingDays, day]
+        : previous.workingDays.filter((item) => item !== day),
     }));
   }
 
-  function renderFields(list, values = form, handler = changeField) {
-    return list.map((field) => (
+  function renderFields(fieldList) {
+    return fieldList.map((field) => (
       <AttributeField
         key={field.name}
         field={field}
-        value={values[field.name]}
-        onChange={handler}
+        value={form[field.name]}
+        onChange={changeField}
         disabled={saving}
       />
     ));
@@ -204,404 +277,255 @@ function AddWarehouse({ onClose, onSave, saving = false }) {
     event.preventDefault();
 
     if (activeTab < warehouseTabs.length - 1) {
-      setActiveTab((prev) => prev + 1);
+      setActiveTab((previous) => previous + 1);
       return;
     }
 
     onSave({
       ...form,
-      typeNumericCode: Number(form.typeNumericCode) || 0,
-      zoneTypeNumericCode: Number(form.zoneTypeNumericCode) || 0,
-      minimumTemperature: Number(form.minimumTemperature),
-      maximumTemperature: Number(form.maximumTemperature),
-      minimumHumidity: Number(form.minimumHumidity),
-      maximumHumidity: Number(form.maximumHumidity),
       totalCapacity: Number(form.totalCapacity) || 0,
-      zones: form.zones.map((zone) => ({
-        ...zone,
-        floorLevel: Number(zone.floorLevel) || 0,
-        maximumCapacity: Number(zone.maximumCapacity) || 0,
-      })),
+      length,
+      width,
+      height,
+      floorArea,
+      floorAreaSqFt,
+      buildingVolume,
+      buildingVolumeCuFt,
     });
   }
 
-  const zoneFields =  [
-  { name: "zoneCode", label: "Zone Code", required: true, placeholder: "Enter zone code" },
-  { name: "zoneName", label: "Zone Name", required: true, placeholder: "Enter zone name" },
-  { name: "zoneType", label: "Zone Type", type: "select", required: true, options: zonePurposes },
-  { name: "floorLevel", label: "Floor Level", type: "number", placeholder: "Enter floor level" },
-  { name: "maximumCapacity", label: "Maximum Capacity", type: "number", required: true, placeholder: "Enter maximum capacity" },
-  { name: "capacityUnit", label: "Capacity Unit", type: "select", required: true, options: capacityOptions },
-  ];
+  function closeModal(event) {
+    if (event.target === event.currentTarget && !saving) {
+      onClose();
+    }
+  }
 
   return (
-    <section className="warehouse-modal">
-      <header className="warehouse-modal-header">
-        <h2>Add Warehouse</h2>
-        <Button type="button" onClick={onClose} disabled={saving}>
-          ×
-        </Button>
-      </header>
+    <div
+      className="warehouse-modal-overlay"
+      onMouseDown={closeModal}
+    >
+      <section
+        className="warehouse-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="warehouse-modal-title"
+      >
+        <header className="warehouse-modal-header">
+          <h2 id="warehouse-modal-title">Add Warehouse</h2>
 
-      <WarehouseTabs
-        tabs={warehouseTabs}
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        disabled={saving}
-      />
+          <button
+            type="button"
+            className="warehouse-close-btn"
+            onClick={onClose}
+            disabled={saving}
+            aria-label="Close"
+          >
+            ×
+          </button>
+        </header>
 
-      <form className="warehouse-form" onSubmit={handleSubmit}>
-        <div className="warehouse-modal-body">
-          {activeTab === 0 && (
-            <div className="warehouse-tab-content">
-              <h3>Warehouse Type Details</h3>
+        <WarehouseTabs
+          tabs={warehouseTabs}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          disabled={saving}
+        />
 
-              <div className="warehouse-form-grid">
-                {renderFields(fields.warehouseType)}
+        <form className="warehouse-form" onSubmit={handleSubmit}>
+          <div className="warehouse-modal-body">
+            {activeTab === 0 && (
+              <div className="warehouse-tab-content">
+                <h3>Warehouse Details</h3>
 
-                <div className="warehouse-description-field">
-                  {renderFields([
-                    {name: "typeDescription",label: "Description",type: "textarea",placeholder: "Enter description",},
-                  ])}
-                </div>
-              </div>
-
-              <div className="warehouse-active-row">
-                <div>
-                  <strong>Active</strong>
-                  <p>Enable or disable this warehouse type.</p>
-                </div>
-                <Toggle
-                  checked={form.typeActive}
-                  onChange={(value) => changeValue("typeActive", value)}
-                  disabled={saving}
-                />
-              </div>
-
-              <div className="warehouse-active-row">
-                <div>
-                  <strong>Available for Selection</strong>
-                  <p>Allow this type to be selected in forms.</p>
-                </div>
-                <Toggle
-                  checked={form.typeAvailable}
-                  onChange={(value) => changeValue("typeAvailable", value)}
-                  disabled={saving}
-                />
-              </div>
-            </div>
-          )}
-
-          {activeTab === 1 && (
-            <div className="warehouse-tab-content">
-              <h3>Warehouse Details</h3>
-              <div className="warehouse-form-grid">
-                {renderFields(fields.details)}
-                <div className="warehouse-description-field">
-                  {renderFields([
-                    {name: "description",label: "Description",type: "textarea",placeholder: "Enter description",},
-                  ])}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 2 && (
-            <div className="warehouse-tab-content">
-              <h3>Warehouse Address</h3>
-
-              <div className="warehouse-form-grid">
-                {renderFields(fields.address)}
-              </div>
-
-              <div className="warehouse-active-row">
-                <div>
-                  <strong>Active</strong>
-                  <p>Enable or disable this warehouse.</p>
-                </div>
-                <Toggle
-                  checked={form.active}
-                  onChange={(value) => changeValue("active", value)}
-                  disabled={saving}
-                />
-              </div>
-            </div>
-          )}
-
-          {activeTab === 3 && (
-            <div className="warehouse-tab-content">
-              <h3>Warehouse Capacity</h3>
-              <div className="warehouse-form-grid">
-                {renderFields(fields.capacity)}
-              </div>
-            </div>
-          )}
-
-          {activeTab === 4 && (
-            <div className="warehouse-tab-content">
-              <h3>Operating Hours</h3>
-              <div className="warehouse-form-grid">
-                {renderFields(fields.hours)}
-              </div>
-
-              <h3 className="warehouse-subheading">Working Days</h3>
-
-              <div className="warehouse-day-options">
-                {weekdays.map((day) => (
-                  <Checkbox
-                    key={day}
-                    label={day}
-                    checked={form.workingDays.includes(day)}
-                    disabled={saving}
-                    onChange={(checked) => changeDay(day, checked)}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {activeTab === 5 && (
-            <div className="warehouse-tab-content">
-              <h3>Zone Type Details</h3>
-
-              <div className="warehouse-form-grid">
-                {renderFields(fields.zoneType)}
-              </div>
-
-              <div className="zone-control-section">
-                <div className="zone-control-heading">
-                  <h3>Temperature Control</h3>
-                  <Toggle
-                    checked={form.temperatureControl}
-                    onChange={(value) =>
-                      changeValue("temperatureControl", value)
-                    }
-                    disabled={saving}
-                  />
+                <div className="warehouse-form-grid">
+                  {renderFields(fields.details)}
                 </div>
 
-                {form.temperatureControl && (
-                  <>
-                    <div className="warehouse-form-grid zone-control-grid">
-                      <AttributeField
-                        field={{name: "minimumTemperature",label: "Minimum Temperature",type: "number",
-                        }}
-                        value={form.minimumTemperature}
-                        onChange={changeField}
-                        disabled={saving}
-                      />
-
-                      <AttributeField
-                        field={{name: "maximumTemperature",label: "Maximum Temperature",type: "number",
-                        }}
-                        value={form.maximumTemperature}
-                        onChange={changeField}
-                        disabled={saving}
-                      />
+                <section className="warehouse-physical-dimensions">
+                  <div className="warehouse-dimensions-header">
+                    <div className="warehouse-dimensions-icon">
+                      <Ruler />
                     </div>
 
-                    <div className="zone-unit-group">
-                      <span>Temperature Unit</span>
+                    <div>
+                      <h3>Physical Dimensions</h3>
+                     
+                    </div>
+                  </div>
 
-                      {["Celsius", "Fahrenheit"].map((unit) => (
-                        <label key={unit}>
-                          <input
-                            type="radio"
-                            name="temperatureUnit"
-                            value={unit}
-                            checked={form.temperatureUnit === unit}
-                            onChange={changeField}
-                            disabled={saving}
-                          />
-                          {unit === "Celsius"
-                            ? "Celsius (°C)"
-                            : "Fahrenheit (°F)"}
-                        </label>
+                  <div className="warehouse-unit-section">
+                    <label
+                      className="warehouse-unit-label"
+                      htmlFor="warehouse-dimension-unit"
+                    >
+                      Dimension Unit <span>*</span>
+                    </label>
+
+                    <select
+                      id="warehouse-dimension-unit"
+                      className="warehouse-dimension-unit-select"
+                      name="dimensionUnit"
+                      value={form.dimensionUnit}
+                      onChange={changeField}
+                      disabled={saving}
+                    >
+                      {dimensionUnits.map((unit) => (
+                        <option key={unit.value} value={unit.value}>
+                          {unit.label}
+                        </option>
                       ))}
-                    </div>
-                  </>
-                )}
-              </div>
+                    </select>
 
-              <div className="zone-control-section">
-                <div className="zone-control-heading">
-                  <h3>Humidity Control</h3>
-                  <Toggle
-                    checked={form.humidityControl}
-                    onChange={(value) =>
-                      changeValue("humidityControl", value)
-                    }
-                    disabled={saving}
-                  />
-                </div>
+                    <p className="warehouse-unit-hint">
+                      Use the same unit for length, width and height.
+                    </p>
+                  </div>
 
-                {form.humidityControl && (
-                  <div className="warehouse-form-grid zone-control-grid">
-                    <AttributeField
-                      field={{name: "minimumHumidity",label: "Minimum Humidity (%)",type: "number",
-                      }}
-                      value={form.minimumHumidity}
-                      onChange={changeField}
-                      disabled={saving}
-                    />
+                  <div className="warehouse-dimensions-input-grid">
+                    {["length", "width", "height"].map((dimension) => (
+                      <div
+                        key={dimension}
+                        className="warehouse-dimension-field"
+                      >
+                        <label htmlFor={`warehouse-${dimension}`}>
+                          {dimension.charAt(0).toUpperCase() +
+                            dimension.slice(1)}{" "}
+                          ({selectedUnit?.symbol})
+                        </label>
 
-                    <AttributeField
-                      field={{name: "maximumHumidity",label: "Maximum Humidity (%)",type: "number",
-                      }}
-                      value={form.maximumHumidity}
-                      onChange={changeField}
-                      disabled={saving}
+                        <input
+                          id={`warehouse-${dimension}`}
+                          type="number"
+                          name={dimension}
+                          value={form[dimension]}
+                          onChange={changeField}
+                          placeholder="0.000"
+                          min="0"
+                          step="any"
+                          disabled={saving}
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="warehouse-calculated-section">
+                    <h3>Calculated Measurements</h3>
+
+                    <div className="warehouse-measurement-cards">
+                    <StatCard
+                       title="Floor Area"
+                       value={`${formatNumber(floorArea)} ${selectedUnit?.symbol}²`}
+                       subtitle={`${formatNumber(floorAreaSqFt)} sq ft`}
+                       icon={<Ruler />}
+                      />
+
+                    <StatCard
+                        title="Building Volume"
+                        value={`${formatNumber(buildingVolume)} ${selectedUnit?.symbol}³`}
+                        subtitle={`${formatNumber(buildingVolumeCuFt)} cu ft`}
+                        icon={<Box />}
                     />
                   </div>
-                )}
+                  </div>
+                </section>
               </div>
+            )}
 
-              <div className="zone-control-section">
-                <div className="zone-control-heading">
-                  <h3>Handling &amp; Operational Defaults</h3>
-                  <Toggle
-                    checked={form.specialHandling}
-                    onChange={(value) =>
-                      changeValue("specialHandling", value)
-                    }
-                    disabled={saving}
-                  />
+            {activeTab === 1 && (
+              <div className="warehouse-tab-content">
+                <h3>Warehouse Address</h3>
+
+                <div className="warehouse-form-grid">
+                  {renderFields(fields.address)}
                 </div>
               </div>
+            )}
 
-              <div className="warehouse-active-row">
-                <div>
-                  <strong>Active</strong>
-                  <p>Enable or disable this zone type.</p>
+            {activeTab === 2 && (
+              <div className="warehouse-tab-content">
+                <h3>Warehouse Capacity</h3>
+
+                <div className="warehouse-form-grid">
+                  {renderFields(fields.capacity)}
                 </div>
-                <Toggle
-                  checked={form.zoneTypeActive}
-                  onChange={(value) =>
-                    changeValue("zoneTypeActive", value)
-                  }
-                  disabled={saving}
-                />
               </div>
+            )}
 
-              <div className="warehouse-active-row">
-                <div>
-                  <strong>Available for Selection</strong>
-                  <p>Allow this zone type to be selected in forms.</p>
+            {activeTab === 3 && (
+              <div className="warehouse-tab-content">
+                <h3>Operating Hours</h3>
+
+                <div className="warehouse-form-grid">
+                  {renderFields(fields.hours)}
                 </div>
-                <Toggle
-                  checked={form.zoneTypeAvailable}
-                  onChange={(value) =>
-                    changeValue("zoneTypeAvailable", value)
-                  }
-                  disabled={saving}
-                />
+
+                <h3 className="warehouse-subheading">
+                  Working Days
+                </h3>
+
+                <div className="warehouse-day-options">
+                  {weekdays.map((day) => (
+                    <label
+                      key={day}
+                      className="warehouse-day-option"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={form.workingDays.includes(day)}
+                        disabled={saving}
+                        onChange={(event) =>
+                          changeDay(day, event.target.checked)
+                        }
+                      />
+
+                      <span>{day}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
+            )}
+          </div>
 
-              <div className="warehouse-description-field zone-description-bottom">
-                {renderFields([
-                  {name: "zoneTypeDescription",label: "Description",type: "textarea",placeholder: "Enter zone type description",},
-                ])}
-              </div>
-            </div>
-          )}
+          <footer className="warehouse-modal-footer">
+            <span className="warehouse-step-count">
+              Step {activeTab + 1} of {warehouseTabs.length}
+            </span>
 
-          {activeTab === 6 && (
-            <div className="warehouse-tab-content">
-              <div className="warehouse-zones-heading">
-                <h3>Warehouse Zones</h3>
+            <div className="warehouse-footer-actions">
+              <Button
+                type="button"
+                onClick={onClose}
+                disabled={saving}
+              >
+                Cancel
+              </Button>
 
+              {activeTab > 0 && (
                 <Button
                   type="button"
                   onClick={() =>
-                    setForm((prev) => ({
-                      ...prev,
-                      zones: [...prev.zones, emptyZone()],
-                    }))
+                    setActiveTab((previous) => previous - 1)
                   }
                   disabled={saving}
                 >
-                  <Plus size={16} /> Add Zone
+                  Previous
                 </Button>
-              </div>
+              )}
 
-              {form.zones.map((zone, index) => (
-                <div className="warehouse-zone-card" key={index}>
-                  <div className="warehouse-zone-title">
-                    <h4>Zone {index + 1}</h4>
-
-                    {form.zones.length > 1 && (
-                      <Button
-                        type="button"
-                        onClick={() =>
-                          setForm((prev) => ({
-                            ...prev,
-                            zones: prev.zones.filter(
-                              (_, i) => i !== index
-                            ),
-                          }))
-                        }
-                        disabled={saving}
-                      >
-                        <Trash2 size={16} /> Remove
-                      </Button>
-                    )}
-                  </div>
-
-                  <div className="warehouse-form-grid">
-                    {renderFields(
-                      zoneFields,
-                      zone,
-                      (event) =>
-                        changeZone(
-                          index,
-                          event.target.name,
-                          event.target.value
-                        )
-                    )}
-                  </div>
-                </div>
-              ))}
+              <Button type="submit" disabled={saving}>
+                {activeTab < warehouseTabs.length - 1
+                  ? "Next"
+                  : saving
+                    ? "Saving..."
+                    : "Save Warehouse"}
+              </Button>
             </div>
-          )}
-        </div>
-
-        <footer className="warehouse-modal-footer">
-          <span>
-            Step {activeTab + 1} of {warehouseTabs.length}
-          </span>
-
-          <div className="warehouse-footer-actions">
-            <Button
-              type="button"
-              onClick={onClose}
-              disabled={saving}
-            >
-              Cancel
-            </Button>
-
-            {activeTab > 0 && (
-              <Button
-                type="button"
-                onClick={() => setActiveTab((prev) => prev - 1)}
-                disabled={saving}
-              >
-                Previous
-              </Button>
-            )}
-
-            {activeTab < warehouseTabs.length - 1 ? (
-              <Button type="submit" disabled={saving}>
-                Next
-              </Button>
-            ) : (
-              <Button type="submit" disabled={saving}>
-                {saving ? "Saving..." : "Save Warehouse"}
-              </Button>
-            )}
-          </div>
-        </footer>
-      </form>
-    </section>
+          </footer>
+        </form>
+      </section>
+    </div>
   );
 }
+
 export default AddWarehouse;

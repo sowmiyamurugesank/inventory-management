@@ -1,7 +1,5 @@
-
-import Select from "./Select.jsx";
 import Label from "./Label.jsx";
-import "../../styles/SelectField.css"
+import "../../styles/SelectField.css";
 
 function SelectField({
   label,
@@ -10,29 +8,44 @@ function SelectField({
   onChange,
   options = [],
   placeholder = "Select an option",
+  disabled = false,
   required = false,
   error = "",
-  disabled = false,
 }) {
+  const errorId = error ? `${name}-error` : undefined;
+
   return (
-    <div className="form-field">
+    <div className="warehouse-field">
       <Label htmlFor={name} required={required}>
         {label}
       </Label>
 
-      <Select
+      <select
+        id={name}
         name={name}
-        value={value}
+        className="reusable-select"
+        value={value ?? ""}
         onChange={onChange}
-        options={options}
-        placeholder={placeholder}
-        required={required}
         disabled={disabled}
-        aria-invalid={Boolean(error)}
-      />
+        required={required}
+        aria-invalid={error ? "true" : "false"}
+        aria-describedby={errorId}
+      >
+       <option value="" disabled hidden style={{ display: "none" }}>
+      {placeholder}
+      </option>
+
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
 
       {error && (
-        <p className="field-error">{error}</p>
+        <p id={errorId} className="field-error">
+          {error}
+        </p>
       )}
     </div>
   );

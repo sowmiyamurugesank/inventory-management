@@ -1,3 +1,4 @@
+
 import FormField from "./FormField-LIE.jsx";
 import SelectField from "./SelectField.jsx";
 import "../../styles/AttributeField.css";
@@ -6,6 +7,7 @@ function AttributeField({
   field,
   value,
   onChange,
+  disabled = false,
   error = "",
 }) {
   const commonProps = {
@@ -14,26 +16,37 @@ function AttributeField({
     value,
     onChange,
     required: field.required,
+    disabled,
     error,
   };
 
+  const fieldClassName =
+    field.type === "textarea"
+      ? "warehouse-field warehouse-full-width"
+      : "warehouse-field";
+
   if (field.type === "select") {
     return (
-      <SelectField
-        {...commonProps}
-        options={field.options || []}
-        placeholder={field.placeholder}
-      />
+      <div className={fieldClassName}>
+        <SelectField
+          {...commonProps}
+          options={field.options || []}
+          placeholder={field.placeholder}
+        />
+      </div>
     );
   }
-  
+
   return (
-    <FormField
-      {...commonProps}
-      type={field.type || "text"}
-      placeholder={field.placeholder}
-    />
+    <div className={fieldClassName}>
+      <FormField
+        {...commonProps}
+        type={field.type || "text"}
+        placeholder={field.placeholder}
+      />
+    </div>
   );
 }
 
 export default AttributeField;
+
