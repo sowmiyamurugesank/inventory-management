@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import "../../styles/DetailsAccordion.css";
+import "../../styles/DetailsAccordin.css";
 
 function DetailsAccordion({ title, children, defaultOpen = false }) {
   const [isOpen, setIsOpen] = useState(defaultOpen);

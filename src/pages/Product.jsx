@@ -11,15 +11,14 @@ import {
 
 } from "lucide-react";
 
-import ProductManagement from "../component/ProductManagement";
-import StatCard from "../StatCard";
-import Table from "../component/Table";
-import ProductForm from "../component/Productform";
-import Button from "../component/Button";
-import Modal from "../component/Modal1";
-import PurchaseOrder from "../component/PurchaseOrder";
-import ProductDetails from "./ProductDetails";
-
+import ProductManagement from "../component/ProductManagement.jsx";
+import StatCard from "../StatCard.jsx";
+import Table from "../component/Table.jsx";
+import ProductForm from "../component/Productform.jsx";
+import Button from "../component/Button.jsx";
+import Modal from "../component/Modal1.jsx";
+import PurchaseOrder from "../component/PurchaseOrder.jsx";
+import ProductDetails from "./ProductDetail.jsx";
 import {
   getItems,
   createItem,
@@ -525,34 +524,33 @@ function Products() {
       )}
 
       {/* PRODUCT FORM */}
+     
+
       <Modal isOpen={showForm} onClose={handleCancel}>
-        <div className="product-form-heading">
-          <h2>
-            {editingProduct ? "Edit Product" : "Add Product"}
-          </h2>
+  <div className="product-form-heading">
+    <h2>{editingProduct ? "Edit Product" : "Add Product"}</h2>
+  </div>
 
-    <ProductForm
-      key={editingProduct?.id ?? "new-product"}
-      initialData={editingProduct}
-      categories={categories}
-      warehouses={warehouses}
-      warehouseZones={warehouseZones}
-      vendors={vendors}
-      units={units}
-      statuses={statuses}
-      onSave={handleSave}
-      onCancel={handleCancel}
-      disabled={saving}
-    />
-  </Modal>
-   
-  {/* PRODUCT DETAILS MODAL */}
-  <ProductDetails
-    product={selectedProduct}
-    onClose={() => setSelectedProduct(null)}
+  <ProductForm
+    key={editingProduct?.id ?? "new-product"}
+    initialData={editingProduct}
+    categories={categories}
+    warehouses={warehouses}
+    warehouseZones={warehouseZones}
+    vendors={vendors}
+    units={units}
+    statuses={statuses}
+    onSave={handleSave}
+    onCancel={handleCancel}
+    disabled={saving}
   />
+</Modal>
 
-
+{/* PRODUCT DETAILS MODAL */}
+<ProductDetails
+  product={selectedProduct}
+  onClose={() => setSelectedProduct(null)}
+/>
       {/* =========================
           PURCHASE WORKFLOW POPUP
       ========================= */}
