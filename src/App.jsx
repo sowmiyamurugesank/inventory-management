@@ -8,6 +8,7 @@ import Storage from "./pages/Storage.jsx";
 import IncomingStock from "./pages/IncomingStock.jsx";
 import OutgoingStock from "./pages/OutgoingStock.jsx";
 import WarehouseLocation from "./pages/WarehouseLocation.jsx";
+import Billing  from "./pages/Billing.jsx";
 
 function Page({ title }) {
   return <h1>{title}</h1>;
@@ -27,7 +28,7 @@ function App() {
           <Route path="storage/warehouse" element={<WarehouseLocation />} />
           <Route path="storage/incoming-stock" element={<IncomingStock />} />
           <Route path="storage/outgoing-stock" element={<OutgoingStock />} />
-          <Route path="billing" element={<Page title="Billing" />} />
+         <Route path="billing" element={<Billing />} />
           <Route path="parties" element={<Page title="Parties" />} />
           <Route path="income-expense" element={<Page title="Income & Expense" />} />
           <Route path="design" element={<Page title="Design" />} />
