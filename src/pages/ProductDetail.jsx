@@ -1,12 +1,11 @@
 
 import { Package, IndianRupee, Barcode, Tags } from "lucide-react";
-import Modal1 from "../component/Modal1";
-import Button from "../component/Button";
-import StatCard from "../component/StatCard";
-import DetailsSection from "../component/DetailsSection";
-import DetailsAccordion from "../component/DetailsAccordion";
+import Modal1 from "../component/Modal1.jsx";
+import Button from "../component/Button.jsx";
+import StatCard from "../StatCard.jsx";
+import DetailsSection from "../component/Atom/DetailsSection.jsx";
+import DetailsAccordion from "../component/Atom/DetailsAccordin.jsx";
 import "../styles/ProductDetails.css";
-
 function ProductDetails({ product, onClose }) {
   if (!product) return null;
 
