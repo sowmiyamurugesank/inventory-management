@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import DataTable from "./DataTable";
@@ -307,4 +306,3 @@ function ProductManagement({ activeTab }) {
 }
 
 export default ProductManagement;
-

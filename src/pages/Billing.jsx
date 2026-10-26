@@ -1,6 +1,8 @@
 
 import { useState } from "react";
 import "../styles/Billing.css";
+
+import Quotation from "../component/Quotation";
 import LOI from "./LOI.jsx";
 import PurchaseReceipt from "./PurchaseReceipt.jsx";
 
@@ -33,7 +35,9 @@ function BillingTabs() {
       </div>
 
       <div className="billing-tab-content">
-        {activeTab === "LOI" ? (
+        {activeTab === "Quotations" ? (
+          <Quotation />
+        ) : activeTab === "LOI" ? (
           <LOI />
         ) : activeTab === "Purchase Receipt" ? (
           <PurchaseReceipt />
@@ -49,3 +53,4 @@ function BillingTabs() {
 }
 
 export default BillingTabs;
+

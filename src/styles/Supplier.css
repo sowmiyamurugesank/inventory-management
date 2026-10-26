@@ -3,7 +3,7 @@
   position: fixed;
 
   inset: 0;
-
+ 
   display: flex;
 
   align-items: center;
@@ -12,7 +12,7 @@
 
   padding: 20px;
 
-  background: rgba(247, 242, 242, 0.918);
+  background: rgba(0, 0, 0, 0.35);
 
   z-index: 1000;
 
@@ -396,4 +396,48 @@
 
   cursor: not-allowed;
 
+}
+/* Fix Numeric Code number arrows inside input border */
+.supplier-section .number-input-wrapper {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.supplier-section .number-input-wrapper .number-input {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding-right: 30px;
+}
+
+.supplier-section .number-input-wrapper .number-input-controls {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  bottom: 1px;
+  width: 24px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+/* Supplier Modal Scrollbar */
+.supplier-modal::-webkit-scrollbar {
+  width: 6px;
+}
+
+.supplier-modal::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 12px 0;
+}
+
+.supplier-modal::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+.supplier-modal::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
