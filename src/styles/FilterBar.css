@@ -1,11 +1,16 @@
 
+.filter-container {
+  width: 100%;
+  position: relative;
+}
+
 .filter-bar {
   display: flex;
   align-items: center;
   gap: 12px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   width: 100%;
-  margin-bottom: 20px;
+  margin-bottom: 0;
 }
 
 .filter-search,
@@ -24,7 +29,8 @@
 
 .filter-search {
   flex: 1;
-  min-width: 200px;
+  width: 100%;
+  min-width: 0;
 }
 
 .filter-date,
@@ -38,12 +44,85 @@
   border-color: #4b49ed;
 }
 
+.filter-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  flex-shrink: 0;
+  height: 42px;
+  padding: 0 16px;
+  border: 1px solid #d9deea;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #333333;
+  font-size: 14px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.filter-toggle-btn:hover,
+.filter-toggle-btn.active {
+  background: #eeeeff;
+  border-color: #4b49ed;
+  color: #4b49ed;
+}
+
+.filter-panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 16px;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 12px;
+  padding: 18px;
+  border: 1px solid #e2e6f0;
+  border-radius: 9px;
+  background: #ffffff;
+}
+
+.filter-field {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 180px;
+}
+
+.filter-field label {
+  color: #454b62;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.filter-field .filter-date,
+.filter-field .filter-select {
+  width: 100%;
+}
+
+.filter-empty {
+  margin: 0;
+  color: #687087;
+  font-size: 13px;
+}
+
 @media (max-width: 768px) {
-  .filter-search,
-  .filter-date,
-  .filter-select {
+  .filter-bar {
+    flex-wrap: wrap;
+  }
+
+  .filter-search {
+    flex: 1 1 100%;
     width: 100%;
+  }
+
+  .filter-toggle-btn {
+    flex-shrink: 0;
+  }
+
+  .filter-field {
+    flex: 1 1 100%;
     min-width: 0;
-    flex: none;
   }
 }

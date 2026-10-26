@@ -1,129 +1,94 @@
-
 .storage-table-container {
   width: 100%;
   overflow-x: auto;
-  border: 1px solid #e7e9f1;
-  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
   background: #ffffff;
 }
 
 .storage-table {
   width: 100%;
-  min-width: 600px;
+  min-width: 700px;
   border-collapse: collapse;
   table-layout: auto;
-  text-align: left;
 }
 
-.storage-table thead {
-  background: #f7f8fc;
+.storage-table th,
+.storage-table td {
+  padding: 14px 16px;
+  text-align: left;
+  white-space: nowrap;
+  border-bottom: 1px solid #e9edf3;
 }
 
 .storage-table th {
-  padding: 15px 16px;
-  color: #646b80;
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-  white-space: nowrap;
-  border-bottom: 1px solid #e7e9f1;
+  background: #f7f8fb;
+  color: #475467;
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .storage-table td {
-  padding: 16px;
-  color: #555c72;
-  font-size: 14px;
-  border-bottom: 1px solid #eef0f6;
-  vertical-align: middle;
+  color: #344054;
+  font-size: 13px;
 }
 
 .storage-table tbody tr:last-child td {
   border-bottom: none;
 }
 
-.storage-table tbody tr:hover {
-  background: #fafaff;
+.empty-message {
+  padding: 32px 16px !important;
+  color: #8a94a6 !important;
+  text-align: center !important;
 }
-
-.warehouse-name {
-  margin-bottom: 4px;
-  color: #20243a;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.warehouse-code {
-  color: #8a90a4;
-  font-size: 12px;
-}
-
 
 .warehouse-status {
-  display: inline-flex;
-  align-items: center;
+  display: inline-block;
   padding: 5px 10px;
   border-radius: 20px;
   font-size: 12px;
-  font-weight: 600;
-  white-space: nowrap;
+  font-weight: 500;
 }
 
 .status-active {
-  color: #16804a;
-  background: #e8f8ef;
+  background-color: #e8f8ee;
+  color: #21864b;
 }
 
 .status-inactive {
-  color: #9a6700;
-  background: #fff4d6;
+  background-color: #f1f2f4;
+  color: #667085;
 }
 
-.delete-icon-btn {
-  display: inline-flex;
+.warehouse-actions {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  width: 34px;
-  height: 34px;
-  padding: 0;
-  border: none;
-  border-radius: 7px;
-  background: transparent;
-  color: #e34d4d;
+  gap: 8px;
+}
+
+.view-btn,
+.delete-btn {
+  padding: 6px 10px;
+  border: 1px solid #dfe3eb;
+  border-radius: 5px;
+  background-color: #ffffff;
+  font-size: 12px;
   cursor: pointer;
-  transition: background 0.2s ease;
 }
 
-.delete-icon-btn:hover {
-  background: #fff0f0;
+.view-btn {
+  color: #4169e1;
 }
 
-.delete-icon-btn:focus-visible {
-  outline: 2px solid #e34d4d;
-  outline-offset: 2px;
+.delete-btn {
+  color: #dc3545;
 }
 
-.delete-icon-btn svg {
-  width: 17px;
-  height: 17px;
+.view-btn:hover {
+  background-color: #f0f4ff;
 }
 
-
-.empty-message {
-  height: 70px;
-  text-align: center;
-  color: #858ba0 ;
-  font-size: 14px ;
-}
-
-
-@media (max-width: 640px) {
-  .storage-table {
-    min-width: 600px;
-  }
-
-  .storage-table th,
-  .storage-table td {
-    padding: 13px 12px;
-  }
+.delete-btn:hover {
+  background-color: #fff1f1;
 }
