@@ -13,6 +13,7 @@ import WarehouseType from "./pages/WarehouseType.jsx";
 import Zone from "./pages/Zone.jsx";
 import ZoneType from "./pages/ZoneType.jsx";
 
+
 function Page({ title }) {
   return <h1>{title}</h1>;
 }

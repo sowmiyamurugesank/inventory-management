@@ -4,6 +4,7 @@ import { Pencil, Trash2, Eye } from "lucide-react";
 import Button from "./Button";
 import Dropdown from "./Dropdown";
 import Pagination from "./Pagination";
+import Badge from "../component/Atom/Badge";
 import "../styles/Table.css";
 
 function Table({
@@ -14,6 +15,7 @@ function Table({
   onDelete,
   onView,
   itemsPerPage = 15,
+  type = "stock",
 }) {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
@@ -25,9 +27,7 @@ function Table({
   const [openDropdown, setOpenDropdown] = useState(null);
 
   const getStatus = (item) => {
-    if (item.quantity === undefined || item.quantity === null) {
-      return "";
-    }
+    if (item.quantity === undefined || item.quantity === null) return "-";
 
     const quantity = Number(item.quantity) || 0;
 
@@ -36,21 +36,54 @@ function Table({
     return "In Stock";
   };
 
+  const getItemStatus = (item) => {
+    if (type === "stock") return getStatus(item);
+    return item.status || "Unknown";
+  };
+
+  const getBadgeVariant = (value) => {
+    const normalized = String(value || "").toLowerCase().trim();
+
+    if (
+      ["passed", "accepted", "completed", "inspected", "received", "closed"].includes(
+        normalized
+      )
+    ) {
+      return "success";
+    }
+
+    if (
+      ["pending", "awaiting inspection", "partially received"].includes(
+        normalized
+      )
+    ) {
+      return "warning";
+    }
+
+    if (
+      ["failed", "rejected", "cancelled", "canceled"].includes(normalized)
+    ) {
+      return "danger";
+    }
+
+    return "default";
+  };
+
   const categoryOptions = [
     { label: "All Categories", value: "all" },
     ...Array.from(
       new Set(data.map((item) => item.category).filter(Boolean))
-    ).map((name) => ({
-      label: name,
-      value: name,
-    })),
+    ).map((name) => ({ label: name, value: name })),
   ];
+
+  const statusValues =
+    type === "stock"
+      ? ["In Stock", "Low Stock", "Out of Stock"]
+      : [...new Set(data.map((item) => item.status).filter(Boolean))];
 
   const statusOptions = [
     { label: "All Status", value: "all" },
-    { label: "In Stock", value: "In Stock" },
-    { label: "Low Stock", value: "Low Stock" },
-    { label: "Out of Stock", value: "Out of Stock" },
+    ...statusValues.map((value) => ({ label: value, value })),
   ];
 
   const searchData = data.filter((item) => {
@@ -58,11 +91,9 @@ function Table({
 
     return columns.some((column) => {
       const value =
-        column.key === "status" ? getStatus(item) : item[column.key];
+        column.key === "status" ? getItemStatus(item) : item[column.key];
 
-      return String(value ?? "")
-        .toLowerCase()
-        .includes(searchText);
+      return String(value ?? "").toLowerCase().includes(searchText);
     });
   });
 
@@ -71,7 +102,7 @@ function Table({
   );
 
   const statusData = data.filter(
-    (item) => status === "all" || getStatus(item) === status
+    (item) => status === "all" || getItemStatus(item) === status
   );
 
   const filteredData =
@@ -113,13 +144,32 @@ function Table({
       return;
     }
 
-    const updatedItem = {
-      ...item,
-      [column.key]: value,
-    };
-
-    onUpdate(updatedItem);
+    onUpdate({ ...item, [column.key]: value });
     setEditingCell(null);
+  };
+
+  const formatCellValue = (item, column) => {
+    const value =
+      column.key === "status" ? getItemStatus(item) : item[column.key];
+
+    if (value === undefined || value === null || value === "") return "-";
+
+    if (column.format === "currency") {
+      return new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency: "INR",
+        maximumFractionDigits: 2,
+      }).format(Number(value) || 0);
+    }
+
+    if (column.format === "date" && value) {
+      const date = new Date(value);
+      return Number.isNaN(date.getTime())
+        ? value
+        : date.toLocaleDateString("en-IN");
+    }
+
+    return String(value);
   };
 
   return (
@@ -145,9 +195,7 @@ function Table({
           options={categoryOptions}
           value={category}
           isOpen={openDropdown === "category"}
-          onToggle={(open) =>
-            setOpenDropdown(open ? "category" : null)
-          }
+          onToggle={(open) => setOpenDropdown(open ? "category" : null)}
           onChange={(value) => {
             setCategory(value);
             setActiveFilter("category");
@@ -161,9 +209,7 @@ function Table({
           options={statusOptions}
           value={status}
           isOpen={openDropdown === "status"}
-          onToggle={(open) =>
-            setOpenDropdown(open ? "status" : null)
-          }
+          onToggle={(open) => setOpenDropdown(open ? "status" : null)}
           onChange={(value) => {
             setStatus(value);
             setActiveFilter("status");
@@ -181,7 +227,6 @@ function Table({
               {columns.map((column) => (
                 <th key={column.key}>{column.label}</th>
               ))}
-
               {(onView || onEdit || onDelete) && <th>Actions</th>}
             </tr>
           </thead>
@@ -195,9 +240,13 @@ function Table({
                       editingCell?.id === item.id &&
                       editingCell?.key === column.key;
 
+                    const isStatusColumn =
+                      column.key === "status" ||
+                      column.key === "inspectionStatus";
+
                     const cellValue =
                       column.key === "status"
-                        ? getStatus(item)
+                        ? getItemStatus(item)
                         : item[column.key];
 
                     return (
@@ -210,42 +259,37 @@ function Table({
                             min={column.type === "number" ? 0 : undefined}
                             value={editValue}
                             autoFocus
-                            onChange={(e) =>
-                              setEditValue(e.target.value)
-                            }
+                            onChange={(e) => setEditValue(e.target.value)}
                             onBlur={() => saveCell(item, column)}
                             onKeyDown={(e) => {
                               if (e.key === "Enter") {
                                 e.preventDefault();
                                 saveCell(item, column);
                               }
-
-                              if (e.key === "Escape") {
-                                setEditingCell(null);
-                              }
+                              if (e.key === "Escape") setEditingCell(null);
                             }}
                           />
-                        ) : column.key === "status" ? (
+                        ) : type === "receipt" && isStatusColumn ? (
+                          <Badge variant={getBadgeVariant(cellValue)}>
+                            {cellValue || "-"}
+                          </Badge>
+                        ) : isStatusColumn ? (
                           <span
-                            className={`status-badge ${getStatus(item)
+                            className={`status-badge ${String(cellValue)
                               .toLowerCase()
                               .replaceAll(" ", "-")}`}
                           >
-                            {getStatus(item) || "-"}
+                            {cellValue || "-"}
                           </span>
                         ) : (
                           <span
-                            className={
-                              column.editable ? "editable-cell" : ""
-                            }
-                            onDoubleClick={() =>
-                              startEditing(item, column)
-                            }
+                            className={column.editable ? "editable-cell" : ""}
+                            onDoubleClick={() => startEditing(item, column)}
                             title={
                               column.editable ? "Double-click to edit" : ""
                             }
                           >
-                            {cellValue ?? "-"}
+                            {formatCellValue(item, column)}
                           </span>
                         )}
                       </td>
@@ -256,27 +300,19 @@ function Table({
                     <td>
                       <div className="table-actions">
                         {onView && (
-                          <Button
-                            onClick={() => onView(item)}
-                            title="View Product"
-                          >
+                          <Button onClick={() => onView(item)} title="View">
                             <Eye size={16} />
                           </Button>
                         )}
-
                         {onEdit && (
-                          <Button
-                            onClick={() => onEdit(item)}
-                            title="Edit Product"
-                          >
+                          <Button onClick={() => onEdit(item)} title="Edit">
                             <Pencil size={16} />
                           </Button>
                         )}
-
                         {onDelete && (
                           <Button
                             onClick={() => onDelete(item.id)}
-                            title="Delete Product"
+                            title="Delete"
                           >
                             <Trash2 size={16} />
                           </Button>
@@ -290,8 +326,7 @@ function Table({
               <tr>
                 <td
                   colSpan={
-                    columns.length +
-                    ((onView || onEdit || onDelete) ? 1 : 0)
+                    columns.length + ((onView || onEdit || onDelete) ? 1 : 0)
                   }
                   className="empty-table"
                 >

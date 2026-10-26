@@ -438,6 +438,7 @@ function Products() {
                 onDelete={handleDelete}
                 onView={(product) => setSelectedProduct(product)}
                 itemsPerPage={15}
+                type="stock"
               />
             )}
           </div>
