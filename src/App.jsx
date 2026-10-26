@@ -10,6 +10,7 @@ import OutgoingStock from "./pages/OutgoingStock.jsx";
 import WarehouseLocation from "./pages/WarehouseLocation.jsx";
 import Billing  from "./pages/Billing.jsx";
 
+
 function Page({ title }) {
   return <h1>{title}</h1>;
 }
