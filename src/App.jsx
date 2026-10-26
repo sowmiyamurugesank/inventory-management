@@ -9,6 +9,9 @@ import IncomingStock from "./pages/IncomingStock.jsx";
 import OutgoingStock from "./pages/OutgoingStock.jsx";
 import WarehouseLocation from "./pages/WarehouseLocation.jsx";
 import Billing  from "./pages/Billing.jsx";
+import WarehouseType from "./pages/WarehouseType.jsx";
+import Zone from "./pages/Zone.jsx";
+import ZoneType from "./pages/ZoneType.jsx";
 
 function Page({ title }) {
   return <h1>{title}</h1>;

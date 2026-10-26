@@ -1,8 +1,4 @@
-/* ==============================
-
-   PURCHASE ORDER MODAL
-
-================================= */
+/* PURCHASE ORDER MODAL */
 
 .purchase-order-overlay {
 
@@ -728,32 +724,6 @@
 
 /* ==============================
 
-   SCROLLBAR
-
-================================= */
-
-.purchase-order-modal::-webkit-scrollbar {
-
-  width: 8px;
-
-}
-
-.purchase-order-modal::-webkit-scrollbar-track {
-
-  background: #f3f4f6;
-
-}
-
-.purchase-order-modal::-webkit-scrollbar-thumb {
-
-  background: #cbd5e1;
-
-  border-radius: 10px;
-
-}
-
-/* ==============================
-
    RESPONSIVE
 
 ================================= */
@@ -783,7 +753,6 @@
   }
 
   .purchase-order-tabs .purchase-order-tab {
-
     flex: 0 0 auto;
 
   }
@@ -870,4 +839,29 @@
 
   }
 
+}
+/* Purchase Workflow Popup Scrollbar */
+
+.purchase-workflow-popup {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.purchase-workflow-popup::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.purchase-workflow-popup::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 12px 0;
+}
+
+.purchase-workflow-popup::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+.purchase-workflow-popup::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
