@@ -37,17 +37,15 @@ function WarehouseLocation() {
           );
         }
 
-        const data = await response.json();
+        const result = await response.json();
 
-        const list = Array.isArray(data)
-          ? data
-          : data.warehouses;
+if (!result.success || !Array.isArray(result.data)) {
+  throw new Error(
+    result.error || "Backend did not return a warehouse array."
+  );
+}
 
-        if (!Array.isArray(list)) {
-          throw new Error("Backend did not return a warehouse array.");
-        }
-
-        setWarehouses(list);
+setWarehouses(result.data);
       } catch (err) {
         if (err.name !== "AbortError") {
           console.error("Warehouse fetch error:", err);
@@ -101,12 +99,22 @@ function WarehouseLocation() {
       const result = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        throw new Error(
-          result.message || `Failed to add warehouse (${response.status})`
-        );
-      }
+  console.error("Warehouse creation failed:", result);
 
-      const newWarehouse = result.warehouse || result;
+  throw new Error(
+    result.error ||
+      result.message ||
+      `Failed to add warehouse (${response.status})`
+  );
+}
+
+      if (!result.success || !result.data) {
+  throw new Error(
+    result.error || "Backend did not return the created warehouse."
+  );
+}
+
+const newWarehouse = result.data;
 
       setWarehouses((previous) => [
         ...previous,

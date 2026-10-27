@@ -211,7 +211,39 @@ function Products() {
       } else {
         await createItem({
           ...payload,
-          quantity: Number(formData.incomingQuantity ?? 0),
+
+          // Initial incoming-stock details
+          warehouseId: formData.warehouseId,
+          warehouseZoneId: formData.warehouseZoneId,
+          incomingStockCode: formData.incomingStockCode,
+          incomingQuantity: Number(formData.incomingQuantity ?? 0),
+          quantityUnit: formData.quantityUnit,
+
+          // Supplier and source details
+          vendorId: formData.vendorId,
+          vendorItemId: formData.vendorItemId,
+          directEntry: formData.directEntry,
+          sourceDocumentType: formData.sourceDocumentType,
+          quotationNumber: formData.quotationNumber,
+          purchaseOrderNumber: formData.purchaseOrderNumber,
+          goodsReceiptNumber: formData.goodsReceiptNumber,
+          invoiceNumber: formData.invoiceNumber,
+          creditNoteNumber: formData.creditNoteNumber,
+          paymentReferenceNumber: formData.paymentReferenceNumber,
+          otherReferenceNumber: formData.otherReferenceNumber,
+
+          // Cost and receipt details
+          unitCost: formData.unitCost,
+          totalCost: formData.totalCost,
+          stockCurrency: formData.stockCurrency,
+          expiryDate: formData.expiryDate,
+          receivedAt: formData.receivedAt,
+          notes: formData.notes,
+
+          // Stock status and custom fields
+          customAttributes: formData.customAttributes,
+          incomingStockStatus: formData.incomingStockStatus,
+          stockVerified: formData.stockVerified,
         });
       }
 
