@@ -2,8 +2,15 @@
 .details-field {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: 8px;
+  width: 100%;
   min-width: 0;
+  padding: 12px;
+  box-sizing: border-box;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
   overflow-wrap: anywhere;
 }
 

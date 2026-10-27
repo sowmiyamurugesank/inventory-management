@@ -1,3 +1,4 @@
+
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -6,53 +7,73 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 15px;
+  box-sizing: border-box;
 }
+
 .modal {
+  display: flex;
+  flex-direction: column;
   width: 100%;
-  max-width: 850px;
-  max-height: 90vh;
-  overflow-y: auto;
-  overflow-x: hidden;
+  max-width: 800px;
+  height: 85vh;
+  max-height: 850px;
+  min-height: 0;
+  overflow: hidden;
   background: #ffffff;
   border-radius: 12px;
   box-shadow: 0 10px 35px rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
+}
+
+/* Fixed Modal Header */
+.modal-header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-shrink: 0;
+  min-height: 44px;
+  padding: 8px 16px;
+  background: #ffffff;
+
+  box-sizing: border-box;
+}
+
+/* Scroll Only Modal Content */
+.modal-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 24px;
+  box-sizing: border-box;
   scrollbar-width: thin;
   scrollbar-color: #cbd5e1 transparent;
 }
 
 /* Professional Modal Scrollbar */
-.modal::-webkit-scrollbar {
+.modal-body::-webkit-scrollbar {
   width: 6px;
 }
 
-.modal::-webkit-scrollbar-track {
+.modal-body::-webkit-scrollbar-track {
   background: transparent;
   margin: 12px 0;
 }
 
-.modal::-webkit-scrollbar-thumb {
+.modal-body::-webkit-scrollbar-thumb {
   background: #cbd5e1;
   border-radius: 10px;
   border: 1px solid transparent;
   background-clip: padding-box;
 }
 
-.modal::-webkit-scrollbar-thumb:hover {
+.modal-body::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
   background-clip: padding-box;
 }
 
-.modal-header {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  padding: 8px 12px;
-}
-
-.modal-body {
-  padding: 24px;
-}
+/* Close Button */
 button.product-modal-cross {
   all: unset;
   display: inline-flex;
@@ -77,24 +98,35 @@ button.product-modal-cross:hover {
   background: transparent;
   box-shadow: none;
   color: #374151;
-  transform: scale(0.8);
+  transform: scale(0.9);
 }
 
 button.product-modal-cross:focus,
-button.product-modal-cross:active {
-  outline: none;
-  background: transparent;
-  box-shadow: none;
-}
-button.product-modal-cross,
-button.product-modal-cross:hover,
-button.product-modal-cross:focus,
+button.product-modal-cross:active,
 button.product-modal-cross:focus-visible,
-button.product-modal-cross:active {
+button.product-modal-cross:hover {
+  outline: none;
   background: transparent !important;
   background-color: transparent !important;
   border: none !important;
-  outline: none !important;
   box-shadow: none !important;
   -webkit-tap-highlight-color: transparent;
+}
+
+/* Responsive Modal */
+@media (max-width: 700px) {
+  .modal-overlay {
+    padding: 10px;
+  }
+
+  .modal {
+    width: 100%;
+    height: 90vh;
+    max-height: 90vh;
+    border-radius: 10px;
+  }
+
+  .modal-body {
+    padding: 16px;
+  }
 }
