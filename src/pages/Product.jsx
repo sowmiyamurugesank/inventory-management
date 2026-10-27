@@ -344,7 +344,7 @@ function Products() {
     }
   };
 
-  // Product card calculations
+  // Card calculations
   const totalProducts = products.length;
 
   const lowStock = products.filter(
@@ -374,8 +374,7 @@ function Products() {
     <div className="products-page">
       {/* PAGE HEADING */}
 
-      <div className="products-heading">
-      </div>
+      
 
       {/* TABS */}
       <div className="product-tabs">
@@ -471,6 +470,7 @@ function Products() {
                 onDelete={handleDelete}
                 onView={(product) => setSelectedProduct(product)}
                 itemsPerPage={15}
+                type="stock"
               />
             )}
           </div>
@@ -583,9 +583,7 @@ function Products() {
   product={selectedProduct}
   onClose={() => setSelectedProduct(null)}
 />
-      {/* =========================
-          PURCHASE WORKFLOW POPUP
-      ========================= */}
+      {/* PURCHASE WORKFLOW POPUP */}
 
       {/* PURCHASE WORKFLOW POPUP */}
       {showPurchaseWorkflow && (

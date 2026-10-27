@@ -13,8 +13,6 @@ function FormField({
   required = false,
   error = "",
   disabled = false,
-  min,
-  step,
 }) {
   return (
     <div className="form-field">
@@ -22,18 +20,31 @@ function FormField({
         {label}
       </Label>
 
-      <Input
-        name={name}
-        type={type}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        required={required}
-        disabled={disabled}
-        aria-invalid={Boolean(error)}
-        min={min}
-        step={step}
-      />
+      {type === "textarea" ? (
+        <textarea
+          id={name}
+          name={name}
+          value={value ?? ""}
+          onChange={onChange}
+          placeholder={placeholder}
+          required={required}
+          disabled={disabled}
+          aria-invalid={Boolean(error)}
+          rows={4}
+          className="form-textarea-field"
+        />
+      ) : (
+        <Input
+          name={name}
+          type={type}
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          required={required}
+          disabled={disabled}
+          aria-invalid={Boolean(error)}
+        />
+      )}
 
       {error && (
         <p className="field-error">{error}</p>
@@ -43,3 +54,4 @@ function FormField({
 }
 
 export default FormField;
+

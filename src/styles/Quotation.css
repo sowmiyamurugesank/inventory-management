@@ -1,0 +1,81 @@
+.quotation-page {
+width: 100%;
+padding: 24px;
+box-sizing: border-box;
+background: #ffffff;
+color: #20243a;
+border-radius: 15px;
+}
+
+.quotation-heading {
+margin-bottom: 24px;
+}
+
+.quotation-title {
+display: flex;
+align-items: center;
+gap: 10px;
+margin-bottom: 8px;
+}
+
+.quotation-title h2 {
+margin: 0;
+font-size: 22px;
+font-weight: 600;
+color: #172033;
+}
+
+.quotation-title svg {
+flex-shrink: 0;
+color: #5b4de6;
+}
+
+.quotation-heading p {
+margin: 0;
+font-size: 13px;
+color: #64748b;
+}
+
+.quotation-table-section {
+width: 100%;
+overflow-x: auto;
+
+}
+
+.quotation-table-section .table-container {
+min-width: 1000px;
+
+}
+
+@media (max-width: 600px) {
+.quotation-page {
+padding: 16px;
+}
+
+.quotation-title h2 {
+font-size: 19px;
+}
+}
+.billing-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.billing-tabs > button {
+  flex-shrink: 0;
+}
+
+.billing-tabs > .quotation-container,
+.billing-tabs > div {
+  width: 100%;
+  flex-basis: 100%;
+  margin-top: 20px;
+}
+.quotation-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}

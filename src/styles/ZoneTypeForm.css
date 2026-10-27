@@ -1,0 +1,364 @@
+
+.zone-type-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  background: rgba(25, 30, 45, 0.55);
+}
+
+.zone-type-modal {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 780px;
+  max-height: calc(100vh - 48px);
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 12px 40px rgba(16, 24, 40, 0.18);
+  box-sizing: border-box;
+}
+
+.zone-type-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 24px;
+  border-bottom: 1px solid #e9edf3;
+  flex-shrink: 0;
+}
+
+.zone-type-modal-header h3 {
+  margin: 0;
+  color: #202939;
+  font-size: 18px;
+  font-weight:bold;
+}
+.zone-type-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #667085;
+  font-size: 25px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.zone-type-close:hover {
+  background: #f2f4f7;
+  color: #202939;
+}
+
+.zone-type-close:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.zone-type-form-body {
+  padding: 24px;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.zone-type-form-body::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.zone-type-form-body::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 6px 0;
+}
+
+.zone-type-form-body::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+.zone-type-form-body::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.zone-type-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.zone-type-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.zone-type-field label,
+.zone-type-toggle-info label {
+  color: #344054;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.zone-type-field label span {
+  color: #dc3545;
+}
+
+.zone-type-field input,
+.zone-type-field select,
+.zone-type-field textarea {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 12px;
+  box-sizing: border-box;
+  border: 1px solid #dfe3eb;
+  border-radius: 6px;
+  outline: none;
+  background: #ffffff;
+  color: #344054;
+  font-family: inherit;
+  font-size: 13px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.zone-type-field input,
+.zone-type-field select {
+  min-height: 42px;
+}
+
+.zone-type-field textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.zone-type-field input:focus,
+.zone-type-field select:focus,
+.zone-type-field textarea:focus {
+  border-color: #4169e1;
+  box-shadow: 0 0 0 3px rgba(65, 105, 225, 0.1);
+}
+
+.zone-type-field input::placeholder,
+.zone-type-field textarea::placeholder {
+  color: #98a2b3;
+}
+
+.zone-type-field select:invalid {
+  color: #98a2b3;
+}
+
+.zone-type-field input:disabled,
+.zone-type-field select:disabled,
+.zone-type-field textarea:disabled {
+  background: #f5f7fa;
+  color: #98a2b3;
+  cursor: not-allowed;
+}
+
+.zone-type-full-width {
+  grid-column: 1 / -1;
+}
+
+.zone-type-control-section {
+  margin-top: 24px;
+  padding: 18px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fafbfc;
+}
+
+.zone-type-control-section h4 {
+  margin: 0 0 14px;
+  color: #344054;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.zone-type-section-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.zone-type-section-heading h4 {
+  margin-bottom: 0;
+}
+
+.zone-type-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 36px;
+}
+
+.zone-type-toggle-info {
+  min-width: 0;
+}
+
+.zone-type-toggle-info p {
+  margin: 5px 0 0;
+  color: #667085;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.zone-type-toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 42px;
+  height: 24px;
+  flex-shrink: 0;
+  padding: 3px;
+  border: none;
+  border-radius: 20px;
+  background: #cbd0d9;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.zone-type-toggle span {
+  display: block;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease;
+}
+
+.zone-type-toggle.is-on {
+  background: #4169e1;
+}
+
+.zone-type-toggle.is-on span {
+  transform: translateX(18px);
+}
+
+.zone-type-toggle:focus-visible {
+  outline: 3px solid rgba(65, 105, 225, 0.25);
+  outline-offset: 3px;
+}
+
+.zone-type-toggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.zone-type-extra-fields {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.zone-type-control-section
+  > .zone-type-toggle-row
+  + .zone-type-toggle-row {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.zone-type-description {
+  margin-top: 24px;
+}
+
+.zone-type-form-error {
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0 24px 16px;
+  color: #dc3545;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.zone-type-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 18px 24px;
+  border-top: 1px solid #e9edf3;
+  background: #ffffff;
+  flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+  .zone-type-modal-backdrop {
+    padding: 12px;
+  }
+
+  .zone-type-modal {
+    max-height: calc(100vh - 24px);
+  }
+
+  .zone-type-modal-header {
+    padding: 18px;
+  }
+
+  .zone-type-form-body {
+    padding: 18px;
+  }
+
+  .zone-type-form-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .zone-type-full-width {
+    grid-column: auto;
+  }
+
+  .zone-type-control-section {
+    margin-top: 18px;
+    padding: 14px;
+  }
+
+  .zone-type-description {
+    margin-top: 18px;
+  }
+
+  .zone-type-form-error {
+    padding: 0 18px 14px;
+  }
+
+  .zone-type-modal-actions {
+    padding: 16px 18px;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 360px) {
+  .zone-type-modal-header,
+  .zone-type-form-body {
+    padding: 14px;
+  }
+
+  .zone-type-modal-header h3 {
+    font-size: 18px;
+  }
+
+  .zone-type-modal-actions {
+    padding: 14px;
+  }
+}

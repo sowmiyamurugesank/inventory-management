@@ -1,95 +1,256 @@
-import { Trash2 } from "lucide-react";
+
+import { useRef, useState } from "react";
 import "../styles/StorageTable.css";
 
-function StorageTable({ warehouses = [], onDelete }) {
-return ( <div className="storage-table-container"> <table className="storage-table"> <thead> <tr> <th>Warehouse</th> <th>Location</th> <th>Capacity</th> <th>Status</th> <th>Actions</th> </tr> </thead>
+function StorageTable({
+  warehouses = [],
+  columns = [],
+  onView,
+  onDelete,
+  onUpdate,
+  showSerial = false,
+  emptyMessage = "No records found",
+}) {
+  const [editingId, setEditingId] = useState(null);
+  const [draft, setDraft] = useState({});
+  const [saveStatus, setSaveStatus] = useState("");
+  const [saveError, setSaveError] = useState("");
 
-    <tbody>
-      {warehouses.length === 0 ? (
-        <tr>
-          <td colSpan={5} className="empty-message">
-            No warehouses found
-          </td>
-        </tr>
-      ) : (
-        warehouses.map((warehouse) => {
-          const attributes =
-            warehouse.custom_attributes ??
-            warehouse.customAttributes ??
-            {};
+  const timerRef = useRef(null);
+  const originalRef = useRef(null);
+  const latestDraftRef = useRef({});
 
-          const location = [
-            attributes.city,
-            attributes.state,
-          ]
-            .filter(Boolean)
-            .join(", ");
+  const hasActions = Boolean(onView || onDelete || onUpdate);
 
-          const capacity =
-            warehouse.total_capacity ??
-            warehouse.totalCapacity;
+  const totalColumns =
+    columns.length + (showSerial ? 1 : 0) + (hasActions ? 1 : 0);
 
-          const capacityUnit =
-            warehouse.capacity_unit ??
-            warehouse.capacityUnit ??
-            "";
+  function startEdit(row) {
+    clearTimeout(timerRef.current);
 
-          const status = warehouse.status ?? "Unknown";
+    const rowId = row.id ?? row._id;
 
-          return (
-            <tr key={warehouse.id}>
-              <td>
-                <div className="warehouse-name">
-                  {warehouse.name || "-"}
-                </div>
+    setEditingId(rowId);
+    setDraft({ ...row });
+    originalRef.current = { ...row };
+    latestDraftRef.current = { ...row };
+    setSaveStatus("");
+    setSaveError("");
+  }
 
-                <div className="warehouse-code">
-                  {warehouse.code || "-"}
-                </div>
-              </td>
+  async function saveRow(rowId, updatedRow) {
+    if (!onUpdate) return;
 
-              <td>{location || "-"}</td>
+    setSaveStatus("saving");
+    setSaveError("");
 
-              <td>
-                {capacity != null
-                  ? `${capacity} ${capacityUnit}`.trim()
-                  : "-"}
-              </td>
+    try {
+      await onUpdate(rowId, updatedRow);
 
-              <td>
-                <span
-                  className={`warehouse-status ${
-                    status.toLowerCase() === "active"
-                      ? "status-active"
-                      : "status-inactive"
-                  }`}
-                >
-                  {status}
-                </span>
-              </td>
+      originalRef.current = { ...updatedRow };
+      setSaveStatus("saved");
+    } catch (error) {
+      setSaveStatus("error");
+      setSaveError(error.message || "Unable to save changes.");
+    }
+  }
 
-              <td>
-                <button
-                  type="button"
-                  className="delete-icon-btn"
-                  onClick={() => onDelete?.(warehouse.id)}
-                  aria-label={`Delete ${
-                    warehouse.name || "warehouse"
-                  }`}
-                  title="Delete warehouse"
-                >
-                  <Trash2 />
-                </button>
+  function handleChange(key, value) {
+    const updatedDraft = {
+      ...latestDraftRef.current,
+      [key]: value,
+    };
+
+    latestDraftRef.current = updatedDraft;
+    setDraft(updatedDraft);
+    setSaveStatus("pending");
+    setSaveError("");
+
+    clearTimeout(timerRef.current);
+
+    const rowId = editingId;
+
+    // Auto-save after the user stops typing.
+    timerRef.current = setTimeout(() => {
+      saveRow(rowId, updatedDraft);
+    }, 800);
+  }
+
+  function cancelEdit() {
+    clearTimeout(timerRef.current);
+
+    const original = originalRef.current || {};
+
+    latestDraftRef.current = { ...original };
+    setDraft({ ...original });
+    setEditingId(null);
+    setSaveStatus("");
+    setSaveError("");
+  }
+
+  function handleKeyDown(event) {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      cancelEdit();
+    }
+  }
+
+  function finishEdit() {
+    clearTimeout(timerRef.current);
+
+    const rowId = editingId;
+    const currentDraft = latestDraftRef.current;
+
+    // Save any final pending changes before closing.
+    if (
+      JSON.stringify(currentDraft) !==
+      JSON.stringify(originalRef.current)
+    ) {
+      saveRow(rowId, currentDraft);
+    }
+
+    setEditingId(null);
+  }
+
+  return (
+    <div className="storage-table-container">
+      <table className="storage-table">
+        <thead>
+          <tr>
+            {showSerial && <th>S.No</th>}
+
+            {columns.map((column) => (
+              <th key={column.key}>{column.label}</th>
+            ))}
+
+            {hasActions && <th>Actions</th>}
+          </tr>
+        </thead>
+
+        <tbody>
+          {warehouses.length === 0 ? (
+            <tr>
+              <td
+                colSpan={Math.max(totalColumns, 1)}
+                className="empty-message"
+              >
+                {emptyMessage}
               </td>
             </tr>
-          );
-        })
-      )}
-    </tbody>
-  </table>
-</div>
+          ) : (
+            warehouses.map((row, index) => {
+              const rowId = row.id ?? row._id ?? index;
+              const isEditing = editingId === rowId;
 
-);
+              return (
+                <tr key={rowId}>
+                  {showSerial && <td>{index + 1}</td>}
+
+                  {columns.map((column) => {
+                    const value = isEditing
+                      ? draft[column.key]
+                      : row[column.key];
+
+                    return (
+                      <td key={column.key}>
+                        {isEditing && column.editable !== false ? (
+                          <input
+                            className="storage-inline-input"
+                            type={column.type || "text"}
+                            value={value ?? ""}
+                            onChange={(event) =>
+                              handleChange(
+                                column.key,
+                                event.target.value
+                              )
+                            }
+                            onKeyDown={handleKeyDown}
+                            aria-label={`Edit ${column.label}`}
+                          />
+                        ) : column.key === "status" ? (
+                          <span
+                            className={`warehouse-status ${
+                              String(value).toLowerCase() === "active" ||
+                              value === true
+                                ? "status-active"
+                                : "status-inactive"
+                            }`}
+                          >
+                            {value === true
+                              ? "Active"
+                              : value === false
+                                ? "Inactive"
+                                : value ?? "-"}
+                          </span>
+                        ) : (
+                          value ?? "-"
+                        )}
+                      </td>
+                    );
+                  })}
+
+                  {hasActions && (
+                    <td>
+                      <div className="warehouse-actions">
+                        {onUpdate && (
+                          isEditing ? (
+                            <button
+                              type="button"
+                              className="view-btn"
+                              onClick={finishEdit}
+                            >
+                              Done
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              className="view-btn"
+                              onClick={() => startEdit(row)}
+                            >
+                              Edit
+                            </button>
+                          )
+                        )}
+
+                        {onView && (
+                          <button
+                            type="button"
+                            className="view-btn"
+                            onClick={() => onView(row)}
+                          >
+                            View
+                          </button>
+                        )}
+
+                        {onDelete && (
+                          <button
+                            type="button"
+                            className="delete-btn"
+                            onClick={() => onDelete(rowId)}
+                          >
+                            Delete
+                          </button>
+                        )}
+                      </div>
+
+                      {isEditing && (
+                        <div className="inline-save-status">
+                          {saveStatus === "pending" && "Unsaved changes"}
+                          {saveStatus === "saving" && "Saving..."}
+                          {saveStatus === "saved" && "Saved"}
+                          {saveStatus === "error" && saveError}
+                        </div>
+                      )}
+                    </td>
+                  )}
+                </tr>
+              );
+            })
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
 }
 
 export default StorageTable;
