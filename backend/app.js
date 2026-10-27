@@ -6,6 +6,8 @@ import itemListRoutes from "./routes/itemList.routes.js";
 
 import vendorRoutes from "./routes/vendor.routes.js";
 
+import warehouseRoutes from "./routes/warehouse.routes.js";
+
 import { errorHandler } from "./middleware/errorHandler.js";
 
 const app = express();
@@ -28,6 +30,8 @@ app.get("/api/health", (req, res) => {
 app.use("/api/items", itemListRoutes);
 
 app.use("/api/vendors", vendorRoutes);
+
+app.use("/api/warehouses", warehouseRoutes);
 
 app.use(errorHandler);
 

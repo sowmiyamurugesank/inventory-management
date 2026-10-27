@@ -71,7 +71,7 @@ function WarehouseLocation() {
           throw new Error("Invalid warehouse data.");
         }
 
-        setWarehouses(list);
+setWarehouses(result.data);
       } catch (err) {
         if (err.name !== "AbortError") {
           setError(
