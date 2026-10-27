@@ -6,19 +6,11 @@ import { useNavigate } from "react-router-dom";
 import StorageTable from "../component/StorageTable.jsx";
 import SearchBox from "../component/SearchBox.jsx";
 import Button from "../component/Button.jsx";
-import WarehouseTabs from "../component/WarehouseTabs.jsx";
 import ZoneForm from "../component/ZoneForm.jsx";
 
 import "../styles/Zone.css";
 
 const API_URL = "http://localhost:5000/api/zones";
-
-const TABS = [
-  "Warehouse",
-  "Warehouse Type",
-  "Zone",
-  "Zone Type",
-];
 
 const COLUMNS = [
   { key: "zoneCode", label: "Zone Code", editable: true },
@@ -213,39 +205,10 @@ function Zone() {
     );
   }
 
-  function handleTabChange(index) {
-    const paths = [
-      "/storage/warehouse",
-      "/storage/warehouse-type",
-      "/storage/zone",
-      "/storage/zone-type",
-    ];
-
-    if (paths[index]) {
-      navigate(paths[index]);
-    }
-  }
-
   return (
     <main className="zone-page">
       <section className="zone-section">
-        <button
-          type="button"
-          className="zone-back-arrow"
-          onClick={() => navigate("/storage")}
-          aria-label="Back to Storage"
-          title="Back to Storage"
-        >
-          <ArrowLeft />
-        </button>
-
         <h2 className="zone-heading">Warehouse Management</h2>
-
-        <WarehouseTabs
-          tabs={TABS}
-          activeTab={2}
-          setActiveTab={handleTabChange}
-        />
 
         <div className="zone-toolbar">
           <div className="zone-search">
