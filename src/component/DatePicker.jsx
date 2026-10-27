@@ -1,4 +1,3 @@
-
 import "../styles/DatePicker.css";
 
 function DatePicker({
@@ -12,13 +11,13 @@ function DatePicker({
 }) {
   return (
     <div className="date-picker">
-      <label htmlFor={name}>{label}</label>
+      {label && <label htmlFor={name}>{label}</label>}
       <input
         type={type}
         id={name}
         name={name}
         value={value ?? ""}
-        onChange={onChange}
+        onChange={(e) => onChange?.(e.target.value)}
         required={required}
         disabled={disabled}
       />
