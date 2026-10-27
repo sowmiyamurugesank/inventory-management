@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Button from "./Button.jsx";
 import "../styles/ZoneTypeForm.css";
 
@@ -45,6 +45,21 @@ function ZoneTypeForm({ onSave, onClose, saving = false }) {
   const [form, setForm] = useState({ ...INITIAL_FORM });
   const [error, setError] = useState("");
 
+  // Escape key press pannina modal close aagum
+  useEffect(() => {
+    function handleEscape(event) {
+      if (event.key === "Escape" && !saving) {
+        onClose();
+      }
+    }
+
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [onClose, saving]);
+
   function handleChange(event) {
     const { name, value } = event.target;
 
@@ -86,7 +101,10 @@ function ZoneTypeForm({ onSave, onClose, saving = false }) {
     return (
       <div className="zone-type-toggle-row">
         <div className="zone-type-toggle-info">
-          <label htmlFor={`toggle-${name}`}>{label}</label>
+          <label htmlFor={`toggle-${name}`}>
+            {label}
+          </label>
+
           {description && <p>{description}</p>}
         </div>
 
@@ -126,7 +144,6 @@ function ZoneTypeForm({ onSave, onClose, saving = false }) {
         <div className="zone-type-modal-header">
           <div>
             <h3>Zone Type Details</h3>
-            <p>Add and configure zone type specifications</p>
           </div>
 
           <button
@@ -146,6 +163,7 @@ function ZoneTypeForm({ onSave, onClose, saving = false }) {
               <label htmlFor="zoneTypeCode">
                 Zone Type Code <span>*</span>
               </label>
+
               <input
                 id="zoneTypeCode"
                 name="zoneTypeCode"
@@ -153,11 +171,15 @@ function ZoneTypeForm({ onSave, onClose, saving = false }) {
                 onChange={handleChange}
                 placeholder="Enter zone type code"
                 required
+                disabled={saving}
               />
             </div>
 
             <div className="zone-type-field">
-              <label htmlFor="numericCode">Numeric Code</label>
+              <label htmlFor="numericCode">
+                Numeric Code
+              </label>
+
               <input
                 id="numericCode"
                 name="numericCode"
@@ -165,6 +187,7 @@ function ZoneTypeForm({ onSave, onClose, saving = false }) {
                 step="1"
                 value={form.numericCode}
                 onChange={handleChange}
+                disabled={saving}
               />
             </div>
 
@@ -172,6 +195,7 @@ function ZoneTypeForm({ onSave, onClose, saving = false }) {
               <label htmlFor="zoneTypeName">
                 Zone Type Name <span>*</span>
               </label>
+
               <input
                 id="zoneTypeName"
                 name="zoneTypeName"
@@ -179,18 +203,26 @@ function ZoneTypeForm({ onSave, onClose, saving = false }) {
                 onChange={handleChange}
                 placeholder="Enter zone type name"
                 required
+                disabled={saving}
               />
             </div>
 
             <div className="zone-type-field">
-              <label htmlFor="zonePurpose">Zone Purpose</label>
+              <label htmlFor="zonePurpose">
+                Zone Purpose
+              </label>
+
               <select
                 id="zonePurpose"
                 name="zonePurpose"
                 value={form.zonePurpose}
                 onChange={handleChange}
+                disabled={saving}
               >
-                <option value="">Select zone purpose</option>
+                <option value="">
+                  Select zone purpose
+                </option>
+
                 {ZONE_PURPOSES.map((purpose) => (
                   <option key={purpose} value={purpose}>
                     {purpose}
@@ -203,12 +235,14 @@ function ZoneTypeForm({ onSave, onClose, saving = false }) {
               <label htmlFor="storageType">
                 Storage Type <span>*</span>
               </label>
+
               <select
                 id="storageType"
                 name="storageType"
                 value={form.storageType}
                 onChange={handleChange}
                 required
+                disabled={saving}
               >
                 {STORAGE_TYPES.map((type) => (
                   <option key={type} value={type}>
@@ -222,40 +256,56 @@ function ZoneTypeForm({ onSave, onClose, saving = false }) {
           <section className="zone-type-control-section">
             <div className="zone-type-section-heading">
               <h4>Temperature Control</h4>
-              {renderToggle("temperatureControl", "Enable temperature control")}
+
+              {renderToggle(
+                "temperatureControl",
+                "Enable temperature control"
+              )}
             </div>
 
             {form.temperatureControl && (
               <div className="zone-type-form-grid zone-type-extra-fields">
                 <div className="zone-type-field">
-                  <label htmlFor="minTemp">Minimum Temperature</label>
+                  <label htmlFor="minTemp">
+                    Minimum Temperature
+                  </label>
+
                   <input
                     id="minTemp"
                     name="minTemp"
                     type="number"
                     value={form.minTemp}
                     onChange={handleChange}
+                    disabled={saving}
                   />
                 </div>
 
                 <div className="zone-type-field">
-                  <label htmlFor="maxTemp">Maximum Temperature</label>
+                  <label htmlFor="maxTemp">
+                    Maximum Temperature
+                  </label>
+
                   <input
                     id="maxTemp"
                     name="maxTemp"
                     type="number"
                     value={form.maxTemp}
                     onChange={handleChange}
+                    disabled={saving}
                   />
                 </div>
 
                 <div className="zone-type-field zone-type-full-width">
-                  <label htmlFor="tempUnit">Temperature Unit</label>
+                  <label htmlFor="tempUnit">
+                    Temperature Unit
+                  </label>
+
                   <select
                     id="tempUnit"
                     name="tempUnit"
                     value={form.tempUnit}
                     onChange={handleChange}
+                    disabled={saving}
                   >
                     {TEMP_UNITS.map((unit) => (
                       <option key={unit} value={unit}>
@@ -271,7 +321,11 @@ function ZoneTypeForm({ onSave, onClose, saving = false }) {
           <section className="zone-type-control-section">
             <div className="zone-type-section-heading">
               <h4>Humidity Control</h4>
-              {renderToggle("humidityControl", "Enable humidity control")}
+
+              {renderToggle(
+                "humidityControl",
+                "Enable humidity control"
+              )}
             </div>
 
             {form.humidityControl && (
@@ -280,6 +334,7 @@ function ZoneTypeForm({ onSave, onClose, saving = false }) {
                   <label htmlFor="minHumidity">
                     Minimum Humidity (%)
                   </label>
+
                   <input
                     id="minHumidity"
                     name="minHumidity"
@@ -288,6 +343,7 @@ function ZoneTypeForm({ onSave, onClose, saving = false }) {
                     max="100"
                     value={form.minHumidity}
                     onChange={handleChange}
+                    disabled={saving}
                   />
                 </div>
 
@@ -295,6 +351,7 @@ function ZoneTypeForm({ onSave, onClose, saving = false }) {
                   <label htmlFor="maxHumidity">
                     Maximum Humidity (%)
                   </label>
+
                   <input
                     id="maxHumidity"
                     name="maxHumidity"
@@ -303,6 +360,7 @@ function ZoneTypeForm({ onSave, onClose, saving = false }) {
                     max="100"
                     value={form.maxHumidity}
                     onChange={handleChange}
+                    disabled={saving}
                   />
                 </div>
               </div>
@@ -326,7 +384,10 @@ function ZoneTypeForm({ onSave, onClose, saving = false }) {
           </section>
 
           <div className="zone-type-field zone-type-description">
-            <label htmlFor="description">Description</label>
+            <label htmlFor="description">
+              Description
+            </label>
+
             <textarea
               id="description"
               name="description"
@@ -334,6 +395,7 @@ function ZoneTypeForm({ onSave, onClose, saving = false }) {
               placeholder="Enter zone type description"
               value={form.description}
               onChange={handleChange}
+              disabled={saving}
             />
           </div>
         </div>
@@ -353,7 +415,10 @@ function ZoneTypeForm({ onSave, onClose, saving = false }) {
             Cancel
           </Button>
 
-          <Button type="submit" disabled={saving}>
+          <Button
+            type="submit"
+            disabled={saving}
+          >
             {saving ? "Saving..." : "Save"}
           </Button>
         </div>

@@ -21,10 +21,15 @@ const TABS = [
 ];
 
 const COLUMNS = [
-  { key: "name", label: "Warehouse" },
-  { key: "location", label: "Location" },
-  { key: "capacity", label: "Capacity" },
-  { key: "status", label: "Status" },
+  { key: "name", label: "Warehouse", editable: true },
+  { key: "location", label: "Location", editable: true },
+  {
+    key: "capacity",
+    label: "Capacity",
+    editable: true,
+    type: "number",
+  },
+  { key: "status", label: "Status", editable: false },
 ];
 
 function WarehouseLocation() {
@@ -40,6 +45,7 @@ function WarehouseLocation() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
+  // Load warehouse data
   useEffect(() => {
     const controller = new AbortController();
 
@@ -57,13 +63,15 @@ function WarehouseLocation() {
         }
 
         const data = await response.json();
-        const list = Array.isArray(data) ? data : data.warehouses;
+        const list = Array.isArray(data)
+          ? data
+          : data.warehouses;
 
         if (!Array.isArray(list)) {
           throw new Error("Invalid warehouse data.");
         }
 
-        setWarehouses(list);
+setWarehouses(result.data);
       } catch (err) {
         if (err.name !== "AbortError") {
           setError(
@@ -82,6 +90,7 @@ function WarehouseLocation() {
     return () => controller.abort();
   }, []);
 
+  // Navigate between warehouse tabs
   function handleTabChange(index) {
     const paths = [
       "/storage/warehouse",
@@ -95,6 +104,7 @@ function WarehouseLocation() {
     }
   }
 
+  // Search and filter warehouses
   const filteredWarehouses = warehouses.filter((warehouse) => {
     const capacity =
       warehouse.capacity ??
@@ -132,6 +142,7 @@ function WarehouseLocation() {
     return matchesSearch && matchesName && matchesCapacity;
   });
 
+  // Reload warehouses after adding a record
   async function reloadWarehouses() {
     const response = await fetch(API_URL);
 
@@ -140,7 +151,9 @@ function WarehouseLocation() {
     }
 
     const data = await response.json();
-    const list = Array.isArray(data) ? data : data.warehouses;
+    const list = Array.isArray(data)
+      ? data
+      : data.warehouses;
 
     if (!Array.isArray(list)) {
       throw new Error("Invalid warehouse data.");
@@ -149,6 +162,7 @@ function WarehouseLocation() {
     setWarehouses(list);
   }
 
+  // Add a new warehouse
   async function handleSaveWarehouse(formData) {
     try {
       setSaving(true);
@@ -179,13 +193,57 @@ function WarehouseLocation() {
     }
   }
 
+  // UPDATE: Save inline-edited warehouse to the backend
+  async function handleUpdateWarehouse(id, updatedWarehouse) {
+    if (id == null || id === "") {
+      throw new Error("Warehouse ID is missing.");
+    }
+
+    setError("");
+
+    const response = await fetch(
+      `${API_URL}/${encodeURIComponent(id)}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedWarehouse),
+      }
+    );
+
+    const result = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(
+        result.message || "Unable to update warehouse."
+      );
+    }
+
+    // Support either a direct record or { warehouse: record } response.
+    const updatedRecord = result.warehouse ?? result;
+
+    setWarehouses((previous) =>
+      previous.map((warehouse) =>
+        String(warehouse.id ?? warehouse._id) === String(id)
+          ? { ...warehouse, ...updatedRecord }
+          : warehouse
+      )
+    );
+  }
+
+  // Delete a warehouse
   async function handleDelete(id) {
     if (id == null || id === "") {
       setError("Warehouse ID is missing.");
       return;
     }
 
-    if (!window.confirm("Are you sure you want to delete this warehouse?")) {
+    if (
+      !window.confirm(
+        "Are you sure you want to delete this warehouse?"
+      )
+    ) {
       return;
     }
 
@@ -216,29 +274,29 @@ function WarehouseLocation() {
     }
   }
 
+  // Clear all search and filter values
   function clearFilters() {
     setSearch("");
     setFilterWarehouseName("");
     setFilterCapacity("");
   }
 
-return (
-  <main className="warehouse-page">
-    <section className="warehouse-section">
+  return (
+    <main className="warehouse-page">
+      <section className="warehouse-section">
+        <button
+          type="button"
+          className="warehouse-back-arrow"
+          onClick={() => navigate("/storage")}
+          aria-label="Back to Storage"
+          title="Back to Storage"
+        >
+          <ArrowLeft />
+        </button>
 
-      <button
-        type="button"
-        className="warehouse-back-arrow"
-        onClick={() => navigate("/storage")}
-        aria-label="Back to Storage"
-        title="Back to Storage"
-      >
-        <ArrowLeft/>
-      </button>
-
-      <h2 className="warehouse-heading">
-        Warehouse Management
-      </h2>
+        <h2 className="warehouse-heading">
+          Warehouse Management
+        </h2>
 
         <WarehouseTabs
           tabs={TABS}
@@ -258,7 +316,9 @@ return (
           <Button
             type="button"
             className={`filter-btn ${showFilters ? "active" : ""}`}
-            onClick={() => setShowFilters((previous) => !previous)}
+            onClick={() =>
+              setShowFilters((previous) => !previous)
+            }
           >
             <SlidersHorizontal size={16} />
             Filter
@@ -296,7 +356,9 @@ return (
             </div>
 
             <div className="warehouse-filter-field">
-              <label htmlFor="filter-capacity">Capacity</label>
+              <label htmlFor="filter-capacity">
+                Capacity
+              </label>
 
               <input
                 id="filter-capacity"
@@ -334,6 +396,7 @@ return (
           <StorageTable
             warehouses={filteredWarehouses}
             columns={COLUMNS}
+            onUpdate={handleUpdateWarehouse}
             onView={(warehouse) => {
               console.log("View warehouse:", warehouse);
             }}
@@ -344,7 +407,9 @@ return (
         {showAddWarehouse && (
           <AddWarehouse
             onClose={() => {
-              if (!saving) setShowAddWarehouse(false);
+              if (!saving) {
+                setShowAddWarehouse(false);
+              }
             }}
             onSave={handleSaveWarehouse}
             saving={saving}

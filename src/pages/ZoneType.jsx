@@ -21,10 +21,10 @@ const TABS = [
 ];
 
 const COLUMNS = [
-  { key: "zoneTypeName", label: "Zone Type Name" },
-  { key: "zoneTypeCode", label: "Zone Type Code" },
-  { key: "storageType", label: "Storage Type" },
-  { key: "status", label: "Status" },
+  { key: "zoneTypeCode", label: "Zone Type Code", editable: true },
+  { key: "zoneTypeName", label: "Zone Type Name", editable: true },
+  { key: "storageType", label: "Storage Type", editable: true },
+  { key: "status", label: "Status", editable: false },
 ];
 
 const FILTER_FIELDS = [
@@ -36,12 +36,21 @@ const FILTER_FIELDS = [
 function normalizeZoneType(row) {
   return {
     ...row,
-    zoneTypeName:
-      row.zoneTypeName ?? row.name ?? row.zone_type_name ?? "",
     zoneTypeCode:
-      row.zoneTypeCode ?? row.typeCode ?? row.zone_type_code ?? "",
-    storageType: row.storageType ?? row.storage_type ?? "",
-    status: row.status ?? row.active ?? true,
+      row.zoneTypeCode ??
+      row.typeCode ??
+      row.zone_type_code ??
+      "",
+    zoneTypeName:
+      row.zoneTypeName ??
+      row.name ??
+      row.zone_type_name ??
+      "",
+    storageType:
+      row.storageType ??
+      row.storage_type ??
+      "",
+    status: row.status ?? row.active ?? "",
   };
 }
 
@@ -70,6 +79,7 @@ function ZoneType() {
     }
 
     const data = await response.json();
+
     const rows = Array.isArray(data)
       ? data
       : data.zoneTypes ?? data.zone_types;
@@ -86,7 +96,6 @@ function ZoneType() {
 
     async function fetchData() {
       try {
-        setLoading(true);
         setError("");
         await loadZoneTypes();
       } catch (err) {
@@ -114,7 +123,9 @@ function ZoneType() {
       const matchesSearch =
         !query ||
         COLUMNS.some(({ key }) =>
-          String(row[key] ?? "").toLowerCase().includes(query)
+          String(row[key] ?? "")
+            .toLowerCase()
+            .includes(query)
         );
 
       const matchesFilters = FILTER_FIELDS.every(({ key }) =>
@@ -129,6 +140,7 @@ function ZoneType() {
 
   function clearFilters() {
     setSearch("");
+
     setFilters({
       zoneTypeName: "",
       zoneTypeCode: "",
@@ -169,6 +181,64 @@ function ZoneType() {
     }
   }
 
+  async function handleUpdateZoneType(id, updatedRow) {
+    if (id == null || id === "") {
+      throw new Error("Zone type ID is missing.");
+    }
+
+    setError("");
+
+    const response = await fetch(
+      `${API_URL}/${encodeURIComponent(id)}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          zoneTypeCode: updatedRow.zoneTypeCode,
+          zoneTypeName: updatedRow.zoneTypeName,
+          storageType: updatedRow.storageType,
+        }),
+      }
+    );
+
+    const result = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(
+        result.message || "Unable to update zone type."
+      );
+    }
+
+    const updatedRecord = result.zoneType ?? result.zone_type ?? result;
+
+    setZoneTypes((previous) =>
+      previous.map((row) =>
+        String(row.id ?? row._id) === String(id)
+          ? normalizeZoneType({
+              ...row,
+              ...updatedRecord,
+              zoneTypeCode:
+                updatedRecord.zoneTypeCode ??
+                updatedRecord.typeCode ??
+                updatedRecord.zone_type_code ??
+                updatedRow.zoneTypeCode,
+              zoneTypeName:
+                updatedRecord.zoneTypeName ??
+                updatedRecord.name ??
+                updatedRecord.zone_type_name ??
+                updatedRow.zoneTypeName,
+              storageType:
+                updatedRecord.storageType ??
+                updatedRecord.storage_type ??
+                updatedRow.storageType,
+            })
+          : row
+      )
+    );
+  }
+
   function handleTabChange(index) {
     const paths = [
       "/storage/warehouse",
@@ -181,22 +251,23 @@ function ZoneType() {
       navigate(paths[index]);
     }
   }
-return (
-  <main className="zone-type-page">
-    <section className="zone-type-section">
-      <button
-        type="button"
-        className="zone-type-back-arrow"
-        onClick={() => navigate("/storage")}
-        aria-label="Back to Storage"
-        title="Back to Storage"
-      >
-        <ArrowLeft/>
-      </button>
 
-      <h2 className="zone-type-heading">
-        Warehouse Management
-      </h2>
+  return (
+    <main className="zone-type-page">
+      <section className="zone-type-section">
+        <button
+          type="button"
+          className="zone-type-back-arrow"
+          onClick={() => navigate("/storage")}
+          aria-label="Back to Storage"
+          title="Back to Storage"
+        >
+          <ArrowLeft />
+        </button>
+
+        <h2 className="zone-type-heading">
+          Warehouse Management
+        </h2>
 
         <WarehouseTabs
           tabs={TABS}
@@ -218,7 +289,9 @@ return (
             className={`zone-type-filter-btn ${
               showFilters ? "active" : ""
             }`}
-            onClick={() => setShowFilters((value) => !value)}
+            onClick={() =>
+              setShowFilters((value) => !value)
+            }
           >
             <SlidersHorizontal size={16} />
             Filter
@@ -239,7 +312,10 @@ return (
         {showFilters && (
           <div className="zone-type-filter-panel">
             {FILTER_FIELDS.map(({ key, label }) => (
-              <div className="zone-type-filter-field" key={key}>
+              <div
+                className="zone-type-filter-field"
+                key={key}
+              >
                 <label htmlFor={`filter-${key}`}>
                   {label}
                 </label>
@@ -259,7 +335,10 @@ return (
               </div>
             ))}
 
-            <Button type="button" onClick={clearFilters}>
+            <Button
+              type="button"
+              onClick={clearFilters}
+            >
               Clear
             </Button>
           </div>
@@ -279,6 +358,7 @@ return (
           <StorageTable
             warehouses={filteredZoneTypes}
             columns={COLUMNS}
+            onUpdate={handleUpdateZoneType}
             showSerial
             emptyMessage="No zone types found"
           />
