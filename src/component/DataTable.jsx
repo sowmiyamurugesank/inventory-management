@@ -22,7 +22,9 @@ function DataTable(props) {
               props.data.map((item, index) => (
                 <tr key={item.id ?? index}>
                   {props.columns.map((column) => (
-                    <td key={column.key}>{item[column.key] ?? "-"}</td>
+                    <td key={column.key}>
+  {column.render ? column.render(item) : item[column.key] ?? "-"}
+</td>
                   ))}
 
                   <td>

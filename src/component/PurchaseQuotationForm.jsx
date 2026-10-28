@@ -57,33 +57,40 @@ const emptyItem = {
   customAttributes: "",
 };
 
-function PurchaseQuotationForm({ onClose }) {
+function PurchaseQuotationForm({ onClose, initialData = null, onSave }) {
   const [activeTab, setActiveTab] = useState("details");
 
-  const [formData, setFormData] = useState({
-    quotationCode: "",
-    numericCode: "",
-    quotationNumber: "",
-    vendor: "",
-    quotationDate: "",
-    validUntil: "",
-    currency: "INR",
-    status: "Draft",
-    quotationDiscount: "0",
-    additionalCharges: "0",
-    paymentTerms: "",
-    deliveryTerms: "",
-    overallDeliveryDays: "",
-    notes: "",
-    customAttributes: "",
-    isActive: true,
-    isVerified: false,
-  });
+  const [formData, setFormData] = useState(() => ({
+  quotationCode: initialData?.quotationCode ?? "",
+  numericCode: initialData?.numericCode ?? "",
+  quotationNumber: initialData?.quotationNumber ?? "",
+  vendor: initialData?.vendor ?? "",
+  quotationDate: initialData?.quotationDate ?? "",
+  validUntil: initialData?.validUntil ?? "",
+  currency: initialData?.currency ?? "INR",
+  status: initialData?.status ?? "Draft",
+  quotationDiscount: initialData?.quotationDiscount ?? "0",
+  additionalCharges: initialData?.additionalCharges ?? "0",
+  paymentTerms: initialData?.paymentTerms ?? "",
+  deliveryTerms: initialData?.deliveryTerms ?? "",
+  overallDeliveryDays: initialData?.overallDeliveryDays ?? "",
+  notes: initialData?.notes ?? "",
+  customAttributes: initialData?.customAttributes ?? "",
+  isActive: initialData?.isActive ?? true,
+  isVerified: initialData?.isVerified ?? false,
+}));
 
   const [errors, setErrors] = useState({});
 
   // Each item has its own independent form data.
-  const [items, setItems] = useState([{ ...emptyItem }]);
+  const [items, setItems] = useState(() =>
+  initialData?.items?.length
+    ? initialData.items.map((item) => ({
+        ...emptyItem,
+        ...item,
+      }))
+    : [{ ...emptyItem }]
+);
   const [itemErrors, setItemErrors] = useState({});
   const [editingIndex, setEditingIndex] = useState(null);
 
@@ -468,9 +475,25 @@ function PurchaseQuotationForm({ onClose }) {
     }
 
     // Backend API integration will be added when the API is available.
-    alert(
-      "Quotation details and items validated. Backend save integration is pending."
-    );
+    const quotationData = {
+  ...formData,
+  items,
+  quotationNo: formData.quotationNumber,
+  vendor: formData.vendor,
+  item: items[0]?.product || "",
+  quantity: items.reduce(
+    (total, item) => total + Number(item.quantity || 0),
+    0
+  ),
+  unitPrice: Number(items[0]?.unitPrice || 0),
+  quotationTotal,
+};
+
+if (onSave) {
+  onSave(quotationData);
+} else {
+  alert("Quotation details validated successfully.");
+}
   };
 
   return (
@@ -537,7 +560,11 @@ function PurchaseQuotationForm({ onClose }) {
                 <label>Currency <span>*</span></label>
                 <Dropdown
                   options={[
-                    { label: "INR — Indian Rupee", value: "INR" },
+                    { label: "INR (₹)", value: "INR" }, 
+                    { label: "USD ($)", value: "USD" }, 
+                    { label: "EUR (€)", value: "EUR" }, 
+                    { label: "GBP (£)", value: "GBP" }, 
+                    { label: "AED (د.إ)", value: "AED" }, 
                   ]}
                   value={formData.currency}
                   onChange={(value) =>
@@ -550,7 +577,14 @@ function PurchaseQuotationForm({ onClose }) {
               <div className="quotation-form-field">
                 <label>Status <span>*</span></label>
                 <Dropdown
-                  options={[{ label: "Draft", value: "Draft" }]}
+                  options={[{ label: "Draft", value: "Draft" },
+                             { label: "Sent", value: "Sent" },
+                             { label: "Under Review", value: "Under Review" },
+                             { label: "Accepted", value: "Accepted" },
+                            { label: "Rejected", value: "Rejected" },
+                            { label: "Expired", value: "Expired" },
+                            { label: "Cancelled", value: "Cancelled" },
+                  ]}
                   value={formData.status}
                   onChange={(value) =>
                     updateDropdown("status", value)

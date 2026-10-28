@@ -1,4 +1,6 @@
+
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+
 import MainLayout from "./pages/Mainlayout.jsx";
 import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
@@ -20,14 +22,16 @@ function App() {
         <Route path="/" element={<MainLayout />}>
           <Route index element={<Dashboard />} />
           <Route path="products" element={<Product />} />
+
           <Route path="storage" element={<Storage />} />
          
           <Route path="Billing" element={<Billing/>}/>
 
-          
-       
           <Route path="parties" element={<Page title="Parties" />} />
-          <Route path="income-expense" element={<Page title="Income & Expense" />} />
+          <Route
+            path="income-expense"
+            element={<Page title="Income & Expense" />}
+          />
           <Route path="design" element={<Page title="Design" />} />
           <Route path="transport" element={<Page title="Transport" />} />
           <Route path="reports" element={<Page title="Reports" />} />
@@ -42,3 +46,4 @@ function App() {
 }
 
 export default App;
+
