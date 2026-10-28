@@ -1,25 +1,38 @@
+/* ===== Reusable Search Box ===== */
+
 .search-box {
+  display: block;
   width: 100%;
   max-width: 600px;
   min-width: 0;
+  box-sizing: border-box;
 }
 
 .search-box input {
+  display: block;
   width: 100%;
-  box-sizing: border-box;
-  padding: 11px 12px;
+  max-width: 100%;
+  min-width: 0;
+  height: 42px;
+  margin: 0;
+  padding: 0 12px;
   border: 1px solid #dce1eb;
   border-radius: 7px;
   outline: none;
-  background: #fff;
+  background: #ffffff;
   color: #25243a;
+  font-family: inherit;
   font-size: 14px;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .search-box input::placeholder {
   color: #98a2b3;
+  opacity: 1;
 }
 
 .search-box input:focus {
   border-color: #5145f5;
+  box-shadow: 0 0 0 3px rgba(81, 69, 245, 0.1);
 }
