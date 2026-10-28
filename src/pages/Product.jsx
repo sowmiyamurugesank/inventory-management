@@ -1,5 +1,6 @@
 
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import {
   Package,
@@ -7,8 +8,6 @@ import {
   PackageX,
   IndianRupee,
   Plus,
-  X
-
 } from "lucide-react";
 
 import ProductManagement from "../component/ProductManagement.jsx";
@@ -18,7 +17,9 @@ import ProductForm from "../component/Productform.jsx";
 import Button from "../component/Button.jsx";
 import Modal from "../component/Modal1.jsx";
 import PurchaseOrder from "../component/PurchaseOrder.jsx";
+import PurchaseWorkflow from "../component/PurchaseWorkflow.jsx";
 import ProductDetails from "./ProductDetail.jsx";
+
 import {
   getItems,
   createItem,
@@ -58,20 +59,24 @@ function toApiItem(formData) {
   const payload = {
     code: formData.itemCode?.trim(),
     name: formData.itemName?.trim(),
+
     item_type:
       formData.itemType === "SERVICE" ||
       formData.itemType === "Service"
         ? "SERVICE"
         : "PRODUCT",
+
     base_unit: formData.baseUnit,
     description: formData.description ?? "",
     brand_name: formData.brandName ?? "",
     manufacturer_name: formData.manufacturer ?? "",
     manufacturer_part_number:
       formData.manufacturerPartNumber ?? "",
+
     purchase_cost: Number(formData.purchaseCost || 0),
     selling_price: Number(formData.sellingPrice || 0),
     mrp: Number(formData.mrp || 0),
+
     currency_code: formData.currency || "INR",
     status: formData.status ?? "OUT_OF_STOCK",
     is_active: Boolean(formData.active),
@@ -90,6 +95,8 @@ function toApiItem(formData) {
 }
 
 function Products() {
+  const navigate = useNavigate();
+
   const [activeTab, setActiveTab] = useState("All Products");
 
   const [products, setProducts] = useState([]);
@@ -104,18 +111,12 @@ function Products() {
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
+
   // Existing Purchase Order form
-  const [showPurchaseOrder, setShowPurchaseOrder] =
-    useState(false);
+  const [showPurchaseOrder, setShowPurchaseOrder] = useState(false);
 
-  // Purchase Order workflow popup
+  // PurchaseWorkflow component visibility
   const [showPurchaseWorkflow, setShowPurchaseWorkflow] = useState(false);
-
-  // Purchase workflow selections
-  const [purchaseMethod, setPurchaseMethod] = useState("direct");
-  const [vendorStatus, setVendorStatus] = useState("existing");
-  const [productStatus, setProductStatus] = useState("regular");
-  const [specialApproval, setSpecialApproval] = useState("no");
 
   // Purchase Orders table data
   const [purchaseOrders, setPurchaseOrders] = useState([]);
@@ -321,27 +322,9 @@ function Products() {
     setShowPurchaseOrder(false);
   };
 
-  // Open workflow with default selections
+  // Open purchase workflow component
   const handleOpenPurchaseWorkflow = () => {
-    setPurchaseMethod("direct");
-    setVendorStatus("existing");
-    setProductStatus("regular");
-    setSpecialApproval("no");
     setShowPurchaseWorkflow(true);
-  };
-
-  // Next works only for the exact permitted combination
-  const handlePurchaseWorkflowNext = () => {
-    const isValidDirectPurchase =
-      purchaseMethod === "direct" &&
-      vendorStatus === "existing" &&
-      productStatus === "regular" &&
-      specialApproval === "no";
-
-    if (isValidDirectPurchase) {
-      setShowPurchaseWorkflow(false);
-      setShowPurchaseOrder(true);
-    }
   };
 
   // Card calculations
@@ -372,9 +355,6 @@ function Products() {
 
   return (
     <div className="products-page">
-      {/* PAGE HEADING */}
-
-      
 
       {/* TABS */}
       <div className="product-tabs">
@@ -556,217 +536,55 @@ function Products() {
       )}
 
       {/* PRODUCT FORM */}
-     
-
       <Modal isOpen={showForm} onClose={handleCancel}>
-  <div className="product-form-heading">
-    <h2>{editingProduct ? "Edit Product" : "Add Product"}</h2>
-  </div>
-
-  <ProductForm
-    key={editingProduct?.id ?? "new-product"}
-    initialData={editingProduct}
-    categories={categories}
-    warehouses={warehouses}
-    warehouseZones={warehouseZones}
-    vendors={vendors}
-    units={units}
-    statuses={statuses}
-    onSave={handleSave}
-    onCancel={handleCancel}
-    disabled={saving}
-  />
-</Modal>
-
-{/* PRODUCT DETAILS MODAL */}
-<ProductDetails
-  product={selectedProduct}
-  onClose={() => setSelectedProduct(null)}
-/>
-      {/* PURCHASE WORKFLOW POPUP */}
-
-      {/* PURCHASE WORKFLOW POPUP */}
-      {showPurchaseWorkflow && (
-        <div className="purchase-workflow-overlay">
-          <div className="purchase-workflow-popup">
-            {/* HEADER */}
-            <div className="purchase-workflow-header">
-              <h2>Purchase Order</h2>
-
-              <button
-                type="button"
-                className="purchase-workflow-close"
-                onClick={() => setShowPurchaseWorkflow(false)}
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            {/* CONTENT */}
-            <div className="purchase-workflow-content">
-              {/* PURCHASE METHOD */}
-              <h3>Choose the purchasing method</h3>
-
-              <div className="purchase-method-options">
-                <label
-                  className={
-                    purchaseMethod === "direct"
-                      ? "purchase-method-card selected"
-                      : "purchase-method-card"
-                  }
-                >
-                  <input
-                    type="radio"
-                    name="purchaseMethod"
-                    value="direct"
-                    checked={purchaseMethod === "direct"}
-                    onChange={() => setPurchaseMethod("direct")}
-                  />
-
-                  <div>
-                    <strong>Direct Purchase Order</strong>
-                    <p>
-                      Create a purchase order directly from the
-                      selected vendor.
-                    </p>
-                  </div>
-                </label>
-
-                <label
-                  className={
-                    purchaseMethod === "quotation"
-                      ? "purchase-method-card selected"
-                      : "purchase-method-card"
-                  }
-                >
-                  <input
-                    type="radio"
-                    name="purchaseMethod"
-                    value="quotation"
-                    checked={purchaseMethod === "quotation"}
-                    onChange={() => setPurchaseMethod("quotation")}
-                  />
-
-                  <div>
-                    <strong>
-                      Quotation → LOI → Purchase Order
-                    </strong>
-                    <p>
-                      Follow the quotation and LOI process before
-                      creating the PO.
-                    </p>
-                  </div>
-                </label>
-              </div>
-
-              {/* VENDOR + PRODUCT */}
-              <h3 className="purchase-selection-title">
-                Select vendor and products
-              </h3>
-
-              {/* VENDOR */}
-              <div className="purchase-workflow-section">
-                <h4>Vendor status</h4>
-
-                <label className="purchase-radio-row">
-                  <input
-                    type="radio"
-                    name="vendorStatus"
-                    value="existing"
-                    checked={vendorStatus === "existing"}
-                    onChange={() => setVendorStatus("existing")}
-                  />
-                  <span>Existing, approved vendor</span>
-                </label>
-
-                <label className="purchase-radio-row">
-                  <input
-                    type="radio"
-                    name="vendorStatus"
-                    value="new"
-                    checked={vendorStatus === "new"}
-                    onChange={() => setVendorStatus("new")}
-                  />
-                  <span>New vendor / not yet approved</span>
-                </label>
-              </div>
-
-              {/* PRODUCT */}
-              <div className="purchase-workflow-section">
-                <h4>Product status</h4>
-
-                <label className="purchase-radio-row">
-                  <input
-                    type="radio"
-                    name="productStatus"
-                    value="regular"
-                    checked={productStatus === "regular"}
-                    onChange={() => setProductStatus("regular")}
-                  />
-                  <span>Regularly purchased product</span>
-                </label>
-
-                <label className="purchase-radio-row">
-                  <input
-                    type="radio"
-                    name="productStatus"
-                    value="new"
-                    checked={productStatus === "new"}
-                    onChange={() => setProductStatus("new")}
-                  />
-                  <span>New product / first-time purchase</span>
-                </label>
-              </div>
-
-              {/* SPECIAL APPROVAL */}
-              <div className="purchase-workflow-section">
-                <h4>Special approval</h4>
-
-                <label className="purchase-radio-row">
-                  <input
-                    type="radio"
-                    name="specialApproval"
-                    value="no"
-                    checked={specialApproval === "no"}
-                    onChange={() => setSpecialApproval("no")}
-                  />
-                  <span>No</span>
-                </label>
-
-                <label className="purchase-radio-row">
-                  <input
-                    type="radio"
-                    name="specialApproval"
-                    value="yes"
-                    checked={specialApproval === "yes"}
-                    onChange={() => setSpecialApproval("yes")}
-                  />
-                  <span>Yes</span>
-                </label>
-              </div>
-
-              {/* NEXT */}
-              <div className="purchase-workflow-actions">
-                <button
-                  type="button"
-                  className="purchase-workflow-next"
-                  onClick={handlePurchaseWorkflowNext}
-                >
-                  Next
-                </button>
-              </div>
-            </div>
-          </div>
+        <div className="product-form-heading">
+          <h2>
+            {editingProduct ? "Edit Product" : "Add Product"}
+          </h2>
         </div>
+
+        <ProductForm
+          key={editingProduct?.id ?? "new-product"}
+          initialData={editingProduct}
+          categories={categories}
+          warehouses={warehouses}
+          warehouseZones={warehouseZones}
+          vendors={vendors}
+          units={units}
+          statuses={statuses}
+          onSave={handleSave}
+          onCancel={handleCancel}
+          disabled={saving}
+        />
+      </Modal>
+
+      {/* PRODUCT DETAILS MODAL */}
+      <ProductDetails
+        product={selectedProduct}
+        onClose={() => setSelectedProduct(null)}
+      />
+
+      {/* PURCHASE WORKFLOW COMPONENT */}
+      {showPurchaseWorkflow && (
+        <PurchaseWorkflow
+          onClose={() => setShowPurchaseWorkflow(false)}
+          onDirectPurchase={() => setShowPurchaseOrder(true)}
+          onQuotationNext={() =>
+            navigate("/billing", {
+              state: { openQuotationModal: true },
+            })
+          }
+        />
       )}
 
-      {/* PURCHASE ORDER FORM */}
+      {/* EXISTING PURCHASE ORDER FORM */}
       {showPurchaseOrder && (
         <PurchaseOrder
           onClose={() => setShowPurchaseOrder(false)}
           onSubmit={handlePurchaseOrderSubmit}
         />
       )}
+
     </div>
   );
 }
