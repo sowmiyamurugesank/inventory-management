@@ -1,3 +1,4 @@
+
 function StatCard({ title, value, subtitle, icon }) {
   return (
     <div className="stat-card">

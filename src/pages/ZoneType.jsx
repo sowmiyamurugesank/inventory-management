@@ -6,19 +6,11 @@ import { ArrowLeft, SlidersHorizontal } from "lucide-react";
 import StorageTable from "../component/StorageTable.jsx";
 import SearchBox from "../component/SearchBox.jsx";
 import Button from "../component/Button.jsx";
-import WarehouseTabs from "../component/WarehouseTabs.jsx";
 import ZoneTypeForm from "../component/ZoneTypeForm.jsx";
 
 import "../styles/ZoneType.css";
 
 const API_URL = "http://localhost:5000/api/zone-types";
-
-const TABS = [
-  "Warehouse",
-  "Warehouse Type",
-  "Zone",
-  "Zone Type",
-];
 
 const COLUMNS = [
   { key: "zoneTypeCode", label: "Zone Type Code", editable: true },
@@ -140,7 +132,6 @@ function ZoneType() {
 
   function clearFilters() {
     setSearch("");
-
     setFilters({
       zoneTypeName: "",
       zoneTypeCode: "",
@@ -211,7 +202,8 @@ function ZoneType() {
       );
     }
 
-    const updatedRecord = result.zoneType ?? result.zone_type ?? result;
+    const updatedRecord =
+      result.zoneType ?? result.zone_type ?? result;
 
     setZoneTypes((previous) =>
       previous.map((row) =>
@@ -239,41 +231,12 @@ function ZoneType() {
     );
   }
 
-  function handleTabChange(index) {
-    const paths = [
-      "/storage/warehouse",
-      "/storage/warehouse-type",
-      "/storage/zone",
-      "/storage/zone-type",
-    ];
-
-    if (paths[index]) {
-      navigate(paths[index]);
-    }
-  }
-
   return (
     <main className="zone-type-page">
       <section className="zone-type-section">
-        <button
-          type="button"
-          className="zone-type-back-arrow"
-          onClick={() => navigate("/storage")}
-          aria-label="Back to Storage"
-          title="Back to Storage"
-        >
-          <ArrowLeft />
-        </button>
-
         <h2 className="zone-type-heading">
           Warehouse Management
         </h2>
-
-        <WarehouseTabs
-          tabs={TABS}
-          activeTab={3}
-          setActiveTab={handleTabChange}
-        />
 
         <div className="zone-type-toolbar">
           <div className="zone-type-search">

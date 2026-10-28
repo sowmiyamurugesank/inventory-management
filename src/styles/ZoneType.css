@@ -42,36 +42,16 @@
   background: #94a3b8;
 }
 
-.zone-type-heading {
-  margin: 10px 0 24px;
-  text-align: center;
-  color: #3f4fa9;
+.zone-type-section .zone-type-heading {
+  width: 100%;
+  margin: 0;
+  padding: 0 50px;
+  color: #4857a9;
   font-size: 20px;
-  font-weight: bold;
-}
-
-.zone-type-back-arrow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: fit-content;
-  padding: 0;
-  margin: 0 0 12px;
-  border: none;
-  background: transparent;
-  color: #374151;
-  cursor: pointer;
-  transition: color 0.2s ease;
-}
-
-.zone-type-back-arrow:hover {
-  color: #2563eb;
-}
-
-.zone-type-back-arrow:focus-visible {
-  outline: 2px solid #2563eb;
-  outline-offset: 4px;
-  border-radius: 4px;
+  font-weight: 700;
+  line-height: 1.4;
+  text-align: center;
+  box-sizing: border-box;
 }
 
 .zone-type-toolbar {

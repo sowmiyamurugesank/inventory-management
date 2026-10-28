@@ -8,6 +8,7 @@ function StorageTable({
   onView,
   onDelete,
   onUpdate,
+  onDamage,
   showSerial = false,
   emptyMessage = "No records found",
 }) {
@@ -20,7 +21,9 @@ function StorageTable({
   const originalRef = useRef(null);
   const latestDraftRef = useRef({});
 
-  const hasActions = Boolean(onView || onDelete || onUpdate);
+  const hasActions = Boolean(
+    onView || onDelete || onUpdate || onDamage
+  );
 
   const totalColumns =
     columns.length + (showSerial ? 1 : 0) + (hasActions ? 1 : 0);
@@ -34,6 +37,7 @@ function StorageTable({
     setDraft({ ...row });
     originalRef.current = { ...row };
     latestDraftRef.current = { ...row };
+
     setSaveStatus("");
     setSaveError("");
   }
@@ -70,7 +74,6 @@ function StorageTable({
 
     const rowId = editingId;
 
-    // Auto-save after the user stops typing.
     timerRef.current = setTimeout(() => {
       saveRow(rowId, updatedDraft);
     }, 800);
@@ -101,7 +104,6 @@ function StorageTable({
     const rowId = editingId;
     const currentDraft = latestDraftRef.current;
 
-    // Save any final pending changes before closing.
     if (
       JSON.stringify(currentDraft) !==
       JSON.stringify(originalRef.current)
@@ -192,8 +194,8 @@ function StorageTable({
                   {hasActions && (
                     <td>
                       <div className="warehouse-actions">
-                        {onUpdate && (
-                          isEditing ? (
+                        {onUpdate &&
+                          (isEditing ? (
                             <button
                               type="button"
                               className="view-btn"
@@ -209,8 +211,7 @@ function StorageTable({
                             >
                               Edit
                             </button>
-                          )
-                        )}
+                          ))}
 
                         {onView && (
                           <button
@@ -219,6 +220,16 @@ function StorageTable({
                             onClick={() => onView(row)}
                           >
                             View
+                          </button>
+                        )}
+
+                        {onDamage && (
+                          <button
+                            type="button"
+                            className="damage-btn"
+                            onClick={() => onDamage(row)}
+                          >
+                            Report Damage
                           </button>
                         )}
 

@@ -40,13 +40,18 @@
   border-radius: 12px;
 }
 
-.warehouse-type-heading {
-  margin: 10px 0 24px;
-  text-align: center;
-  color: #3f4fa9;
+.warehouse-type-section .warehouse-type-heading {
+   width: 100%;
+  margin: 0;
+  padding: 0 50px;
+  color: #4857a9;
   font-size: 20px;
-  font-weight: bold;
+  font-weight: 700;
+  line-height: 1.4;
+  text-align: center;
+  box-sizing: border-box;
 }
+
 
 
 .warehouse-type-toolbar {
@@ -57,31 +62,6 @@
   min-width: 0;
   margin-top: 30px;
   margin-bottom: 15px;
-}
-
-.warehouse-type-back-arrow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: fit-content;
-  padding: 0;
-  margin: 0 0 12px;
-  border: none;
-  background: transparent;
-  color: #374151;
-  cursor: pointer;
-  transition: color 0.2s ease;
-}
-
-.warehouse-type-back-arrow:hover {
-  color: #2563eb;
-}
-
-.warehouse-type-back-arrow:focus-visible {
-  outline: 2px solid #2563eb;
-  outline-offset: 4px;
-  border-radius: 4px;
 }
 
 .warehouse-type-search {

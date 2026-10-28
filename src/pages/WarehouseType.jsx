@@ -6,19 +6,11 @@ import { ArrowLeft, SlidersHorizontal } from "lucide-react";
 import StorageTable from "../component/StorageTable.jsx";
 import SearchBox from "../component/SearchBox.jsx";
 import Button from "../component/Button.jsx";
-import WarehouseTabs from "../component/WarehouseTabs.jsx";
 import WarehouseTypeForm from "../component/WarehouseTypeForm.jsx";
 
 import "../styles/WarehouseType.css";
 
 const API_URL = "http://localhost:5000/api/warehouses";
-
-const TABS = [
-  "Warehouse",
-  "Warehouse Type",
-  "Zone",
-  "Zone Type",
-];
 
 const COLUMNS = [
   { key: "warehouseType", label: "Warehouse Type", editable: true },
@@ -34,27 +26,15 @@ const FILTER_FIELDS = [
 ];
 
 function normalizeWarehouse(row) {
-  const type =
-    row.warehouseType ??
-    row.warehouse_type ??
-    row.type;
+  const type = row.warehouseType ?? row.warehouse_type ?? row.type;
 
   const typeObject =
-    typeof type === "object" && type !== null
-      ? type
-      : {};
+    typeof type === "object" && type !== null ? type : {};
 
   return {
     ...row,
-    name:
-      row.name ??
-      row.warehouseName ??
-      row.warehouse_name ??
-      "",
-    status:
-      row.status ??
-      row.warehouseStatus ??
-      "",
+    name: row.name ?? row.warehouseName ?? row.warehouse_name ?? "",
+    status: row.status ?? row.warehouseStatus ?? "",
     warehouseType:
       (typeof type === "string" ? type : "") ||
       typeObject.name ||
@@ -62,14 +42,8 @@ function normalizeWarehouse(row) {
       row.typeName ||
       "",
     typeCode:
-      row.typeCode ??
-      row.type_code ??
-      typeObject.code ??
-      "",
-    category:
-      row.category ??
-      typeObject.category ??
-      "",
+      row.typeCode ?? row.type_code ?? typeObject.code ?? "",
+    category: row.category ?? typeObject.category ?? "",
   };
 }
 
@@ -98,10 +72,7 @@ function WarehouseType() {
     }
 
     const data = await response.json();
-
-    const rows = Array.isArray(data)
-      ? data
-      : data.warehouses;
+    const rows = Array.isArray(data) ? data : data.warehouses;
 
     if (!Array.isArray(rows)) {
       throw new Error("Invalid warehouse data.");
@@ -141,9 +112,7 @@ function WarehouseType() {
       const matchesSearch =
         !query ||
         COLUMNS.some(({ key }) =>
-          String(row[key] ?? "")
-            .toLowerCase()
-            .includes(query)
+          String(row[key] ?? "").toLowerCase().includes(query)
         );
 
       const matchesFilters = FILTER_FIELDS.every(({ key }) =>
@@ -245,49 +214,19 @@ function WarehouseType() {
                 updatedRecord.type_code ??
                 updatedRow.typeCode,
               category:
-                updatedRecord.category ??
-                updatedRow.category,
+                updatedRecord.category ?? updatedRow.category,
             })
           : row
       )
     );
   }
 
-  function handleTabChange(index) {
-    const paths = [
-      "/storage/warehouse",
-      "/storage/warehouse-type",
-      "/storage/zone",
-      "/storage/zone-type",
-    ];
-
-    if (paths[index]) {
-      navigate(paths[index]);
-    }
-  }
-
   return (
     <main className="warehouse-type-page">
       <section className="warehouse-type-section">
-        <button
-          type="button"
-          className="warehouse-type-back-arrow"
-          onClick={() => navigate("/storage")}
-          aria-label="Back to Storage"
-          title="Back to Storage"
-        >
-          <ArrowLeft />
-        </button>
-
         <h2 className="warehouse-type-heading">
           Warehouse Management
         </h2>
-
-        <WarehouseTabs
-          tabs={TABS}
-          activeTab={1}
-          setActiveTab={handleTabChange}
-        />
 
         <div className="warehouse-type-toolbar">
           <div className="warehouse-type-search">
@@ -303,9 +242,7 @@ function WarehouseType() {
             className={`warehouse-filter-btn ${
               showFilters ? "active" : ""
             }`}
-            onClick={() =>
-              setShowFilters((value) => !value)
-            }
+            onClick={() => setShowFilters((value) => !value)}
           >
             <SlidersHorizontal size={16} />
             Filter
@@ -320,7 +257,7 @@ function WarehouseType() {
             }}
           >
             + Add Warehouse Type
-          </Button> 
+          </Button>
         </div>
 
         {showFilters && (
@@ -348,10 +285,7 @@ function WarehouseType() {
               </div>
             ))}
 
-            <Button
-              type="button"
-              onClick={clearFilters}
-            >
+            <Button type="button" onClick={clearFilters}>
               Clear
             </Button>
           </div>
@@ -391,5 +325,4 @@ function WarehouseType() {
     </main>
   );
 }
-
 export default WarehouseType;

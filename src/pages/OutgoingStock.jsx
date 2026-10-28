@@ -5,42 +5,45 @@ import {
   Filter,
   CalendarDays,
   ChevronDown,
-  ChevronLeft,
-  ChevronRight,
   Package,
   Clock,
-  Truck,
   CheckCircle,
-  Eye,
   RotateCcw,
   X,
 } from "lucide-react";
 
 import StatCard from "../StatCard.jsx";
+import StorageTable from "../component/StorageTable.jsx";
+import Pagination from "../component/Pagination.jsx";
+import Button from "../component/Button.jsx";
+
 import "../styles/OutgoingStock.css";
 
 const API_URL = "http://localhost:5000/api/outgoing-stock";
-const ITEMS_PER_PAGE = 15;
+const ITEMS_PER_PAGE = 10;
 
-const STATUS_OPTIONS = [
-  "PENDING",
-  "IN_PROGRESS",
-  "DISPATCHED",
-  "COMPLETED",
-  "RETURN",
-  "CANCELLED",
+const outgoingStockColumns = [
+  { key: "date", label: "Date", editable: false },
+  { key: "product", label: "Product", editable: false },
+  { key: "customer", label: "Customer / Party", editable: false },
+  { key: "quantity", label: "Quantity", editable: false },
+  { key: "warehouse", label: "Warehouse", editable: false },
+  { key: "invoiceNo", label: "Invoice No.", editable: false },
+  { key: "status", label: "Status", editable: false },
 ];
 
-function getCustomer(item) {
-  return item.customer || item.party || item.customerName || "";
-}
+function getValue(record, keys, fallback = "") {
+  for (const key of keys) {
+    if (
+      record?.[key] !== undefined &&
+      record?.[key] !== null &&
+      record?.[key] !== ""
+    ) {
+      return record[key];
+    }
+  }
 
-function getProduct(item) {
-  return item.product || item.productName || "";
-}
-
-function getDate(item) {
-  return item.date || item.dispatchDate || item.createdAt || "";
+  return fallback;
 }
 
 function formatDate(value) {
@@ -48,20 +51,15 @@ function formatDate(value) {
 
   const date = new Date(value);
 
-  if (Number.isNaN(date.getTime())) return String(value);
+  if (Number.isNaN(date.getTime())) {
+    return String(value);
+  }
 
   return date.toLocaleDateString("en-IN", {
     day: "2-digit",
     month: "short",
     year: "numeric",
   });
-}
-
-function getStatusClass(status) {
-  return String(status || "PENDING")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
 }
 
 function OutgoingStock() {
@@ -72,9 +70,9 @@ function OutgoingStock() {
   const [search, setSearch] = useState("");
   const [showFilters, setShowFilters] = useState(false);
 
+  const [date, setDate] = useState("");
   const [product, setProduct] = useState("");
   const [customer, setCustomer] = useState("");
-  const [date, setDate] = useState("");
   const [status, setStatus] = useState("");
 
   const [page, setPage] = useState(1);
@@ -93,23 +91,23 @@ function OutgoingStock() {
         });
 
         if (!response.ok) {
-          throw new Error("Unable to load outgoing stock.");
+          throw new Error(`Request failed: ${response.status}`);
         }
 
         const result = await response.json();
 
-        if (Array.isArray(result)) {
-          setData(result);
-        } else if (Array.isArray(result.data)) {
-          setData(result.data);
-        } else {
-          throw new Error("Unexpected data format from backend.");
-        }
+        const records = Array.isArray(result)
+          ? result
+          : Array.isArray(result.data)
+            ? result.data
+            : Array.isArray(result.outgoingStock)
+              ? result.outgoingStock
+              : [];
+
+        setData(records);
       } catch (err) {
         if (err.name !== "AbortError") {
-          setError(
-            err.message || "Unable to load outgoing stock."
-          );
+          setError(err.message || "Unable to load outgoing stock.");
         }
       } finally {
         if (!controller.signal.aborted) {
@@ -124,52 +122,156 @@ function OutgoingStock() {
   }, []);
 
   const products = useMemo(
-    () => [...new Set(data.map(getProduct).filter(Boolean))],
+    () => [
+      ...new Set(
+        data
+          .map((record) =>
+            getValue(record, ["product", "productName", "name"])
+          )
+          .filter(Boolean)
+      ),
+    ],
     [data]
   );
 
   const customers = useMemo(
-    () => [...new Set(data.map(getCustomer).filter(Boolean))],
+    () => [
+      ...new Set(
+        data
+          .map((record) =>
+            getValue(record, [
+              "customer",
+              "customerName",
+              "party",
+              "partyName",
+            ])
+          )
+          .filter(Boolean)
+      ),
+    ],
     [data]
   );
 
   const filteredData = useMemo(() => {
-    const searchText = search.trim().toLowerCase();
+    return data.filter((record) => {
+      const recordDate = String(
+        getValue(record, ["date", "outgoingDate", "createdAt"])
+      ).slice(0, 10);
 
-    return data.filter((item) => {
-      const itemProduct = getProduct(item);
-      const itemCustomer = getCustomer(item);
-      const itemStatus = String(item.status || "PENDING").toUpperCase();
-      const itemDate = String(getDate(item)).slice(0, 10);
+      const recordProduct = getValue(record, [
+        "product",
+        "productName",
+        "name",
+      ]);
 
-      const matchesSearch = [
-        getDate(item),
-        itemProduct,
-        itemCustomer,
-        item.quantity,
-        item.warehouse,
-        item.invoiceNo,
-        item.invoice,
-        itemStatus,
-        item.remarks,
-      ].some((value) =>
+      const recordCustomer = getValue(record, [
+        "customer",
+        "customerName",
+        "party",
+        "partyName",
+      ]);
+
+      const recordQuantity = getValue(record, [
+        "quantity",
+        "outgoingQuantity",
+        "qty",
+      ]);
+
+      const recordWarehouse = getValue(record, [
+        "warehouse",
+        "warehouseName",
+        "location",
+      ]);
+
+      const recordInvoice = getValue(record, [
+        "invoiceNo",
+        "invoice",
+        "invoiceNumber",
+      ]);
+
+      const recordStatus = getValue(record, ["status"], "Pending");
+
+      const searchableValues = [
+        recordDate,
+        recordProduct,
+        recordCustomer,
+        recordQuantity,
+        recordWarehouse,
+        recordInvoice,
+        recordStatus,
+      ];
+
+      const searchText = search.trim().toLowerCase();
+
+      const matchesSearch = searchableValues.some((value) =>
         String(value ?? "").toLowerCase().includes(searchText)
       );
 
       return (
         matchesSearch &&
-        (!product || itemProduct === product) &&
-        (!customer || itemCustomer === customer) &&
-        (!date || itemDate === date) &&
-        (!status || itemStatus === status)
+        (!date || recordDate === date) &&
+        (!product || recordProduct === product) &&
+        (!customer || recordCustomer === customer) &&
+        (!status ||
+          String(recordStatus).toLowerCase() === status.toLowerCase())
       );
     });
-  }, [data, search, product, customer, date, status]);
+  }, [data, search, date, product, customer, status]);
 
-  const totalPages = Math.ceil(
-    filteredData.length / ITEMS_PER_PAGE
-  );
+  const totalOutgoing = useMemo(() => {
+    return data.reduce((total, record) => {
+      return (
+        total +
+        (Number(
+          getValue(record, ["quantity", "outgoingQuantity", "qty"], 0)
+        ) || 0)
+      );
+    }, 0);
+  }, [data]);
 
+  const pendingCount = data
+    .filter(
+      (record) =>
+        String(getValue(record, ["status"])).toLowerCase() === "pending"
+    )
+    .reduce(
+      (total, record) =>
+        total +
+        (Number(
+          getValue(record, ["quantity", "outgoingQuantity", "qty"], 0)
+        ) || 0),
+      0
+    );
+
+  const inProgressCount = data
+    .filter(
+      (record) =>
+        String(getValue(record, ["status"])).toLowerCase() === "in progress"
+    )
+    .reduce(
+      (total, record) =>
+        total +
+        (Number(
+          getValue(record, ["quantity", "outgoingQuantity", "qty"], 0)
+        ) || 0),
+      0
+    );
+
+  const completedCount = data
+    .filter(
+      (record) =>
+        String(getValue(record, ["status"])).toLowerCase() === "completed"
+    )
+    .reduce(
+      (total, record) =>
+        total +
+        (Number(
+          getValue(record, ["quantity", "outgoingQuantity", "qty"], 0)
+        ) || 0),
+      0
+    );
+
+  const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
   const safePage = Math.min(page, Math.max(totalPages, 1));
   const startIndex = (safePage - 1) * ITEMS_PER_PAGE;
 
@@ -178,19 +280,43 @@ function OutgoingStock() {
     startIndex + ITEMS_PER_PAGE
   );
 
-  const pendingCount = data.filter(
-    (item) => String(item.status || "").toUpperCase() === "PENDING"
-  ).length;
+  const tableData = currentData.map((record, index) => ({
+    ...record,
 
-  const inProgressCount = data.filter(
-    (item) =>
-      String(item.status || "").toUpperCase() === "IN_PROGRESS"
-  ).length;
+    id: record.id ?? record._id ?? `${startIndex + index}`,
 
-  const completedCount = data.filter(
-    (item) =>
-      String(item.status || "").toUpperCase() === "COMPLETED"
-  ).length;
+    date: formatDate(
+      getValue(record, ["date", "outgoingDate", "createdAt"])
+    ),
+
+    product: getValue(record, ["product", "productName", "name"], "-"),
+
+    customer: getValue(
+      record,
+      ["customer", "customerName", "party", "partyName"],
+      "-"
+    ),
+
+    quantity: Number(
+      getValue(record, ["quantity", "outgoingQuantity", "qty"], 0)
+    ),
+
+    warehouse: getValue(
+      record,
+      ["warehouse", "warehouseName", "location"],
+      "-"
+    ),
+
+    invoiceNo: getValue(
+      record,
+      ["invoiceNo", "invoice", "invoiceNumber"],
+      "-"
+    ),
+
+    status: getValue(record, ["status"], "Pending"),
+
+    originalRecord: record,
+  }));
 
   function changeFilter(setter, value) {
     setter(value);
@@ -199,104 +325,112 @@ function OutgoingStock() {
 
   function resetFilters() {
     setSearch("");
+    setDate("");
     setProduct("");
     setCustomer("");
-    setDate("");
     setStatus("");
     setPage(1);
+  }
+
+  function handleView(row) {
+    setSelectedRecord(row.originalRecord);
+  }
+
+  function closeModal() {
+    setSelectedRecord(null);
   }
 
   return (
     <div className="outgoing-stock-page">
       <div className="outgoing-stock-heading">
-        <div>
-          <h1>Outgoing Stock</h1>
-          <p>Track outgoing products and delivery status</p>
-        </div>
       </div>
 
       <div className="outgoing-stock-summary">
         <StatCard
           title="Total Outgoing"
-          value={data.length.toLocaleString("en-IN")}
-          icon={<Package />}
+          value={totalOutgoing.toLocaleString("en-IN")}
+          icon={<Package/>}
         />
 
         <StatCard
           title="Pending"
           value={pendingCount.toLocaleString("en-IN")}
-          icon={<Clock />}
+          icon={<Clock/>}
         />
 
         <StatCard
           title="In Progress"
           value={inProgressCount.toLocaleString("en-IN")}
-          icon={<Truck />}
+          icon={<RotateCcw/>}
         />
 
         <StatCard
           title="Completed"
           value={completedCount.toLocaleString("en-IN")}
-          icon={<CheckCircle />}
+          icon={<CheckCircle/>}
         />
       </div>
 
       <div className="outgoing-stock-toolbar">
         <div className="outgoing-search-box">
-          <Search className="outgoing-search-icon" />
+          <Search/>
 
           <input
             type="text"
             placeholder="Search product, customer, invoice..."
             value={search}
-            onChange={(e) =>
-              changeFilter(setSearch, e.target.value)
+            onChange={(event) =>
+              changeFilter(setSearch, event.target.value)
             }
           />
-
-          {search && (
-            <button
-              type="button"
-              className="outgoing-clear-search"
-              onClick={() => changeFilter(setSearch, "")}
-              aria-label="Clear search"
-            >
-              <X className="outgoing-small-icon" />
-            </button>
-          )}
         </div>
 
-        <button
-          type="button"
+        <Button
           className={`outgoing-filter-button ${
             showFilters ? "filter-active" : ""
           }`}
-          onClick={() => setShowFilters((current) => !current)}
-          aria-expanded={showFilters}
+          onClick={() => setShowFilters((value) => !value)}
         >
-          <Filter className="outgoing-filter-icon" />
+          <Filter/>
           Filters
-          {showFilters ? (
-            <X className="outgoing-small-icon" />
-          ) : (
-            <ChevronDown className="outgoing-small-icon" />
-          )}
-        </button>
+
+          <ChevronDown
+            className={showFilters ? "filter-chevron-open" : ""}
+          />
+        </Button>
       </div>
 
       {showFilters && (
         <div className="outgoing-filter-panel">
+          <div className="outgoing-filter-field">
+            <label htmlFor="outgoing-date">Date</label>
+
+            <div className="outgoing-date-input">
+              <CalendarDays/>
+
+              <input
+                id="outgoing-date"
+                type="date"
+                value={date}
+                onChange={(event) =>
+                  changeFilter(setDate, event.target.value)
+                }
+              />
+            </div>
+          </div>
+
           <div className="outgoing-filter-field">
             <label htmlFor="outgoing-product">Product</label>
 
             <select
               id="outgoing-product"
               value={product}
-              onChange={(e) =>
-                changeFilter(setProduct, e.target.value)
+              onChange={(event) =>
+                changeFilter(setProduct, event.target.value)
               }
             >
               <option value="">All Products</option>
+
               {products.map((item) => (
                 <option key={item} value={item}>
                   {item}
@@ -306,18 +440,17 @@ function OutgoingStock() {
           </div>
 
           <div className="outgoing-filter-field">
-            <label htmlFor="outgoing-customer">
-              Customer / Party
-            </label>
+            <label htmlFor="outgoing-customer">Customer</label>
 
             <select
               id="outgoing-customer"
               value={customer}
-              onChange={(e) =>
-                changeFilter(setCustomer, e.target.value)
+              onChange={(event) =>
+                changeFilter(setCustomer, event.target.value)
               }
             >
-              <option value="">All Customers / Parties</option>
+              <option value="">All Customers</option>
+
               {customers.map((item) => (
                 <option key={item} value={item}>
                   {item}
@@ -327,194 +460,62 @@ function OutgoingStock() {
           </div>
 
           <div className="outgoing-filter-field">
-            <label htmlFor="outgoing-date">Date</label>
-
-            <div className="outgoing-date-input">
-              <CalendarDays className="outgoing-date-icon" />
-
-              <input
-                id="outgoing-date"
-                type="date"
-                value={date}
-                onChange={(e) =>
-                  changeFilter(setDate, e.target.value)
-                }
-              />
-            </div>
-          </div>
-
-          <div className="outgoing-filter-field">
             <label htmlFor="outgoing-status">Status</label>
 
             <select
               id="outgoing-status"
               value={status}
-              onChange={(e) =>
-                changeFilter(setStatus, e.target.value)
+              onChange={(event) =>
+                changeFilter(setStatus, event.target.value)
               }
             >
-              <option value="">All Status</option>
-              {STATUS_OPTIONS.map((item) => (
-                <option key={item} value={item}>
-                  {item.replaceAll("_", " ")}
-                </option>
-              ))}
+              <option value="">All Statuses</option>
+              <option value="Pending">Pending</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Completed">Completed</option>
             </select>
           </div>
 
-          <button
-            type="button"
+          <Button
             className="outgoing-reset-button"
             onClick={resetFilters}
           >
-            <RotateCcw className="outgoing-small-icon" />
-            Reset Filters
-          </button>
+            <RotateCcw/>
+            Reset
+          </Button>
         </div>
       )}
 
       <div className="outgoing-stock-table-card">
-        <div className="outgoing-table-wrapper">
-          <table className="outgoing-stock-table">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Product</th>
-                <th>Customer / Party</th>
-                <th>Quantity</th>
-                <th>Warehouse</th>
-                <th>Invoice No.</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan={8} className="outgoing-table-message">
-                    Loading outgoing stock...
-                  </td>
-                </tr>
-              ) : error ? (
-                <tr>
-                  <td colSpan={8} className="outgoing-table-message">
-                    {error}
-                  </td>
-                </tr>
-              ) : currentData.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="outgoing-table-message">
-                    No outgoing stock records found.
-                  </td>
-                </tr>
-              ) : (
-                currentData.map((item, index) => {
-                  const itemStatus = String(
-                    item.status || "PENDING"
-                  ).toUpperCase();
-
-                  return (
-                    <tr
-                      key={
-                        item.id ??
-                        item._id ??
-                        `${item.invoiceNo || "outgoing"}-${startIndex + index}`
-                      }
-                    >
-                      <td>{formatDate(getDate(item))}</td>
-
-                      <td className="outgoing-product-cell">
-                        {getProduct(item) || "-"}
-                      </td>
-
-                      <td>{getCustomer(item) || "-"}</td>
-
-                      <td className="outgoing-quantity-cell">
-                        {Number(item.quantity) || 0}
-                      </td>
-
-                      <td>{item.warehouse || "-"}</td>
-
-                      <td>{item.invoiceNo || item.invoice || "-"}</td>
-
-                      <td>
-                        <span
-                          className={`outgoing-status-badge ${getStatusClass(
-                            itemStatus
-                          )}`}
-                        >
-                          {itemStatus.replaceAll("_", " ")}
-                        </span>
-                      </td>
-
-                      <td>
-                        <button
-                          type="button"
-                          className="outgoing-view-button"
-                          onClick={() => setSelectedRecord(item)}
-                          aria-label="View outgoing stock details"
-                          title="View details"
-                        >
-                          <Eye className="outgoing-action-icon" />
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
+        <StorageTable
+          warehouses={tableData}
+          columns={outgoingStockColumns}
+          onView={handleView}
+          emptyMessage={
+            loading
+              ? "Loading outgoing stock..."
+              : error || "No outgoing stock records found."
+          }
+        />
 
         {!loading && !error && (
           <div className="outgoing-stock-footer">
-            <span className="outgoing-pagination-info">
-              Showing{" "}
-              {filteredData.length === 0 ? 0 : startIndex + 1}
+            <span className="pagination-info">
+              Showing {filteredData.length === 0 ? 0 : startIndex + 1}
               {" - "}
               {Math.min(
                 startIndex + ITEMS_PER_PAGE,
                 filteredData.length
-              )}{" "}
-              of {filteredData.length} records
+              )}
+              {" of "}
+              {filteredData.length} records
             </span>
 
-            <div className="outgoing-pagination">
-              <button
-                type="button"
-                className="outgoing-pagination-button"
-                disabled={safePage === 1}
-                onClick={() =>
-                  setPage((current) => Math.max(1, current - 1))
-                }
-                aria-label="Previous page"
-              >
-                <ChevronLeft className="outgoing-page-icon" />
-              </button>
-
-              <span className="outgoing-pagination-current">
-                {safePage}
-              </span>
-
-              <span className="outgoing-pagination-total">
-                of {Math.max(totalPages, 1)}
-              </span>
-
-              <button
-                type="button"
-                className="outgoing-pagination-button"
-                disabled={totalPages === 0 || safePage >= totalPages}
-                onClick={() =>
-                  setPage((current) =>
-                    Math.min(totalPages, current + 1)
-                  )
-                }
-                aria-label="Next page"
-              >
-                <ChevronRight className="outgoing-page-icon" />
-              </button>
-            </div>
+            <Pagination
+              currentPage={safePage}
+              totalPages={totalPages}
+              onPageChange={setPage}
+            />
           </div>
         )}
       </div>
@@ -522,61 +523,64 @@ function OutgoingStock() {
       {selectedRecord && (
         <div
           className="outgoing-modal-overlay"
-          onClick={() => setSelectedRecord(null)}
+          onClick={closeModal}
         >
           <div
             className="outgoing-details-modal"
             role="dialog"
             aria-modal="true"
             aria-labelledby="outgoing-details-title"
-            onClick={(e) => e.stopPropagation()}
+            onClick={(event) => event.stopPropagation()}
           >
             <div className="outgoing-modal-header">
               <div>
                 <h2 id="outgoing-details-title">
                   Outgoing Stock Details
                 </h2>
+
                 <p>Stock transaction information</p>
               </div>
 
-              <button
-                type="button"
+              <Button
                 className="outgoing-modal-close"
-                onClick={() => setSelectedRecord(null)}
+                onClick={closeModal}
                 aria-label="Close details"
               >
-                <X className="outgoing-modal-close-icon" />
-              </button>
+                <X size={20} />
+              </Button>
             </div>
 
             <div className="outgoing-details-grid">
-              {[
-                ["Date", formatDate(getDate(selectedRecord))],
-                ["Product", getProduct(selectedRecord)],
-                ["Customer / Party", getCustomer(selectedRecord)],
-                ["Quantity", selectedRecord.quantity],
-                ["Warehouse", selectedRecord.warehouse],
-                [
-                  "Invoice Number",
-                  selectedRecord.invoiceNo || selectedRecord.invoice,
-                ],
-                ["Status", selectedRecord.status],
-                ["Remarks", selectedRecord.remarks],
-              ].map(([label, value]) => (
-                <div className="outgoing-detail-item" key={label}>
-                  <span>{label}</span>
-                  <strong>{value ?? "-"}</strong>
-                </div>
-              ))}
+              {outgoingStockColumns.map((column) => {
+                const value = getValue(
+                  selectedRecord,
+                  [column.key],
+                  "-"
+                );
+
+                return (
+                  <div
+                    className="outgoing-detail-item"
+                    key={column.key}
+                  >
+                    <span>{column.label}</span>
+                    <strong>
+                      {column.key === "date"
+                        ? formatDate(value)
+                        : value}
+                    </strong>
+                  </div>
+                );
+              })}
             </div>
 
             <div className="outgoing-modal-footer">
-              <button
-                type="button"
-                onClick={() => setSelectedRecord(null)}
+              <Button
+                className="outgoing-modal-done"
+                onClick={closeModal}
               >
                 Close
-              </button>
+              </Button>
             </div>
           </div>
         </div>
