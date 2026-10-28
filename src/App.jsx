@@ -6,6 +6,10 @@ import Dashboard from "./Dashboard.jsx";
 import Product from "./pages/Product.jsx";
 import Storage from "./pages/Storage.jsx";
 import Billing  from "./pages/Billing.jsx";
+import WarehouseType from "./pages/WarehouseType.jsx";
+import Zone from "./pages/Zone.jsx";
+import ZoneType from "./pages/ZoneType.jsx";
+
 
 
 function Page({ title }) {

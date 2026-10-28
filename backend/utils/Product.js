@@ -57,7 +57,7 @@ const CRUD_OPERATIONS = {
   },
 };
 
-export async function crud(operation, data = {}) {
+export async function crud(operation, data = {}, db = pool) {
   const config = CRUD_OPERATIONS[operation];
 
   if (!config) {
@@ -66,7 +66,7 @@ export async function crud(operation, data = {}) {
 
   const params = config.params(data);
 
-  const { rows } = await pool.query(config.sql, params);
+  const { rows } = await db.query(config.sql, params);
 
   return rows[0].result;
 }

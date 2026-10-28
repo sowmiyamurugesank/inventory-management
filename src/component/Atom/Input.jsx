@@ -9,16 +9,25 @@ function Input({
   placeholder = "",
   disabled = false,
   required = false,
+  min,
+  max,
+  step = 1,
   ...props
 }) {
+  const minimum = min !== undefined ? Number(min) : 0;
+  const maximum = max !== undefined ? Number(max) : Infinity;
+  const numericStep = Number(step) || 1;
+
   const handleStep = (direction) => {
     if (disabled || !onChange) return;
 
-    const currentValue = value === "" || value == null ? 0 : Number(value);
-    const step = Number(props.step) || 1;
-    const min = props.min !== undefined ? Number(props.min) : -Infinity;
-    const max = props.max !== undefined ? Number(props.max) : Infinity;
-    const nextValue = Math.min(max, Math.max(min, currentValue + direction * step));
+    const currentValue =
+      value === "" || value == null ? minimum : Number(value);
+
+    const nextValue = Math.min(
+      maximum,
+      Math.max(minimum, currentValue + direction * numericStep)
+    );
 
     onChange({
       target: {
@@ -29,7 +38,20 @@ function Input({
     });
   };
 
+  const handleNumberChange = (event) => {
+    const nextValue = event.target.value;
+
+    if (nextValue !== "" && Number(nextValue) < minimum) {
+      return;
+    }
+
+    onChange?.(event);
+  };
+
   if (type === "number") {
+    const numericValue =
+      value === "" || value == null ? null : Number(value);
+
     return (
       <div className="number-input-wrapper">
         <input
@@ -39,10 +61,13 @@ function Input({
           name={name}
           type="number"
           value={value ?? ""}
-          onChange={onChange}
+          onChange={handleNumberChange}
           placeholder={placeholder}
           disabled={disabled}
           required={required}
+          min={minimum}
+          max={max}
+          step={numericStep}
         />
 
         <div className="number-input-controls">
@@ -50,7 +75,10 @@ function Input({
             type="button"
             className="number-input-arrow"
             onClick={() => handleStep(1)}
-            disabled={disabled || (value !== "" && value != null && Number(value) >= Number(props.max ?? Infinity))}
+            disabled={
+              disabled ||
+              (numericValue !== null && numericValue >= maximum)
+            }
             aria-label="Increase value"
           >
             ⌃
@@ -60,7 +88,10 @@ function Input({
             type="button"
             className="number-input-arrow"
             onClick={() => handleStep(-1)}
-            disabled={disabled || (value !== "" && value != null && Number(value) <= Number(props.min ?? -Infinity))}
+            disabled={
+              disabled ||
+              (numericValue !== null && numericValue <= minimum)
+            }
             aria-label="Decrease value"
           >
             ⌄
