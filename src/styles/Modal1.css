@@ -98,3 +98,28 @@ button.product-modal-cross:active {
   box-shadow: none !important;
   -webkit-tap-highlight-color: transparent;
 }
+
+/* Quotation Details Modal Adjustments */
+
+.modal:has(.quotation-details-modal) {
+  width: min(960px, 100%);
+  max-width: 960px;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal:has(.quotation-details-modal) .modal-header {
+  display: none;
+}
+
+.modal:has(.quotation-details-modal) .modal-body {
+  min-height: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+}
+
