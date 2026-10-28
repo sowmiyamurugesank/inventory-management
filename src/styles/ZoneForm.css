@@ -18,10 +18,13 @@
   width: 100%;
   max-width: 760px;
   max-height: calc(100vh - 48px);
+  min-height: 0;
   overflow: hidden;
+  border: 1px solid #e5e7eb;
   border-radius: 12px;
   background: #ffffff;
   box-shadow: 0 12px 40px rgba(16, 24, 40, 0.18);
+  box-sizing: border-box;
 }
 
 .zone-modal-header {
@@ -31,19 +34,14 @@
   gap: 16px;
   padding: 22px 24px;
   border-bottom: 1px solid #e9edf3;
+  flex-shrink: 0;
 }
 
 .zone-modal-header h3 {
   margin: 0;
   color: #202939;
-  font-size: 20px;
-  font-weight: 600;
-}
-
-.zone-modal-header p {
-  margin: 7px 0 0;
-  color: #667085;
-  font-size: 13px;
+  font-size: 18px;
+  font-weight:bold;
 }
 
 .zone-close-btn {
@@ -53,20 +51,30 @@
   width: 32px;
   height: 32px;
   flex-shrink: 0;
+  padding: 0;
   border: none;
   border-radius: 6px;
   background: transparent;
   color: #667085;
   font-size: 25px;
+  line-height: 1;
   cursor: pointer;
+  transition: background 0.2s, color 0.2s;
 }
 
 .zone-close-btn:hover {
   background: #f2f4f7;
+  color: #202939;
+}
+
+.zone-close-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .zone-form-body {
   padding: 24px;
+  min-height: 0;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: #cbd5e1 transparent;
@@ -117,8 +125,8 @@
 .zone-field input,
 .zone-field select {
   width: 100%;
-  height: 42px;
-  padding: 0 12px;
+  min-height: 42px;
+  padding: 10px 12px;
   box-sizing: border-box;
   border: 1px solid #dfe3eb;
   border-radius: 6px;
@@ -127,6 +135,7 @@
   color: #344054;
   font-family: inherit;
   font-size: 13px;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .zone-field input:focus,
@@ -137,6 +146,17 @@
 
 .zone-field input::placeholder {
   color: #98a2b3;
+}
+
+.zone-field select:invalid {
+  color: #98a2b3;
+}
+
+.zone-field input:disabled,
+.zone-field select:disabled {
+  background: #f5f7fa;
+  color: #98a2b3;
+  cursor: not-allowed;
 }
 
 .zone-options {
@@ -169,6 +189,7 @@
 .zone-checkbox input {
   width: 16px;
   height: 16px;
+  flex-shrink: 0;
   margin: 0;
   accent-color: #4169e1;
   cursor: pointer;
@@ -179,10 +200,12 @@
 }
 
 .zone-form-error {
+  flex-shrink: 0;
   margin: 0;
   padding: 0 24px 16px;
   color: #dc3545;
   font-size: 13px;
+  line-height: 1.5;
 }
 
 .zone-modal-actions {
@@ -192,6 +215,7 @@
   padding: 18px 24px;
   border-top: 1px solid #e9edf3;
   background: #ffffff;
+  flex-shrink: 0;
 }
 
 @media (max-width: 600px) {
@@ -212,15 +236,38 @@
   }
 
   .zone-form-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 16px;
   }
 
   .zone-options {
+    gap: 14px;
+    margin-top: 20px;
     padding: 16px;
+  }
+
+  .zone-form-error {
+    padding: 0 18px 14px;
   }
 
   .zone-modal-actions {
     padding: 16px 18px;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 360px) {
+  .zone-modal-header,
+  .zone-form-body {
+    padding: 14px;
+  }
+
+  .zone-modal-header h3 {
+    font-size: 18px;
+  }
+
+  .zone-modal-actions {
+    padding: 14px;
   }
 }

@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Ruler, Box } from "lucide-react";
 
 import WarehouseTabs from "./WarehouseTabs.jsx";
@@ -185,7 +185,6 @@ const initialForm = {
   contactNumber: "",
   email: "",
   description: "",
-
   locationCode: "",
   addressLine1: "",
   addressLine2: "",
@@ -194,14 +193,11 @@ const initialForm = {
   country: "",
   postalCode: "",
   active: true,
-
   totalCapacity: "",
   capacityUnit: "Sacks",
-
   openingTime: "09:00",
   closingTime: "18:00",
   workingDays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-
   length: "50",
   width: "30",
   height: "10",
@@ -221,6 +217,20 @@ function AddWarehouse({ onClose, onSave, saving = false }) {
     ...initialForm,
     workingDays: [...initialForm.workingDays],
   });
+
+  useEffect(() => {
+    function handleEscape(event) {
+      if (event.key === "Escape" && !saving) {
+        onClose();
+      }
+    }
+
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [onClose, saving]);
 
   const selectedUnit = dimensionUnits.find(
     (unit) => unit.value === form.dimensionUnit
@@ -350,7 +360,6 @@ function AddWarehouse({ onClose, onSave, saving = false }) {
 
                     <div>
                       <h3>Physical Dimensions</h3>
-                     
                     </div>
                   </div>
 
@@ -413,20 +422,20 @@ function AddWarehouse({ onClose, onSave, saving = false }) {
                     <h3>Calculated Measurements</h3>
 
                     <div className="warehouse-measurement-cards">
-                    <StatCard
-                       title="Floor Area"
-                       value={`${formatNumber(floorArea)} ${selectedUnit?.symbol}²`}
-                       subtitle={`${formatNumber(floorAreaSqFt)} sq ft`}
-                       icon={<Ruler />}
+                      <StatCard
+                        title="Floor Area"
+                        value={`${formatNumber(floorArea)} ${selectedUnit?.symbol}²`}
+                        subtitle={`${formatNumber(floorAreaSqFt)} sq ft`}
+                        icon={<Ruler />}
                       />
 
-                    <StatCard
+                      <StatCard
                         title="Building Volume"
                         value={`${formatNumber(buildingVolume)} ${selectedUnit?.symbol}³`}
                         subtitle={`${formatNumber(buildingVolumeCuFt)} cu ft`}
                         icon={<Box />}
-                    />
-                  </div>
+                      />
+                    </div>
                   </div>
                 </section>
               </div>

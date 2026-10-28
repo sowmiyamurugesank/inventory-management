@@ -6,21 +6,17 @@ import { ArrowLeft, SlidersHorizontal } from "lucide-react";
 import StorageTable from "../component/StorageTable.jsx";
 import SearchBox from "../component/SearchBox.jsx";
 import Button from "../component/Button.jsx";
-import WarehouseTabs from "../component/WarehouseTabs.jsx";
 import WarehouseTypeForm from "../component/WarehouseTypeForm.jsx";
-import "../styles/WarehouseType.css";
 
+import "../styles/WarehouseType.css";
 
 const API_URL = "http://localhost:5000/api/warehouses";
 
-const TABS = ["Warehouse", "Warehouse Type", "Zone", "Zone Type"];
-
 const COLUMNS = [
-  { key: "name", label: "Warehouse Name" },
-  { key: "warehouseType", label: "Warehouse Type" },
-  { key: "typeCode", label: "Type Code" },
-  { key: "category", label: "Category" },
-  { key: "status", label: "Status" },
+  { key: "warehouseType", label: "Warehouse Type", editable: true },
+  { key: "typeCode", label: "Type Code", editable: true },
+  { key: "category", label: "Category", editable: true },
+  { key: "status", label: "Status", editable: false },
 ];
 
 const FILTER_FIELDS = [
@@ -31,6 +27,7 @@ const FILTER_FIELDS = [
 
 function normalizeWarehouse(row) {
   const type = row.warehouseType ?? row.warehouse_type ?? row.type;
+
   const typeObject =
     typeof type === "object" && type !== null ? type : {};
 
@@ -44,7 +41,8 @@ function normalizeWarehouse(row) {
       typeObject.typeName ||
       row.typeName ||
       "",
-    typeCode: row.typeCode ?? row.type_code ?? typeObject.code ?? "",
+    typeCode:
+      row.typeCode ?? row.type_code ?? typeObject.code ?? "",
     category: row.category ?? typeObject.category ?? "",
   };
 }
@@ -169,42 +167,66 @@ function WarehouseType() {
     }
   }
 
-  function handleTabChange(index) {
-    const paths = [
-      "/storage/warehouse",
-      "/storage/warehouse-type",
-      "/storage/zone",
-      "/storage/zone-type",
-    ];
-
-    if (paths[index]) {
-      navigate(paths[index]);
+  async function handleUpdateWarehouseType(id, updatedRow) {
+    if (id == null || id === "") {
+      throw new Error("Warehouse ID is missing.");
     }
+
+    setError("");
+
+    const response = await fetch(
+      `${API_URL}/${encodeURIComponent(id)}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          warehouseType: updatedRow.warehouseType,
+          typeCode: updatedRow.typeCode,
+          category: updatedRow.category,
+        }),
+      }
+    );
+
+    const result = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(
+        result.message || "Unable to update warehouse type."
+      );
+    }
+
+    const updatedRecord = result.warehouse ?? result;
+
+    setWarehouses((previous) =>
+      previous.map((row) =>
+        String(row.id ?? row._id) === String(id)
+          ? normalizeWarehouse({
+              ...row,
+              ...updatedRecord,
+              warehouseType:
+                updatedRecord.warehouseType ??
+                updatedRecord.warehouse_type ??
+                updatedRow.warehouseType,
+              typeCode:
+                updatedRecord.typeCode ??
+                updatedRecord.type_code ??
+                updatedRow.typeCode,
+              category:
+                updatedRecord.category ?? updatedRow.category,
+            })
+          : row
+      )
+    );
   }
 
-return (
-  <main className="warehouse-type-page">
-    <section className="warehouse-type-section">
-
-      <button
-        type="button"
-        className="warehouse-type-back-arrow"
-        onClick={() => navigate("/storage")}
-        aria-label="Back to Storage"
-        title="Back to Storage"
-      >
-        <ArrowLeft/>
-      </button>
-
-      <h2 className="warehouse-type-heading">
-        Warehouse Management
-      </h2>
-
-        <WarehouseTabs
-          tabs={TABS}
-          activeTab={1}
-          setActiveTab={handleTabChange}
-        />
+  return (
+    <main className="warehouse-type-page">
+      <section className="warehouse-type-section">
+        <h2 className="warehouse-type-heading">
+          Warehouse Management
+        </h2>
 
         <div className="warehouse-type-toolbar">
           <div className="warehouse-type-search">
@@ -245,7 +267,9 @@ return (
                 className="warehouse-type-filter-field"
                 key={key}
               >
-                <label htmlFor={`filter-${key}`}>{label}</label>
+                <label htmlFor={`filter-${key}`}>
+                  {label}
+                </label>
 
                 <input
                   id={`filter-${key}`}
@@ -281,6 +305,7 @@ return (
           <StorageTable
             warehouses={filteredWarehouses}
             columns={COLUMNS}
+            onUpdate={handleUpdateWarehouseType}
             showSerial
           />
         )}
@@ -289,7 +314,9 @@ return (
           <WarehouseTypeForm
             onSave={saveWarehouseType}
             onClose={() => {
-              if (!saving) setShowForm(false);
+              if (!saving) {
+                setShowForm(false);
+              }
             }}
             saving={saving}
           />
@@ -298,5 +325,4 @@ return (
     </main>
   );
 }
-
 export default WarehouseType;

@@ -9,36 +9,46 @@ import {
 
 import StatCard from "../StatCard.jsx";
 import WarehouseLocation from "./WarehouseLocation.jsx";
+import WarehouseType from "./WarehouseType.jsx";
+import Zone from "./Zone.jsx";
+import ZoneType from "./ZoneType.jsx";
 import IncomingStock from "./IncomingStock.jsx";
-import "../styles/Storage.css";
 import OutgoingStock from "./OutgoingStock.jsx";
+import WarehouseInventory from "./Warehouse Inventory.jsx";
+import DamagedGoods from "./DamagedGoods.jsx";
+
+import "../styles/Storage.css";
+
+const tabs = [
+  "Warehouse",
+  "Incoming Stock",
+  "Outgoing Stock",
+  "Warehouse Inventory",
+  "Damaged Goods",
+];
+
+const warehouseTabs = [
+  "Warehouse",
+  "Warehouse Type",
+  "Zone",
+  "Zone Type",
+];
 
 function Storage() {
   const [activeTab, setActiveTab] = useState("Warehouse");
-
-  const tabs = [
-    "Warehouse",
-    "Incoming Stock",
-    "Outgoing Stock",
-  ];
+  const [activeWarehouseTab, setActiveWarehouseTab] =
+    useState("Warehouse");
 
   return (
     <div className="storage-page">
-      <div className="storage-heading">
-        <div className="storage-heading-text">
-        </div>
-      </div>
-
       <div className="storage-tabs">
         {tabs.map((tab) => (
           <button
             key={tab}
             type="button"
-            className={
-              activeTab === tab
-                ? "storage-tab active"
-                : "storage-tab"
-            }
+            className={`storage-tab ${
+              activeTab === tab ? "active" : ""
+            }`}
             onClick={() => setActiveTab(tab)}
           >
             {tab}
@@ -47,45 +57,84 @@ function Storage() {
       </div>
 
       {activeTab === "Warehouse" && (
-        <div className="storage-summary">
-          <StatCard
-            title="Total Warehouses"
-            value="0"
-            icon={<Warehouse />}
-          />
+        <>
+          <div className="storage-summary">
+            <StatCard
+              title="Total Warehouses"
+              value="0"
+              icon={<Warehouse />}
+            />
+            <StatCard
+              title="Total Stock"
+              value="0"
+              icon={<Package />}
+            />
+            <StatCard
+              title="Incoming Stock"
+              value="0"
+              icon={<PackagePlus />}
+            />
+            <StatCard
+              title="Outgoing Stock"
+              value="0"
+              icon={<PackageMinus />}
+            />
+          </div>
 
-          <StatCard
-            title="Total Stock"
-            value="0"
-            icon={<Package />}
-          />
+          <div className="storage-content">
+            <div className="warehouse-tabs">
+              {warehouseTabs.map((tab) => (
+                <button
+                  key={tab}
+                  type="button"
+                  className={`warehouse-tab ${
+                    activeWarehouseTab === tab ? "active" : ""
+                  }`}
+                  onClick={() => setActiveWarehouseTab(tab)}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
 
-          <StatCard
-            title="Incoming Stock"
-            value="0"
-            icon={<PackagePlus />}
-          />
+            {activeWarehouseTab === "Warehouse" && (
+              <WarehouseLocation />
+            )}
 
-          <StatCard
-            title="Outgoing Stock"
-            value="0"
-            icon={<PackageMinus />}
-          />
+            {activeWarehouseTab === "Warehouse Type" && (
+              <WarehouseType />
+            )}
+
+            {activeWarehouseTab === "Zone" && <Zone />}
+
+            {activeWarehouseTab === "Zone Type" && <ZoneType />}
+          </div>
+        </>
+      )}
+
+      {activeTab === "Incoming Stock" && (
+        <div className="storage-content">
+          <IncomingStock />
         </div>
       )}
 
-      <div className="storage-content">
-        {activeTab === "Warehouse" && (
-          <WarehouseLocation />
-        )}
+      {activeTab === "Outgoing Stock" && (
+        <div className="storage-content">
+          <OutgoingStock />
+        </div>
+      )}
 
-        {activeTab === "Incoming Stock" && (
-          <IncomingStock />
-        )}
-           
-           {activeTab === "Outgoing Stock" && (<OutgoingStock />)}
-       
-      </div>
+      {activeTab === "Warehouse Inventory" && (
+        <div className="storage-content">
+          <WarehouseInventory />
+        </div>
+      )}
+
+      {activeTab === "Damaged Goods" && (
+        <div className="storage-content">
+          <DamagedGoods />
+        </div>
+      )}
     </div>
   );
 }

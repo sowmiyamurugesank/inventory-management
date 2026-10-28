@@ -1,3 +1,4 @@
+
 import { ArrowLeft, SlidersHorizontal } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -5,25 +6,17 @@ import { useNavigate } from "react-router-dom";
 import StorageTable from "../component/StorageTable.jsx";
 import SearchBox from "../component/SearchBox.jsx";
 import Button from "../component/Button.jsx";
-import WarehouseTabs from "../component/WarehouseTabs.jsx";
 import ZoneForm from "../component/ZoneForm.jsx";
 
 import "../styles/Zone.css";
 
 const API_URL = "http://localhost:5000/api/zones";
 
-const TABS = [
-  "Warehouse",
-  "Warehouse Type",
-  "Zone",
-  "Zone Type",
-];
-
 const COLUMNS = [
-  { key: "name", label: "Zone Name" },
-  { key: "zoneCode", label: "Zone Code" },
-  { key: "zoneType", label: "Zone Type" },
-  { key: "status", label: "Status" },
+  { key: "zoneCode", label: "Zone Code", editable: true },
+  { key: "name", label: "Zone Name", editable: true },
+  { key: "zoneType", label: "Zone Type", editable: true },
+  { key: "status", label: "Status", editable: false },
 ];
 
 const FILTER_FIELDS = [
@@ -35,10 +28,11 @@ const FILTER_FIELDS = [
 function normalizeZone(row) {
   return {
     ...row,
+    id: row.id ?? row._id,
     name: row.name ?? row.zoneName ?? row.zone_name ?? "",
     zoneCode: row.zoneCode ?? row.zone_code ?? row.code ?? "",
     zoneType: row.zoneType ?? row.zone_type ?? "",
-    status: row.status ?? true,
+    status: row.status ?? "Active",
   };
 }
 
@@ -67,7 +61,9 @@ function Zone() {
     }
 
     const data = await response.json();
-    const rows = Array.isArray(data) ? data : data.zones;
+    const rows = Array.isArray(data)
+      ? data
+      : data.zones ?? data.data;
 
     if (!Array.isArray(rows)) {
       throw new Error("Invalid zone data.");
@@ -162,40 +158,57 @@ function Zone() {
     }
   }
 
-  function handleTabChange(index) {
-    const paths = [
-      "/storage/warehouse",
-      "/storage/warehouse-type",
-      "/storage/zone",
-      "/storage/zone-type",
-    ];
-
-    if (paths[index]) {
-      navigate(paths[index]);
+  async function handleUpdateZone(id, updatedRow) {
+    if (id == null || id === "") {
+      throw new Error("Zone ID is missing.");
     }
+
+    const response = await fetch(
+      `${API_URL}/${encodeURIComponent(id)}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          zoneCode: updatedRow.zoneCode,
+          name: updatedRow.name,
+          zoneType: updatedRow.zoneType,
+        }),
+      }
+    );
+
+    const result = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(result.message || "Unable to update zone.");
+    }
+
+    const updatedRecord = result.zone ?? result.data ?? result;
+
+    setZones((previous) =>
+      previous.map((row) => {
+        const rowId = row.id ?? row._id;
+        const responseId = updatedRecord.id ?? updatedRecord._id ?? id;
+
+        if (String(rowId) !== String(responseId)) {
+          return row;
+        }
+
+        return normalizeZone({
+          ...row,
+          ...updatedRecord,
+          ...updatedRow,
+          id: rowId,
+        });
+      })
+    );
   }
 
   return (
     <main className="zone-page">
       <section className="zone-section">
-
-    <button
-      type="button"
-      className="zone-back-arrow"
-      onClick={() => navigate("/storage")}
-      aria-label="Back to Storage"
-      title="Back to Storage"
-    >
-      <ArrowLeft/>
-    </button>
-
-    <h2 className="zone-heading">Warehouse Management</h2>
-
-        <WarehouseTabs
-          tabs={TABS}
-          activeTab={2}
-          setActiveTab={handleTabChange}
-        />
+        <h2 className="zone-heading">Warehouse Management</h2>
 
         <div className="zone-toolbar">
           <div className="zone-search">
@@ -266,6 +279,7 @@ function Zone() {
           <StorageTable
             warehouses={filteredZones}
             columns={COLUMNS}
+            onUpdate={handleUpdateZone}
             showSerial
             emptyMessage="No zones found"
           />

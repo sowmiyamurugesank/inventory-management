@@ -5,8 +5,6 @@ import {
   Filter,
   CalendarDays,
   ChevronDown,
-  ChevronLeft,
-  ChevronRight,
   Package,
   CheckCircle,
   RotateCcw,
@@ -14,13 +12,38 @@ import {
 } from "lucide-react";
 
 import StatCard from "../StatCard.jsx";
+import StorageTable from "../component/StorageTable.jsx";
+import Pagination from "../component/Pagination.jsx";
+import Button from "../component/Button.jsx";
+
 import "../styles/IncomingStock.css";
 
-
 const API_URL = "http://localhost:5000/api/incoming-stock";
+const ITEMS_PER_PAGE = 10;
+
+const incomingStockColumns = [
+  { key: "date", label: "Date", editable: false },
+  { key: "product", label: "Product", editable: false },
+  { key: "supplier", label: "Supplier", editable: false },
+  { key: "quantity", label: "Quantity", editable: false },
+  { key: "warehouse", label: "Warehouse", editable: false },
+  { key: "invoiceNo", label: "Invoice No.", editable: false },
+  { key: "stockType", label: "Stock Type", editable: false },
+  { key: "status", label: "Status", editable: false },
+];
+
+function getValue(item, keys, fallback = "") {
+  for (const key of keys) {
+    if (item[key] !== undefined && item[key] !== null && item[key] !== "") {
+      return item[key];
+    }
+  }
+
+  return fallback;
+}
 
 function getStockType(item) {
-  return item.stockType || item.receivingType || item.type || "";
+  return getValue(item, ["stockType", "receivingType", "type"], "-");
 }
 
 function formatDate(value) {
@@ -57,8 +80,6 @@ function IncomingStock() {
   const [page, setPage] = useState(1);
   const [selectedRecord, setSelectedRecord] = useState(null);
 
-  const itemsPerPage = 10;
-
   useEffect(() => {
     const controller = new AbortController();
 
@@ -72,25 +93,23 @@ function IncomingStock() {
         });
 
         if (!response.ok) {
-          throw new Error(
-            `Request failed with status ${response.status}`
-          );
+          throw new Error(`Request failed: ${response.status}`);
         }
 
         const result = await response.json();
 
-        if (Array.isArray(result)) {
-          setData(result);
-        } else if (Array.isArray(result.data)) {
-          setData(result.data);
-        } else {
-          throw new Error("Unexpected data format from backend.");
-        }
+        const records = Array.isArray(result)
+          ? result
+          : Array.isArray(result.data)
+            ? result.data
+            : Array.isArray(result.incomingStock)
+              ? result.incomingStock
+              : [];
+
+        setData(records);
       } catch (err) {
         if (err.name !== "AbortError") {
-          setError(
-            "Unable to load incoming stock. Check your backend URL and server."
-          );
+          setError(err.message || "Unable to load incoming stock.");
         }
       } finally {
         if (!controller.signal.aborted) {
@@ -104,89 +123,126 @@ function IncomingStock() {
     return () => controller.abort();
   }, []);
 
-  const today = new Date();
+  const todayString = new Date().toLocaleDateString("en-CA");
 
-  const todayString = [
-    today.getFullYear(),
-    String(today.getMonth() + 1).padStart(2, "0"),
-    String(today.getDate()).padStart(2, "0"),
-  ].join("-");
+  const totalReceived = useMemo(() => {
+    return data.reduce((total, item) => {
+      return (
+        total +
+        (Number(getValue(item, ["quantity", "receivedQuantity", "qty"], 0)) || 0)
+      );
+    }, 0);
+  }, [data]);
 
-  const totalReceived = data.reduce(
-    (total, item) => total + (Number(item.quantity) || 0),
-    0
-  );
+  const receivedToday = useMemo(() => {
+    return data
+      .filter((item) => {
+        const itemDate = String(
+          getValue(item, ["date", "receivedDate", "createdAt"])
+        ).slice(0, 10);
 
-  const receivedToday = data
-    .filter(
-      (item) => String(item.date || "").slice(0, 10) === todayString
-    )
-    .reduce(
-      (total, item) => total + (Number(item.quantity) || 0),
-      0
-    );
+        return itemDate === todayString;
+      })
+      .reduce((total, item) => {
+        return (
+          total +
+          (Number(getValue(item, ["quantity", "receivedQuantity", "qty"], 0)) || 0)
+        );
+      }, 0);
+  }, [data, todayString]);
 
   const products = useMemo(
     () => [
-      ...new Set(data.map((item) => item.product).filter(Boolean)),
+      ...new Set(
+        data
+          .map((item) =>
+            getValue(item, ["product", "productName", "name"])
+          )
+          .filter(Boolean)
+      ),
     ],
     [data]
   );
 
   const suppliers = useMemo(
     () => [
-      ...new Set(data.map((item) => item.supplier).filter(Boolean)),
+      ...new Set(
+        data
+          .map((item) =>
+            getValue(item, ["supplier", "supplierName", "vendor"])
+          )
+          .filter(Boolean)
+      ),
     ],
     [data]
   );
 
   const warehouses = useMemo(
     () => [
-      ...new Set(data.map((item) => item.warehouse).filter(Boolean)),
+      ...new Set(
+        data
+          .map((item) =>
+            getValue(item, ["warehouse", "warehouseName", "location"])
+          )
+          .filter(Boolean)
+      ),
     ],
     [data]
   );
 
+  function changeFilter(setter, value) {
+    setter(value);
+    setPage(1);
+  }
+
   const filteredData = useMemo(() => {
     return data.filter((item) => {
-      const searchText = search.trim().toLowerCase();
+      const itemDate = String(
+        getValue(item, ["date", "receivedDate", "createdAt"])
+      ).slice(0, 10);
+
+      const itemProduct = getValue(item, ["product", "productName", "name"]);
+      const itemSupplier = getValue(item, ["supplier", "supplierName", "vendor"]);
+      const itemWarehouse = getValue(
+        item,
+        ["warehouse", "warehouseName", "location"]
+      );
+      const itemQuantity = getValue(
+        item,
+        ["quantity", "receivedQuantity", "qty"]
+      );
+      const itemInvoice = getValue(
+        item,
+        ["invoiceNo", "invoice", "invoiceNumber"]
+      );
+      const itemStatus = getValue(item, ["status"], "Received");
+      const itemType = getStockType(item);
 
       const searchableValues = [
-        item.date,
-        item.product,
-        item.supplier,
-        item.quantity,
-        item.warehouse,
-        item.invoiceNo,
-        item.invoice,
-        item.status,
-        getStockType(item),
+        itemDate,
+        itemProduct,
+        itemSupplier,
+        itemQuantity,
+        itemWarehouse,
+        itemInvoice,
+        itemStatus,
+        itemType,
       ];
+
+      const searchText = search.trim().toLowerCase();
 
       const matchesSearch = searchableValues.some((value) =>
         String(value ?? "").toLowerCase().includes(searchText)
       );
 
-      const itemDate = String(item.date || "").slice(0, 10);
-
-      const matchesFromDate = !fromDate || itemDate >= fromDate;
-      const matchesToDate = !toDate || itemDate <= toDate;
-      const matchesProduct = !product || item.product === product;
-      const matchesSupplier = !supplier || item.supplier === supplier;
-      const matchesWarehouse = !warehouse || item.warehouse === warehouse;
-
-      const matchesStockType =
-        !stockType ||
-        getStockType(item).toLowerCase() === stockType.toLowerCase();
-
       return (
         matchesSearch &&
-        matchesFromDate &&
-        matchesToDate &&
-        matchesProduct &&
-        matchesSupplier &&
-        matchesWarehouse &&
-        matchesStockType
+        (!fromDate || itemDate >= fromDate) &&
+        (!toDate || itemDate <= toDate) &&
+        (!product || itemProduct === product) &&
+        (!supplier || itemSupplier === supplier) &&
+        (!warehouse || itemWarehouse === warehouse) &&
+        (!stockType || itemType.toLowerCase() === stockType.toLowerCase())
       );
     });
   }, [
@@ -200,14 +256,52 @@ function IncomingStock() {
     stockType,
   ]);
 
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
+
   const safePage = Math.min(page, Math.max(totalPages, 1));
-  const startIndex = (safePage - 1) * itemsPerPage;
+
+  const startIndex = (safePage - 1) * ITEMS_PER_PAGE;
 
   const currentData = filteredData.slice(
     startIndex,
-    startIndex + itemsPerPage
+    startIndex + ITEMS_PER_PAGE
   );
+
+  const tableData = currentData.map((item, index) => ({
+    ...item,
+
+    id: item.id ?? item._id ?? `${startIndex + index}`,
+
+    date: formatDate(
+      getValue(item, ["date", "receivedDate", "createdAt"])
+    ),
+
+    product: getValue(item, ["product", "productName", "name"], "-"),
+
+    supplier: getValue(item, ["supplier", "supplierName", "vendor"], "-"),
+
+    quantity: Number(
+      getValue(item, ["quantity", "receivedQuantity", "qty"], 0)
+    ),
+
+    warehouse: getValue(
+      item,
+      ["warehouse", "warehouseName", "location"],
+      "-"
+    ),
+
+    invoiceNo: getValue(
+      item,
+      ["invoiceNo", "invoice", "invoiceNumber"],
+      "-"
+    ),
+
+    stockType: getStockType(item),
+
+    status: getValue(item, ["status"], "Received"),
+
+    originalRecord: item,
+  }));
 
   function resetFilters() {
     setSearch("");
@@ -220,60 +314,57 @@ function IncomingStock() {
     setPage(1);
   }
 
-  function changeFilter(setter, value) {
-    setter(value);
-    setPage(1);
+  function handleView(row) {
+    setSelectedRecord(row.originalRecord);
+  }
+
+  function closeModal() {
+    setSelectedRecord(null);
   }
 
   return (
     <div className="incoming-stock-page">
-      <div className="incoming-stock-heading">
-        <div>
-          <h1>Incoming Stock</h1>
-          <p>Manage stock received from suppliers</p>
-        </div>
-      </div>
-
       <div className="incoming-stock-summary">
         <StatCard
           title="Total Received"
           value={totalReceived.toLocaleString("en-IN")}
-          icon={<Package size={22} />}
+          icon={<Package/>}
         />
 
         <StatCard
           title="Received Today"
           value={receivedToday.toLocaleString("en-IN")}
-          icon={<CheckCircle size={22} />}
+          icon={<CheckCircle/>}
         />
       </div>
 
       <div className="incoming-stock-toolbar">
         <div className="incoming-search-box">
-          <Search size={18} />
+          <Search/>
 
           <input
             type="text"
             placeholder="Search product, supplier, invoice..."
             value={search}
-            onChange={(e) => changeFilter(setSearch, e.target.value)}
+            onChange={(event) =>
+              changeFilter(setSearch, event.target.value)
+            }
           />
         </div>
 
-        <button
-          type="button"
+        <Button
           className={`incoming-filter-button ${
             showFilters ? "filter-active" : ""
           }`}
           onClick={() => setShowFilters((value) => !value)}
         >
-          <Filter size={17} />
+          <Filter/>
           Filters
+
           <ChevronDown
-            size={16}
             className={showFilters ? "filter-chevron-open" : ""}
           />
-        </button>
+        </Button>
       </div>
 
       {showFilters && (
@@ -282,15 +373,15 @@ function IncomingStock() {
             <label htmlFor="incoming-from-date">From Date</label>
 
             <div className="incoming-date-input">
-              <CalendarDays size={16} />
+              <CalendarDays/>
 
               <input
                 id="incoming-from-date"
                 type="date"
                 value={fromDate}
                 max={toDate || undefined}
-                onChange={(e) =>
-                  changeFilter(setFromDate, e.target.value)
+                onChange={(event) =>
+                  changeFilter(setFromDate, event.target.value)
                 }
               />
             </div>
@@ -300,15 +391,15 @@ function IncomingStock() {
             <label htmlFor="incoming-to-date">To Date</label>
 
             <div className="incoming-date-input">
-              <CalendarDays size={16} />
+              <CalendarDays/>
 
               <input
                 id="incoming-to-date"
                 type="date"
                 value={toDate}
                 min={fromDate || undefined}
-                onChange={(e) =>
-                  changeFilter(setToDate, e.target.value)
+                onChange={(event) =>
+                  changeFilter(setToDate, event.target.value)
                 }
               />
             </div>
@@ -320,8 +411,8 @@ function IncomingStock() {
             <select
               id="incoming-product"
               value={product}
-              onChange={(e) =>
-                changeFilter(setProduct, e.target.value)
+              onChange={(event) =>
+                changeFilter(setProduct, event.target.value)
               }
             >
               <option value="">All Products</option>
@@ -340,8 +431,8 @@ function IncomingStock() {
             <select
               id="incoming-supplier"
               value={supplier}
-              onChange={(e) =>
-                changeFilter(setSupplier, e.target.value)
+              onChange={(event) =>
+                changeFilter(setSupplier, event.target.value)
               }
             >
               <option value="">All Suppliers</option>
@@ -360,8 +451,8 @@ function IncomingStock() {
             <select
               id="incoming-warehouse"
               value={warehouse}
-              onChange={(e) =>
-                changeFilter(setWarehouse, e.target.value)
+              onChange={(event) =>
+                changeFilter(setWarehouse, event.target.value)
               }
             >
               <option value="">All Warehouses</option>
@@ -380,8 +471,8 @@ function IncomingStock() {
             <select
               id="incoming-stock-type"
               value={stockType}
-              onChange={(e) =>
-                changeFilter(setStockType, e.target.value)
+              onChange={(event) =>
+                changeFilter(setStockType, event.target.value)
               }
             >
               <option value="">All Types</option>
@@ -390,159 +481,47 @@ function IncomingStock() {
             </select>
           </div>
 
-          <button
-            type="button"
+          <Button
             className="incoming-reset-button"
             onClick={resetFilters}
           >
-            <RotateCcw size={15} />
+            <RotateCcw/>
             Reset
-          </button>
+          </Button>
         </div>
       )}
 
       <div className="incoming-stock-table-card">
-        <div className="incoming-table-wrapper">
-          <table className="incoming-stock-table">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Product</th>
-                <th>Supplier</th>
-                <th>Quantity</th>
-                <th>Warehouse</th>
-                <th>Invoice No.</th>
-                <th>Stock Type</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan={9} className="incoming-table-message">
-                    Loading incoming stock...
-                  </td>
-                </tr>
-              ) : error ? (
-                <tr>
-                  <td colSpan={9} className="incoming-table-message">
-                    {error}
-                  </td>
-                </tr>
-              ) : currentData.length === 0 ? (
-                <tr>
-                  <td colSpan={9} className="incoming-table-message">
-                    No incoming stock records found.
-                  </td>
-                </tr>
-              ) : (
-                currentData.map((item, index) => {
-                  const status = item.status || "Received";
-                  const type = getStockType(item);
-
-                  return (
-                    <tr
-                      key={
-                        item.id ??
-                        item._id ??
-                        `${item.invoiceNo || item.invoice || "stock"}-${startIndex + index}`
-                      }
-                    >
-                      <td>{formatDate(item.date)}</td>
-
-                      <td className="incoming-product-cell">
-                        {item.product || "-"}
-                      </td>
-
-                      <td>{item.supplier || "-"}</td>
-
-                      <td className="incoming-quantity-cell">
-                        +{Number(item.quantity) || 0}
-                      </td>
-
-                      <td>{item.warehouse || "-"}</td>
-
-                      <td>{item.invoiceNo || item.invoice || "-"}</td>
-
-                      <td>
-                        {type ? (
-                          <span
-                            className={`incoming-type-badge ${type.toLowerCase()}`}
-                          >
-                            {type}
-                          </span>
-                        ) : (
-                          "-"
-                        )}
-                      </td>
-
-                      <td>
-                        <span
-                          className={`incoming-status-badge ${String(status)
-                            .toLowerCase()
-                            .replace(/[^a-z0-9]+/g, "-")
-                            .replace(/^-|-$/g, "")}`}
-                        >
-                          {status}
-                        </span>
-                      </td>
-
-                      <td className="incoming-actions-cell">
-                        <button
-                          type="button"
-                          className="incoming-view-button"
-                          onClick={() => setSelectedRecord(item)}
-                        >
-                          View
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
+        <StorageTable
+          warehouses={tableData}
+          columns={incomingStockColumns}
+          onView={handleView}
+          emptyMessage={
+            loading
+              ? "Loading incoming stock..."
+              : error || "No incoming stock records found."
+          }
+        />
 
         {!loading && !error && (
           <div className="incoming-stock-footer">
             <span className="pagination-info">
-              Showing {filteredData.length === 0 ? 0 : startIndex + 1}
+              Showing{" "}
+              {filteredData.length === 0 ? 0 : startIndex + 1}
               {" - "}
-              {Math.min(startIndex + itemsPerPage, filteredData.length)}
+              {Math.min(
+                startIndex + ITEMS_PER_PAGE,
+                filteredData.length
+              )}
               {" of "}
               {filteredData.length} records
             </span>
 
-            <div className="incoming-pagination">
-              <button
-                type="button"
-                className="pagination-btn"
-                disabled={safePage === 1}
-                onClick={() =>
-                  setPage((current) => Math.max(1, current - 1))
-                }
-                aria-label="Previous page"
-              >
-                <ChevronLeft className="pagination-icon" />
-              </button>
-
-              <span className="pagination-current">{safePage}</span>
-
-              <button
-                type="button"
-                className="pagination-btn"
-                disabled={totalPages === 0 || safePage >= totalPages}
-                onClick={() =>
-                  setPage((current) => Math.min(totalPages, current + 1))
-                }
-                aria-label="Next page"
-              >
-                <ChevronRight className="pagination-icon" />
-              </button>
-            </div>
+            <Pagination
+              currentPage={safePage}
+              totalPages={totalPages}
+              onPageChange={setPage}
+            />
           </div>
         )}
       </div>
@@ -550,87 +529,124 @@ function IncomingStock() {
       {selectedRecord && (
         <div
           className="incoming-modal-overlay"
-          onClick={() => setSelectedRecord(null)}
+          onClick={closeModal}
         >
           <div
             className="incoming-details-modal"
             role="dialog"
             aria-modal="true"
             aria-labelledby="incoming-details-title"
-            onClick={(e) => e.stopPropagation()}
+            onClick={(event) => event.stopPropagation()}
           >
             <div className="incoming-modal-header">
               <div>
                 <h2 id="incoming-details-title">
                   Incoming Stock Details
                 </h2>
+
                 <p>Stock transaction information</p>
               </div>
 
-              <button
-                type="button"
+              <Button
                 className="incoming-modal-close"
-                onClick={() => setSelectedRecord(null)}
+                onClick={closeModal}
                 aria-label="Close details"
               >
                 <X size={20} />
-              </button>
+              </Button>
             </div>
 
             <div className="incoming-details-grid">
               <div className="incoming-detail-item">
                 <span>Date</span>
-                <strong>{formatDate(selectedRecord.date)}</strong>
+                <strong>
+                  {formatDate(
+                    getValue(selectedRecord, [
+                      "date",
+                      "receivedDate",
+                      "createdAt",
+                    ])
+                  )}
+                </strong>
               </div>
 
               <div className="incoming-detail-item">
                 <span>Product</span>
-                <strong>{selectedRecord.product || "-"}</strong>
+                <strong>
+                  {getValue(
+                    selectedRecord,
+                    ["product", "productName", "name"],
+                    "-"
+                  )}
+                </strong>
               </div>
 
               <div className="incoming-detail-item">
                 <span>Supplier</span>
-                <strong>{selectedRecord.supplier || "-"}</strong>
+                <strong>
+                  {getValue(
+                    selectedRecord,
+                    ["supplier", "supplierName", "vendor"],
+                    "-"
+                  )}
+                </strong>
               </div>
 
               <div className="incoming-detail-item">
                 <span>Quantity</span>
-                <strong>{Number(selectedRecord.quantity) || 0}</strong>
+                <strong>
+                  {Number(
+                    getValue(
+                      selectedRecord,
+                      ["quantity", "receivedQuantity", "qty"],
+                      0
+                    )
+                  ) || 0}
+                </strong>
               </div>
 
               <div className="incoming-detail-item">
                 <span>Warehouse</span>
-                <strong>{selectedRecord.warehouse || "-"}</strong>
+                <strong>
+                  {getValue(
+                    selectedRecord,
+                    ["warehouse", "warehouseName", "location"],
+                    "-"
+                  )}
+                </strong>
               </div>
 
               <div className="incoming-detail-item">
                 <span>Invoice Number</span>
                 <strong>
-                  {selectedRecord.invoiceNo ||
-                    selectedRecord.invoice ||
-                    "-"}
+                  {getValue(
+                    selectedRecord,
+                    ["invoiceNo", "invoice", "invoiceNumber"],
+                    "-"
+                  )}
                 </strong>
               </div>
 
               <div className="incoming-detail-item">
                 <span>Stock Type</span>
-                <strong>{getStockType(selectedRecord) || "-"}</strong>
+                <strong>{getStockType(selectedRecord)}</strong>
               </div>
 
               <div className="incoming-detail-item">
                 <span>Status</span>
-                <strong>{selectedRecord.status || "Received"}</strong>
+                <strong>
+                  {getValue(selectedRecord, ["status"], "Received")}
+                </strong>
               </div>
             </div>
 
             <div className="incoming-modal-footer">
-              <button
-                type="button"
+              <Button
                 className="incoming-modal-done"
-                onClick={() => setSelectedRecord(null)}
+                onClick={closeModal}
               >
                 Close
-              </button>
+              </Button>
             </div>
           </div>
         </div>
