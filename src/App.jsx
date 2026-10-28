@@ -6,12 +6,6 @@ import Dashboard from "./Dashboard.jsx";
 import Product from "./pages/Product.jsx";
 import Storage from "./pages/Storage.jsx";
 import Billing  from "./pages/Billing.jsx";
-import WarehouseType from "./pages/WarehouseType.jsx";
-import Zone from "./pages/Zone.jsx";
-import ZoneType from "./pages/ZoneType.jsx";
-
-
-
 function Page({ title }) {
   return <h1>{title}</h1>;
 }
@@ -28,7 +22,7 @@ function App() {
           <Route path="products" element={<Product />} />
           <Route path="storage" element={<Storage />} />
          
-
+          <Route path="Billing" element={<Billing/>}/>
 
           
        

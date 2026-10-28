@@ -148,16 +148,6 @@
   cursor: pointer;
   transition: background 0.2s ease;
 }
-
-.warehouse-inventory-filter-btn:hover {
-  background: #efedff;
-}
-
-.warehouse-inventory-filter-btn.active {
-  background: #eeecff;
-  border-color: #c8c2ff;
-}
-
 .warehouse-inventory-filter-panel {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

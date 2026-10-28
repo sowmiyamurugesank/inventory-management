@@ -292,8 +292,6 @@ function WarehouseLocation() {
               placeholder="Search warehouse..."
             />
           </div>
-
-          <div className="warehouse-toolbar-actions">
             <Button
               type="button"
               className={`warehouse-filter-btn ${showFilters ? "active" : ""}`}
@@ -317,7 +315,6 @@ function WarehouseLocation() {
               + Add Warehouse
             </Button>
           </div>
-        </div>
 
         {showFilters && (
           <div className="warehouse-filter-panel">

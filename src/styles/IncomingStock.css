@@ -117,25 +117,16 @@
   align-items: center;
   justify-content: center;
   gap: 9px;
-  min-width: 118px;
+  min-width: 110px;
   height: 42px;
   padding: 0 14px;
   border: 1px solid #dedcf8;
   border-radius: 9px;
-  background: #f9f8ff;
-  color: #5144d8;
+  background-color: #5144d8;
+  color:white;
   font-size: 13px;
   cursor: pointer;
   transition: background 0.2s ease;
-}
-
-.incoming-filter-button:hover {
-  background: #efedff;
-}
-
-.incoming-filter-button.filter-active {
-  background: #eeecff;
-  border-color: #c8c2ff;
 }
 
 .filter-chevron-open {

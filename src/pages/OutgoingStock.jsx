@@ -282,39 +282,30 @@ function OutgoingStock() {
 
   const tableData = currentData.map((record, index) => ({
     ...record,
-
     id: record.id ?? record._id ?? `${startIndex + index}`,
-
     date: formatDate(
       getValue(record, ["date", "outgoingDate", "createdAt"])
     ),
-
     product: getValue(record, ["product", "productName", "name"], "-"),
-
     customer: getValue(
       record,
       ["customer", "customerName", "party", "partyName"],
       "-"
     ),
-
     quantity: Number(
       getValue(record, ["quantity", "outgoingQuantity", "qty"], 0)
     ),
-
     warehouse: getValue(
       record,
       ["warehouse", "warehouseName", "location"],
       "-"
     ),
-
     invoiceNo: getValue(
       record,
       ["invoiceNo", "invoice", "invoiceNumber"],
       "-"
     ),
-
     status: getValue(record, ["status"], "Pending"),
-
     originalRecord: record,
   }));
 
@@ -342,38 +333,35 @@ function OutgoingStock() {
 
   return (
     <div className="outgoing-stock-page">
-      <div className="outgoing-stock-heading">
-      </div>
-
       <div className="outgoing-stock-summary">
         <StatCard
           title="Total Outgoing"
           value={totalOutgoing.toLocaleString("en-IN")}
-          icon={<Package/>}
+          icon={<Package />}
         />
 
         <StatCard
           title="Pending"
           value={pendingCount.toLocaleString("en-IN")}
-          icon={<Clock/>}
+          icon={<Clock />}
         />
 
         <StatCard
           title="In Progress"
           value={inProgressCount.toLocaleString("en-IN")}
-          icon={<RotateCcw/>}
+          icon={<RotateCcw />}
         />
 
         <StatCard
           title="Completed"
           value={completedCount.toLocaleString("en-IN")}
-          icon={<CheckCircle/>}
+          icon={<CheckCircle />}
         />
       </div>
 
       <div className="outgoing-stock-toolbar">
         <div className="outgoing-search-box">
-          <Search/>
+          <Search />
 
           <input
             type="text"
@@ -391,9 +379,8 @@ function OutgoingStock() {
           }`}
           onClick={() => setShowFilters((value) => !value)}
         >
-          <Filter/>
+          <Filter />
           Filters
-
           <ChevronDown
             className={showFilters ? "filter-chevron-open" : ""}
           />
@@ -406,7 +393,7 @@ function OutgoingStock() {
             <label htmlFor="outgoing-date">Date</label>
 
             <div className="outgoing-date-input">
-              <CalendarDays/>
+              <CalendarDays size={16} />
 
               <input
                 id="outgoing-date"
@@ -430,7 +417,6 @@ function OutgoingStock() {
               }
             >
               <option value="">All Products</option>
-
               {products.map((item) => (
                 <option key={item} value={item}>
                   {item}
@@ -450,7 +436,6 @@ function OutgoingStock() {
               }
             >
               <option value="">All Customers</option>
-
               {customers.map((item) => (
                 <option key={item} value={item}>
                   {item}
@@ -476,13 +461,15 @@ function OutgoingStock() {
             </select>
           </div>
 
-          <Button
-            className="outgoing-reset-button"
-            onClick={resetFilters}
-          >
-            <RotateCcw/>
-            Reset
-          </Button>
+          <div className="outgoing-reset-wrapper">
+            <Button
+              className="outgoing-reset-button"
+              onClick={resetFilters}
+            >
+              <RotateCcw size={16} />
+              Reset
+            </Button>
+          </div>
         </div>
       )}
 
@@ -533,18 +520,13 @@ function OutgoingStock() {
             onClick={(event) => event.stopPropagation()}
           >
             <div className="outgoing-modal-header">
-              <div>
-                <h2 id="outgoing-details-title">
-                  Outgoing Stock Details
-                </h2>
-
-                <p>Stock transaction information</p>
-              </div>
+              <h2 id="outgoing-details-title">
+                Outgoing Stock Details
+              </h2>
 
               <Button
                 className="outgoing-modal-close"
                 onClick={closeModal}
-                aria-label="Close details"
               >
                 <X size={20} />
               </Button>
