@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import {
   Warehouse,
@@ -28,10 +27,10 @@ const tabs = [
 ];
 
 const warehouseTabs = [
-  "Warehouse",
   "Warehouse Type",
-  "Zone",
+  "Warehouse",
   "Zone Type",
+  "Zone",
 ];
 
 function Storage() {
@@ -97,17 +96,19 @@ function Storage() {
               ))}
             </div>
 
-            {activeWarehouseTab === "Warehouse" && (
-              <WarehouseLocation />
-            )}
-
             {activeWarehouseTab === "Warehouse Type" && (
               <WarehouseType />
             )}
 
-            {activeWarehouseTab === "Zone" && <Zone />}
+            {activeWarehouseTab === "Warehouse" && (
+              <WarehouseLocation />
+            )}
 
-            {activeWarehouseTab === "Zone Type" && <ZoneType />}
+            {activeWarehouseTab === "Zone Type" && (
+              <ZoneType />
+            )}
+
+            {activeWarehouseTab === "Zone" && <Zone />}
           </div>
         </>
       )}
