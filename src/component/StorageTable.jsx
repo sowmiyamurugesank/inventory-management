@@ -1,11 +1,12 @@
-
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "../styles/StorageTable.css";
 
 function StorageTable({
   warehouses = [],
   columns = [],
   onView,
+  viewLabel = "View",
+  onEdit,
   onDelete,
   onUpdate,
   onDamage,
@@ -16,48 +17,93 @@ function StorageTable({
   const [draft, setDraft] = useState({});
   const [saveStatus, setSaveStatus] = useState("");
   const [saveError, setSaveError] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
   const timerRef = useRef(null);
   const originalRef = useRef(null);
   const latestDraftRef = useRef({});
+  const savingRef = useRef(false);
 
+  // Check whether any action is available.
   const hasActions = Boolean(
-    onView || onDelete || onUpdate || onDamage
+    onEdit || onView || onDelete || onUpdate || onDamage
   );
 
   const totalColumns =
-    columns.length + (showSerial ? 1 : 0) + (hasActions ? 1 : 0);
+    columns.length +
+    (showSerial ? 1 : 0) +
+    (hasActions ? 1 : 0);
+
+  useEffect(() => {
+    return () => clearTimeout(timerRef.current);
+  }, []);
+
+  // -----------------------------------
+  // INLINE EDIT - Used by Warehouse
+  // -----------------------------------
 
   function startEdit(row) {
+    if (savingRef.current) return;
+
     clearTimeout(timerRef.current);
 
     const rowId = row.id ?? row._id;
 
-    setEditingId(rowId);
-    setDraft({ ...row });
     originalRef.current = { ...row };
-    latestDraftRef.current = { ...row };
 
+    const initialDraft = { ...row };
+
+    for (const column of columns) {
+      if (column.editKey) {
+        initialDraft[column.key] =
+          row[column.editKey] ??
+          row.custom_attributes?.[column.editKey] ??
+          "";
+      }
+    }
+
+    latestDraftRef.current = initialDraft;
+
+    setEditingId(rowId);
+    setDraft(initialDraft);
     setSaveStatus("");
     setSaveError("");
   }
 
-  async function saveRow(rowId, updatedRow) {
-    if (!onUpdate) return;
+  // -----------------------------------
+  // SAVE INLINE EDIT
+  // -----------------------------------
 
+  async function saveRow(rowId, updatedDraft) {
+    if (!onUpdate || savingRef.current) return false;
+
+    savingRef.current = true;
+    setIsSaving(true);
     setSaveStatus("saving");
     setSaveError("");
 
     try {
-      await onUpdate(rowId, updatedRow);
+      await onUpdate(rowId, updatedDraft);
 
-      originalRef.current = { ...updatedRow };
+      originalRef.current = { ...updatedDraft };
+
       setSaveStatus("saved");
+
+      return true;
     } catch (error) {
       setSaveStatus("error");
       setSaveError(error.message || "Unable to save changes.");
+
+      return false;
+    } finally {
+      savingRef.current = false;
+      setIsSaving(false);
     }
   }
+
+  // -----------------------------------
+  // HANDLE INLINE INPUT CHANGE
+  // -----------------------------------
 
   function handleChange(key, value) {
     const updatedDraft = {
@@ -66,6 +112,7 @@ function StorageTable({
     };
 
     latestDraftRef.current = updatedDraft;
+
     setDraft(updatedDraft);
     setSaveStatus("pending");
     setSaveError("");
@@ -79,26 +126,48 @@ function StorageTable({
     }, 800);
   }
 
+  // -----------------------------------
+  // CANCEL INLINE EDIT
+  // -----------------------------------
+
   function cancelEdit() {
+    if (savingRef.current) return;
+
     clearTimeout(timerRef.current);
 
     const original = originalRef.current || {};
 
     latestDraftRef.current = { ...original };
+
     setDraft({ ...original });
     setEditingId(null);
     setSaveStatus("");
     setSaveError("");
   }
 
+  // -----------------------------------
+  // KEYBOARD EVENTS
+  // -----------------------------------
+
   function handleKeyDown(event) {
     if (event.key === "Escape") {
       event.preventDefault();
       cancelEdit();
     }
+
+    if (event.key === "Enter" && event.target.tagName === "INPUT") {
+      event.preventDefault();
+      finishEdit();
+    }
   }
 
-  function finishEdit() {
+  // -----------------------------------
+  // FINISH INLINE EDIT
+  // -----------------------------------
+
+  async function finishEdit() {
+    if (savingRef.current) return;
+
     clearTimeout(timerRef.current);
 
     const rowId = editingId;
@@ -108,11 +177,19 @@ function StorageTable({
       JSON.stringify(currentDraft) !==
       JSON.stringify(originalRef.current)
     ) {
-      saveRow(rowId, currentDraft);
+      const saved = await saveRow(rowId, currentDraft);
+
+      if (!saved) return;
     }
 
     setEditingId(null);
+    setSaveStatus("");
+    setSaveError("");
   }
+
+  // -----------------------------------
+  // RENDER TABLE
+  // -----------------------------------
 
   return (
     <div className="storage-table-container">
@@ -122,7 +199,9 @@ function StorageTable({
             {showSerial && <th>S.No</th>}
 
             {columns.map((column) => (
-              <th key={column.key}>{column.label}</th>
+              <th key={column.key}>
+                {column.label}
+              </th>
             ))}
 
             {hasActions && <th>Actions</th>}
@@ -142,11 +221,16 @@ function StorageTable({
           ) : (
             warehouses.map((row, index) => {
               const rowId = row.id ?? row._id ?? index;
+
               const isEditing = editingId === rowId;
 
               return (
                 <tr key={rowId}>
-                  {showSerial && <td>{index + 1}</td>}
+                  {showSerial && (
+                    <td>{index + 1}</td>
+                  )}
+
+                  {/* TABLE DATA */}
 
                   {columns.map((column) => {
                     const value = isEditing
@@ -168,6 +252,7 @@ function StorageTable({
                             }
                             onKeyDown={handleKeyDown}
                             aria-label={`Edit ${column.label}`}
+                            disabled={saveStatus === "saving"}
                           />
                         ) : column.key === "status" ? (
                           <span
@@ -191,27 +276,51 @@ function StorageTable({
                     );
                   })}
 
+                  {/* ACTIONS */}
+
                   {hasActions && (
                     <td>
                       <div className="warehouse-actions">
-                        {onUpdate &&
-                          (isEditing ? (
+
+                        {/* FULL FORM EDIT - Used by Zone */}
+
+                        {onEdit && (
+                          <button
+                            type="button"
+                            className="view-btn"
+                            onClick={() => onEdit(row)}
+                          >
+                            Edit
+                          </button>
+                        )}
+
+                        {/* INLINE EDIT - Used by Warehouse */}
+
+                        {!onEdit && onUpdate && (
+                          isEditing ? (
                             <button
                               type="button"
                               className="view-btn"
                               onClick={finishEdit}
+                              disabled={saveStatus === "saving"}
                             >
-                              Done
+                              {saveStatus === "saving"
+                                ? "Saving..."
+                                : "Done"}
                             </button>
                           ) : (
                             <button
                               type="button"
                               className="view-btn"
                               onClick={() => startEdit(row)}
+                              disabled={isSaving}
                             >
                               Edit
                             </button>
-                          ))}
+                          )
+                        )}
+
+                        {/* VIEW */}
 
                         {onView && (
                           <button
@@ -219,9 +328,11 @@ function StorageTable({
                             className="view-btn"
                             onClick={() => onView(row)}
                           >
-                            View
+                            {viewLabel}
                           </button>
                         )}
+
+                        {/* DAMAGE REPORT */}
 
                         {onDamage && (
                           <button
@@ -233,23 +344,38 @@ function StorageTable({
                           </button>
                         )}
 
+                        {/* DELETE */}
+
                         {onDelete && (
                           <button
                             type="button"
                             className="delete-btn"
                             onClick={() => onDelete(rowId)}
+                            disabled={isSaving}
                           >
                             Delete
                           </button>
                         )}
                       </div>
 
+                      {/* INLINE SAVE STATUS */}
+
                       {isEditing && (
-                        <div className="inline-save-status">
-                          {saveStatus === "pending" && "Unsaved changes"}
-                          {saveStatus === "saving" && "Saving..."}
-                          {saveStatus === "saved" && "Saved"}
-                          {saveStatus === "error" && saveError}
+                        <div
+                          className="inline-save-status"
+                          role="status"
+                        >
+                          {saveStatus === "pending" &&
+                            "Unsaved changes"}
+
+                          {saveStatus === "saving" &&
+                            "Saving..."}
+
+                          {saveStatus === "saved" &&
+                            "Saved"}
+
+                          {saveStatus === "error" &&
+                            saveError}
                         </div>
                       )}
                     </td>

@@ -1,7 +1,6 @@
 
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft, SlidersHorizontal } from "lucide-react";
+import { SlidersHorizontal } from "lucide-react";
 
 import StorageTable from "../component/StorageTable.jsx";
 import SearchBox from "../component/SearchBox.jsx";
@@ -26,29 +25,186 @@ const FILTER_FIELDS = [
 ];
 
 function normalizeZoneType(row) {
+  const customAttributes =
+    row.custom_attributes ?? row.customAttributes ?? {};
+
+  const storageType =
+    row.storageType ?? row.storage_type ?? "";
+
   return {
     ...row,
+
+    id: row.id ?? row.zone_type_id ?? row.zoneTypeId ?? row._id,
+
     zoneTypeCode:
       row.zoneTypeCode ??
       row.typeCode ??
       row.zone_type_code ??
+      row.code ??
       "",
+
+    numericCode:
+      row.numericCode ??
+      row.code_int ??
+      "",
+
     zoneTypeName:
       row.zoneTypeName ??
       row.name ??
       row.zone_type_name ??
       "",
-    storageType:
-      row.storageType ??
-      row.storage_type ??
+
+    zonePurpose:
+      row.zonePurpose ??
+      row.zone_purpose ??
       "",
-    status: row.status ?? row.active ?? "",
+
+    storageType:
+      typeof storageType === "string"
+        ? storageType
+            .toLowerCase()
+            .replace(/_/g, " ")
+            .replace(/\b\w/g, (letter) => letter.toUpperCase())
+        : "",
+
+    temperatureControl:
+      row.temperatureControl ??
+      row.temperature_controlled ??
+      false,
+
+    minTemp:
+      row.minTemp ??
+      row.temperature_min ??
+      "",
+
+    maxTemp:
+      row.maxTemp ??
+      row.temperature_max ??
+      "",
+
+    tempUnit:
+      row.tempUnit ??
+      row.temperature_unit ??
+      "CELSIUS",
+
+    humidityControl:
+      row.humidityControl ??
+      row.humidity_controlled ??
+      false,
+
+    minHumidity:
+      row.minHumidity ??
+      row.humidity_min ??
+      "",
+
+    maxHumidity:
+      row.maxHumidity ??
+      row.humidity_max ??
+      "",
+
+    description: row.description ?? "",
+
+    status:
+      row.status ??
+      row.is_active ??
+      row.active ??
+      false,
+
+    availableForSelection:
+      customAttributes.available_for_selection ??
+      row.availableForSelection ??
+      true,
   };
 }
 
-function ZoneType() {
-  const navigate = useNavigate();
+function toApiZoneType(formData) {
+  return {
+    code: formData.zoneTypeCode?.trim(),
 
+    code_int:
+      formData.numericCode === "" || formData.numericCode == null
+        ? null
+        : Number(formData.numericCode),
+
+    name: formData.zoneTypeName?.trim(),
+
+    description: formData.description ?? "",
+
+    zone_purpose: formData.zonePurpose,
+
+    // Convert the UI label into the format expected by PostgreSQL.
+    storage_type: formData.storageType
+      ?.trim()
+      .toUpperCase()
+      .replace(/\s+/g, "_"),
+
+    temperature_controlled: Boolean(formData.temperatureControl),
+
+    temperature_min: formData.temperatureControl
+      ? Number(formData.minTemp)
+      : null,
+
+    temperature_max: formData.temperatureControl
+      ? Number(formData.maxTemp)
+      : null,
+
+    temperature_unit: formData.tempUnit
+      ?.trim()
+      .toUpperCase(),
+
+    humidity_controlled: Boolean(formData.humidityControl),
+
+    humidity_min: formData.humidityControl
+      ? Number(formData.minHumidity)
+      : null,
+
+    humidity_max: formData.humidityControl
+      ? Number(formData.maxHumidity)
+      : null,
+
+    is_active: Boolean(formData.status),
+
+    custom_attributes: {
+      available_for_selection: Boolean(
+        formData.availableForSelection
+      ),
+    },
+  };
+}
+
+function getZoneTypeRows(result) {
+  if (Array.isArray(result)) {
+    return result;
+  }
+
+  if (Array.isArray(result?.data)) {
+    return result.data;
+  }
+
+  if (Array.isArray(result?.zoneTypes)) {
+    return result.zoneTypes;
+  }
+
+  if (Array.isArray(result?.zone_types)) {
+    return result.zone_types;
+  }
+
+  throw new Error("Invalid zone type data.");
+}
+
+function getErrorMessage(result, fallback) {
+  if (typeof result?.error === "string") {
+    return result.error;
+  }
+
+  if (typeof result?.message === "string") {
+    return result.message;
+  }
+
+  return fallback;
+}
+
+function ZoneType() {
   const [zoneTypes, setZoneTypes] = useState([]);
   const [search, setSearch] = useState("");
   const [showFilters, setShowFilters] = useState(false);
@@ -63,39 +219,37 @@ function ZoneType() {
     storageType: "",
   });
 
-  async function loadZoneTypes() {
-    const response = await fetch(API_URL);
+  async function loadZoneTypes(signal) {
+    const response = await fetch(API_URL, { signal });
 
-    if (!response.ok) {
-      throw new Error("Unable to load zone type data.");
+    const result = await response.json().catch(() => ({}));
+
+    if (!response.ok || result?.success === false) {
+      throw new Error(
+        getErrorMessage(result, "Unable to load zone type data.")
+      );
     }
 
-    const data = await response.json();
-
-    const rows = Array.isArray(data)
-      ? data
-      : data.zoneTypes ?? data.zone_types;
-
-    if (!Array.isArray(rows)) {
-      throw new Error("Invalid zone type data.");
-    }
+    const rows = getZoneTypeRows(result);
 
     setZoneTypes(rows.map(normalizeZoneType));
   }
 
   useEffect(() => {
-    let active = true;
+    const controller = new AbortController();
 
     async function fetchData() {
       try {
         setError("");
-        await loadZoneTypes();
+        await loadZoneTypes(controller.signal);
       } catch (err) {
-        if (active) {
-          setError(err.message || "Unable to load zone types.");
+        if (err.name !== "AbortError") {
+          setError(
+            err.message || "Unable to load zone types."
+          );
         }
       } finally {
-        if (active) {
+        if (!controller.signal.aborted) {
           setLoading(false);
         }
       }
@@ -103,9 +257,7 @@ function ZoneType() {
 
     fetchData();
 
-    return () => {
-      active = false;
-    };
+    return () => controller.abort();
   }, []);
 
   const filteredZoneTypes = useMemo(() => {
@@ -132,6 +284,7 @@ function ZoneType() {
 
   function clearFilters() {
     setSearch("");
+
     setFilters({
       zoneTypeName: "",
       zoneTypeCode: "",
@@ -146,26 +299,29 @@ function ZoneType() {
     setError("");
 
     try {
+      const payload = toApiZoneType(formData);
+
       const response = await fetch(API_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       const result = await response.json().catch(() => ({}));
 
-      if (!response.ok) {
+      if (!response.ok || result?.success === false) {
         throw new Error(
-          result.message || "Unable to save zone type."
+          getErrorMessage(result, "Unable to save zone type.")
         );
       }
 
       await loadZoneTypes();
+
       setShowForm(false);
     } catch (err) {
-      setError(err.message || "Something went wrong.");
+      setError(err.message || "Unable to save zone type.");
       throw err;
     } finally {
       setSaving(false);
@@ -179,6 +335,32 @@ function ZoneType() {
 
     setError("");
 
+    const existingRow = zoneTypes.find(
+      (row) => String(row.id) === String(id)
+    );
+
+    const mergedFormData = {
+      ...existingRow,
+      ...updatedRow,
+
+      zoneTypeCode:
+        updatedRow.zoneTypeCode ??
+        existingRow?.zoneTypeCode ??
+        "",
+
+      zoneTypeName:
+        updatedRow.zoneTypeName ??
+        existingRow?.zoneTypeName ??
+        "",
+
+      storageType:
+        updatedRow.storageType ??
+        existingRow?.storageType ??
+        "AMBIENT",
+    };
+
+    const payload = toApiZoneType(mergedFormData);
+
     const response = await fetch(
       `${API_URL}/${encodeURIComponent(id)}`,
       {
@@ -186,50 +368,64 @@ function ZoneType() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          zoneTypeCode: updatedRow.zoneTypeCode,
-          zoneTypeName: updatedRow.zoneTypeName,
-          storageType: updatedRow.storageType,
-        }),
+        body: JSON.stringify(payload),
       }
     );
 
     const result = await response.json().catch(() => ({}));
 
-    if (!response.ok) {
+    if (!response.ok || result?.success === false) {
       throw new Error(
-        result.message || "Unable to update zone type."
+        getErrorMessage(result, "Unable to update zone type.")
       );
     }
 
-    const updatedRecord =
-      result.zoneType ?? result.zone_type ?? result;
-
-    setZoneTypes((previous) =>
-      previous.map((row) =>
-        String(row.id ?? row._id) === String(id)
-          ? normalizeZoneType({
-              ...row,
-              ...updatedRecord,
-              zoneTypeCode:
-                updatedRecord.zoneTypeCode ??
-                updatedRecord.typeCode ??
-                updatedRecord.zone_type_code ??
-                updatedRow.zoneTypeCode,
-              zoneTypeName:
-                updatedRecord.zoneTypeName ??
-                updatedRecord.name ??
-                updatedRecord.zone_type_name ??
-                updatedRow.zoneTypeName,
-              storageType:
-                updatedRecord.storageType ??
-                updatedRecord.storage_type ??
-                updatedRow.storageType,
-            })
-          : row
-      )
-    );
+    await loadZoneTypes();
   }
+
+async function handleDeleteZoneType(id) {
+  if (!id) {
+    setError("Zone Type ID is missing.");
+    return;
+  }
+
+  // Ask for confirmation before deleting.
+  const confirmed = window.confirm(
+    "Are you sure you want to delete this zone type?"
+  );
+
+  if (!confirmed) return;
+
+  setError("");
+
+  try {
+    const response = await fetch(
+      `${API_URL}/${encodeURIComponent(id)}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    const result = await response.json().catch(() => ({}));
+
+    if (!response.ok || result.success !== true) {
+      throw new Error(
+        getErrorMessage(result, "Unable to delete zone type.")
+      );
+    }
+
+    // Remove the successfully deleted record from the table.
+    setZoneTypes((previous) =>
+      previous.filter((row) => String(row.id) !== String(id))
+    );
+  } catch (err) {
+    setError(err.message || "Unable to delete zone type.");
+  }
+}
+
 
   return (
     <main className="zone-type-page">
@@ -308,9 +504,29 @@ function ZoneType() {
         )}
 
         {error && (
-          <p className="zone-type-message" role="alert">
-            {error}
-          </p>
+          <div className="zone-type-message" role="alert">
+            <span>{error}</span>
+
+            <Button
+              type="button"
+              onClick={async () => {
+                setLoading(true);
+                setError("");
+
+                try {
+                  await loadZoneTypes();
+                } catch (err) {
+                  setError(
+                    err.message || "Unable to load zone types."
+                  );
+                } finally {
+                  setLoading(false);
+                }
+              }}
+            >
+              Retry
+            </Button>
+          </div>
         )}
 
         {loading ? (
@@ -318,13 +534,17 @@ function ZoneType() {
             Loading zone types...
           </p>
         ) : (
-          <StorageTable
-            warehouses={filteredZoneTypes}
-            columns={COLUMNS}
-            onUpdate={handleUpdateZoneType}
-            showSerial
-            emptyMessage="No zone types found"
-          />
+  
+<StorageTable
+  warehouses={filteredZoneTypes}
+  columns={COLUMNS}
+  onUpdate={handleUpdateZoneType}
+  onDelete={handleDeleteZoneType}
+  showSerial
+  emptyMessage="No zone types found"
+/>
+
+
         )}
 
         {showForm && (

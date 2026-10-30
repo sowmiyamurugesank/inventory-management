@@ -7,12 +7,12 @@ const INITIAL_FORM = {
   zoneTypeCode: "",
   numericCode: 0,
   zoneTypeName: "",
-  zonePurpose: "",
-  storageType: "Ambient",
+  zonePurpose: "STORAGE",
+  storageType: "AMBIENT",
   temperatureControl: false,
   minTemp: -18,
   maxTemp: -10,
-  tempUnit: "Celsius (°C)",
+  tempUnit: "CELSIUS",
   humidityControl: false,
   minHumidity: 30,
   maxHumidity: 60,
@@ -22,23 +22,34 @@ const INITIAL_FORM = {
 };
 
 const ZONE_PURPOSES = [
-  "Storage",
-  "Receiving",
-  "Picking",
-  "Packing",
-  "Dispatch",
+  { label: "General", value: "GENERAL" },
+  { label: "Receiving", value: "RECEIVING" },
+  { label: "Storage", value: "STORAGE" },
+  { label: "Picking", value: "PICKING" },
+  { label: "Packing", value: "PACKING" },
+  { label: "Dispatch", value: "DISPATCH" },
+  { label: "Staging", value: "STAGING" },
+  { label: "Returns", value: "RETURNS" },
+  { label: "Quarantine", value: "QUARANTINE" },
 ];
 
 const STORAGE_TYPES = [
-  "Ambient",
-  "Refrigerated",
-  "Frozen",
-  "Hazardous",
+  { label: "Ambient", value: "AMBIENT" },
+  { label: "Warm", value: "WARM" },
+  { label: "Cold / Refrigerated", value: "COLD" },
+  { label: "Frozen", value: "FROZEN" },
+  {
+    label: "Controlled Temperature",
+    value: "CONTROLLED_TEMPERATURE",
+  },
+  { label: "Hazardous", value: "HAZARDOUS" },
+  { label: "Dry Storage", value: "DRY_STORAGE" },
+  { label: "General", value: "GENERAL" },
 ];
 
 const TEMP_UNITS = [
-  "Celsius (°C)",
-  "Fahrenheit (°F)",
+  { label: "Celsius (°C)", value: "CELSIUS" },
+  { label: "Fahrenheit (°F)", value: "FAHRENHEIT" },
 ];
 
 function ZoneTypeForm({ onSave, onClose, saving = false }) {
@@ -224,10 +235,10 @@ function ZoneTypeForm({ onSave, onClose, saving = false }) {
                 </option>
 
                 {ZONE_PURPOSES.map((purpose) => (
-                  <option key={purpose} value={purpose}>
-                    {purpose}
-                  </option>
-                ))}
+  <option key={purpose.value} value={purpose.value}>
+    {purpose.label}
+  </option>
+))}
               </select>
             </div>
 
@@ -245,10 +256,10 @@ function ZoneTypeForm({ onSave, onClose, saving = false }) {
                 disabled={saving}
               >
                 {STORAGE_TYPES.map((type) => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
-                ))}
+  <option key={type.value} value={type.value}>
+    {type.label}
+  </option>
+))}
               </select>
             </div>
           </div>
@@ -307,11 +318,11 @@ function ZoneTypeForm({ onSave, onClose, saving = false }) {
                     onChange={handleChange}
                     disabled={saving}
                   >
-                    {TEMP_UNITS.map((unit) => (
-                      <option key={unit} value={unit}>
-                        {unit}
-                      </option>
-                    ))}
+                   {TEMP_UNITS.map((unit) => (
+  <option key={unit.value} value={unit.value}>
+    {unit.label}
+  </option>
+))}
                   </select>
                 </div>
               </div>

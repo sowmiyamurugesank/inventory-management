@@ -14,28 +14,33 @@ const WAREHOUSE_OPERATIONS = {
       data.pageSize ?? 50,
     ],
   },
-
-  DELETE: {
-    sql: `
-    SELECT public.delete_warehouse(
+  UPDATE: {
+    sql: `     SELECT public.update_warehouse(
       $1::uuid,
-      $2::uuid
+      $2::jsonb
     ) AS result
   `,
+    params: (data) => [data.id, JSON.stringify(data.data)],
+  },
+
+  DELETE: {
+    sql: `       SELECT public.delete_warehouse(
+        $1::uuid,
+        $2::uuid
+      ) AS result
+    `,
     params: (data) => [data.id, data.deletedBy ?? null],
   },
 };
 
 async function executeFunction(client, functionName, data) {
   const allowedFunctions = new Set([
-    "create_warehouse_type",
-    "create_warehouse_zone_type",
     "create_warehouse",
     "create_warehouse_zone",
   ]);
 
   if (!allowedFunctions.has(functionName)) {
-    throw new Error("Unsupported warehouse database function.");
+    throw new Error(`Unsupported warehouse database function: ${functionName}`);
   }
 
   const { rows } = await client.query(
@@ -46,136 +51,128 @@ async function executeFunction(client, functionName, data) {
   const result = rows[0]?.result;
 
   if (!result?.success || !result.data) {
-    throw new Error(result?.error || `${functionName} failed.`);
+    throw new Error(
+      result?.error ?? `${functionName} failed without an error message.`,
+    );
   }
 
   return result.data;
 }
 
-const FACILITY_CATEGORY_MAP = {
-  "General Warehouse": "DISTRIBUTION_CENTER",
-  "Distribution Center": "DISTRIBUTION_CENTER",
-  "Fulfillment Center": "FULFILLMENT_CENTER",
-  "Regional Hub": "REGIONAL_HUB",
-  "Retail Outlet": "RETAIL_OUTLET",
-  "Bonded Warehouse": "BONDED_WAREHOUSE",
-  "Cross Dock": "CROSS_DOCK",
-  Other: "OTHER",
-};
+function validateWarehouseData(data) {
+  if (!data || typeof data !== "object" || Array.isArray(data)) {
+    throw new Error("Warehouse form data must be an object.");
+  }
+
+  const requiredFields = [
+    "code",
+    "name",
+    "warehouseTypeId",
+    "totalCapacity",
+    "capacityUnit",
+  ];
+
+  for (const field of requiredFields) {
+    const value = data[field];
+
+    if (value === undefined || value === null || String(value).trim() === "") {
+      throw new Error(`Required warehouse field is missing: ${field}`);
+    }
+  }
+
+  if (
+    !Number.isFinite(Number(data.totalCapacity)) ||
+    Number(data.totalCapacity) < 0
+  ) {
+    throw new Error("Total capacity must be a valid non-negative number.");
+  }
+}
 
 async function createCompleteWarehouse(data) {
+  validateWarehouseData(data);
+
   const client = await pool.connect();
 
   try {
     await client.query("BEGIN");
 
-    // 1. Create the warehouse type.
-    const warehouseType = await executeFunction(
-      client,
-      "create_warehouse_type",
-      {
-        code: data.typeCode,
-        code_int: data.typeNumericCode,
-        name: data.typeName,
-        description: data.typeDescription,
+    const warehouseLength = data.length ?? data.warehouseLength ?? null;
 
-        facility_category:
-          FACILITY_CATEGORY_MAP[data.facilityCategory] ?? data.facilityCategory,
+    const warehouseWidth = data.width ?? data.warehouseWidth ?? null;
 
-        is_active: data.typeActive,
+    const warehouseHeight = data.height ?? data.warehouseHeight ?? null;
 
-        custom_attributes: {
-          available_for_selection: data.typeAvailable,
-        },
-      },
-    );
+    const dimensionUnit =
+      data.dimensionUnit === "Feet" || data.dimensionUnit === "FT" ? "FT" : "M";
 
-    // 2. Create the warehouse zone type.
-    const zoneType = await executeFunction(
-      client,
-      "create_warehouse_zone_type",
-      {
-        code: data.zoneTypeCode,
-        code_int: data.zoneTypeNumericCode,
-        name: data.zoneTypeName,
-        description: data.zoneTypeDescription,
-        zone_purpose: String(data.zonePurpose || "STORAGE").toUpperCase(),
-        storage_type: String(data.storageType || "AMBIENT").toUpperCase(),
-        temperature_controlled: Boolean(data.temperatureControl),
-        temperature_min: data.temperatureControl
-          ? data.minimumTemperature
-          : null,
-        temperature_max: data.temperatureControl
-          ? data.maximumTemperature
-          : null,
-        temperature_unit: String(
-          data.temperatureUnit || "CELSIUS",
-        ).toUpperCase(),
-        humidity_controlled: Boolean(data.humidityControl),
-        humidity_min: data.humidityControl ? data.minimumHumidity : null,
-        humidity_max: data.humidityControl ? data.maximumHumidity : null,
-        requires_special_handling: Boolean(data.specialHandling),
-        is_active: data.zoneTypeActive,
-        custom_attributes: {
-          available_for_selection: data.zoneTypeAvailable,
-        },
-      },
-    );
-
-    // 3. Create the warehouse using the generated type UUID.
     const warehouse = await executeFunction(client, "create_warehouse", {
       code: data.code,
       code_int: data.codeInt ?? null,
       name: data.name,
-      description: data.description,
-      warehouse_type_id: warehouseType.id,
-      email: data.email,
-      phone: data.contactNumber,
-      total_capacity: data.totalCapacity,
+      description: data.description ?? null,
+
+      warehouse_type_id: data.warehouseTypeId,
+
+      email: data.email ?? null,
+      phone: data.contactNumber ?? data.phone ?? null,
+
+      total_capacity: Number(data.totalCapacity),
       capacity_unit: data.capacityUnit,
+
       occupied_capacity: 0,
       capacity_status: "EMPTY",
+
       operating_hours: {
-        opening_time: data.openingTime,
-        closing_time: data.closingTime,
-        working_days: data.workingDays,
+        opening_time: data.openingTime ?? null,
+        closing_time: data.closingTime ?? null,
+        working_days: data.workingDays ?? [],
       },
-      warehouse_length: data.warehouseLength ?? null,
-      warehouse_width: data.warehouseWidth ?? null,
-      warehouse_height: data.warehouseHeight ?? null,
-      dimension_unit: "M",
+
+      warehouse_length: warehouseLength,
+      warehouse_width: warehouseWidth,
+      warehouse_height: warehouseHeight,
+      dimension_unit: dimensionUnit,
+
       status: "active",
-      is_active: data.active,
+      is_active: data.active ?? true,
       is_verified: false,
+
       custom_attributes: {
-        manager_name: data.managerName,
-        location_code: data.locationCode,
-        address_line_1: data.addressLine1,
-        address_line_2: data.addressLine2,
-        city: data.city,
-        state: data.state,
-        country: data.country,
-        postal_code: data.postalCode,
+        manager_name: data.managerName ?? null,
+        location_code: data.locationCode ?? null,
+        address_line_1: data.addressLine1 ?? null,
+        address_line_2: data.addressLine2 ?? null,
+        city: data.city ?? null,
+        state: data.state ?? null,
+        country: data.country ?? null,
+        postal_code: data.postalCode ?? null,
       },
     });
 
-    // 4. Create each warehouse zone.
     const zones = [];
 
     for (const [index, zone] of (data.zones ?? []).entries()) {
+      if (!zone.zoneTypeId) {
+        throw new Error(`Zone type ID is required for zone ${index + 1}.`);
+      }
+
       const createdZone = await executeFunction(
         client,
         "create_warehouse_zone",
         {
           warehouse_id: warehouse.id,
-          warehouse_zone_type_id: zoneType.id,
+          warehouse_zone_type_id: zone.zoneTypeId,
+
           code: zone.zoneCode,
           code_int: zone.codeInt ?? null,
           name: zone.zoneName,
-          floor_level: zone.floorLevel,
+
+          floor_level: zone.floorLevel ?? 0,
           zone_sequence: index + 1,
+
           maximum_capacity: zone.maximumCapacity,
           capacity_unit: zone.capacityUnit,
+
           is_active: true,
           custom_attributes: {},
         },
@@ -190,7 +187,6 @@ async function createCompleteWarehouse(data) {
       success: true,
       data: {
         ...warehouse,
-        warehouse_type: warehouseType,
         zones,
       },
       error: null,
@@ -201,6 +197,8 @@ async function createCompleteWarehouse(data) {
     } catch (rollbackError) {
       console.error("Warehouse transaction rollback failed:", rollbackError);
     }
+
+    console.error("Warehouse creation failed:", error.message);
 
     throw error;
   } finally {

@@ -10,7 +10,7 @@ import WarehouseTypeForm from "../component/WarehouseTypeForm.jsx";
 
 import "../styles/WarehouseType.css";
 
-const API_URL = "http://localhost:5000/api/warehouses";
+const API_URL = "http://localhost:5000/api/warehouse-types";
 
 const COLUMNS = [
   { key: "warehouseType", label: "Warehouse Type", editable: true },
@@ -26,26 +26,35 @@ const FILTER_FIELDS = [
 ];
 
 function normalizeWarehouse(row) {
-  const type = row.warehouseType ?? row.warehouse_type ?? row.type;
+return {
+...row,
 
-  const typeObject =
-    typeof type === "object" && type !== null ? type : {};
+id: row.id,
 
-  return {
-    ...row,
-    name: row.name ?? row.warehouseName ?? row.warehouse_name ?? "",
-    status: row.status ?? row.warehouseStatus ?? "",
-    warehouseType:
-      (typeof type === "string" ? type : "") ||
-      typeObject.name ||
-      typeObject.typeName ||
-      row.typeName ||
-      "",
-    typeCode:
-      row.typeCode ?? row.type_code ?? typeObject.code ?? "",
-    category: row.category ?? typeObject.category ?? "",
-  };
+warehouseType:
+  row.name ??
+  row.warehouseType ??
+  row.warehouse_type ??
+  "",
+
+typeCode:
+  row.code ??
+  row.typeCode ??
+  row.type_code ??
+  "",
+
+category:
+  row.facility_category ??
+  row.category ??
+  "",
+
+status:
+  row.status ??
+  (row.is_active ? "active" : "inactive"),
+
+};
 }
+
 
 function WarehouseType() {
   const navigate = useNavigate();
@@ -65,21 +74,22 @@ function WarehouseType() {
   });
 
   async function loadWarehouses() {
-    const response = await fetch(API_URL);
+const response = await fetch(API_URL);
 
-    if (!response.ok) {
-      throw new Error("Unable to load warehouse data.");
-    }
+const result = await response.json().catch(() => ({}));
 
-    const data = await response.json();
-    const rows = Array.isArray(data) ? data : data.warehouses;
+if (!response.ok || result.success !== true) {
+throw new Error(
+result.error || "Unable to load warehouse types."
+);
+}
 
-    if (!Array.isArray(rows)) {
-      throw new Error("Invalid warehouse data.");
-    }
+if (!Array.isArray(result.data)) {
+throw new Error("Invalid warehouse type response.");
+}
 
-    setWarehouses(rows.map(normalizeWarehouse));
-  }
+setWarehouses(result.data.map(normalizeWarehouse));
+}
 
   useEffect(() => {
     let active = true;
@@ -134,45 +144,133 @@ function WarehouseType() {
     });
   }
 
-  async function saveWarehouseType(formData) {
-    if (saving) return;
+async function saveWarehouseType(formData) {
+  if (saving) return;
 
-    setSaving(true);
-    setError("");
+  setSaving(true);
+  setError("");
 
-    try {
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+  try {
+    // Map each dropdown label to its corresponding database value.
 
-      const result = await response.json().catch(() => ({}));
+const FACILITY_CATEGORY_MAP = {
+  "General Warehouse": "GENERAL_WAREHOUSE",
+  "Distribution Center": "DISTRIBUTION_CENTER",
+  "Cold Storage": "COLD_STORAGE",
+  "Raw Materials": "RAW_MATERIALS",
+  "Finished Goods": "FINISHED_GOODS",
+};
 
-      if (!response.ok) {
-        throw new Error(
-          result.message || "Unable to save warehouse type."
-        );
-      }
 
-      await loadWarehouses();
-      setShowForm(false);
-    } catch (err) {
-      setError(err.message || "Something went wrong.");
-      throw err;
-    } finally {
-      setSaving(false);
+
+    const facilityCategory = FACILITY_CATEGORY_MAP[formData.category];
+
+    // Prepare the request payload for the backend.
+    const payload = {
+      code: formData.typeCode?.trim(),
+
+      code_int:
+        formData.numericCode === "" || formData.numericCode == null
+          ? null
+          : Number(formData.numericCode),
+
+      name: formData.warehouseType?.trim(),
+
+      description: formData.description?.trim() || null,
+
+      facility_category: facilityCategory,
+
+      is_active: Boolean(formData.status),
+
+      custom_attributes: {
+        available_for_selection: Boolean(
+          formData.availableForSelection
+        ),
+      },
+    };
+
+    // Validate required fields.
+    if (!payload.code || !payload.name) {
+      throw new Error(
+        "Type Code and Warehouse Type Name are required."
+      );
     }
+
+    if (!payload.facility_category) {
+      throw new Error("Please select a valid Facility Category.");
+    }
+
+    // Send the new warehouse type to the backend.
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const result = await response.json().catch(() => ({}));
+
+    if (!response.ok || result.success !== true) {
+      throw new Error(
+        result.error ||
+          result.message ||
+          "Unable to save warehouse type."
+      );
+    }
+
+    // Refresh the table with the latest database records.
+    await loadWarehouses();
+
+    // Close the form after a successful save.
+    setShowForm(false);
+  } catch (err) {
+    setError(err.message || "Something went wrong.");
+    throw err;
+  } finally {
+    setSaving(false);
+  }
+}
+
+
+
+
+async function handleUpdateWarehouseType(id, updatedRow) {
+  if (id == null || id === "") {
+    throw new Error("Warehouse Type ID is missing.");
   }
 
-  async function handleUpdateWarehouseType(id, updatedRow) {
-    if (id == null || id === "") {
-      throw new Error("Warehouse ID is missing.");
+  setError("");
+
+  try {
+    // Find the original warehouse type record.
+    const existingWarehouse = warehouses.find(
+      (row) => String(row.id) === String(id)
+    );
+
+    if (!existingWarehouse) {
+      throw new Error("Warehouse type not found. Please refresh.");
     }
 
-    setError("");
+    // Map frontend field names to PostgreSQL field names.
+    const payload = {
+      name: String(updatedRow.warehouseType ?? "").trim(),
+      code: String(updatedRow.typeCode ?? "").trim(),
+      facility_category: updatedRow.category,
+      version: existingWarehouse.version,
+    };
+
+    if (!payload.name) {
+      throw new Error("Warehouse type name cannot be empty.");
+    }
+
+    if (!payload.code) {
+      throw new Error("Type code cannot be empty.");
+    }
+
+    if (!payload.facility_category) {
+      throw new Error("Category cannot be empty.");
+    }
 
     const response = await fetch(
       `${API_URL}/${encodeURIComponent(id)}`,
@@ -181,45 +279,87 @@ function WarehouseType() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          warehouseType: updatedRow.warehouseType,
-          typeCode: updatedRow.typeCode,
-          category: updatedRow.category,
-        }),
+        body: JSON.stringify(payload),
       }
     );
 
     const result = await response.json().catch(() => ({}));
 
-    if (!response.ok) {
+    if (!response.ok || result.success !== true) {
       throw new Error(
-        result.message || "Unable to update warehouse type."
+        result.error ||
+          result.message ||
+          "Unable to update warehouse type."
       );
     }
 
-    const updatedRecord = result.warehouse ?? result;
+    if (!result.data) {
+      throw new Error("The server did not return the updated record.");
+    }
 
+    // Normalize the updated database record.
+    const updatedWarehouse = normalizeWarehouse(result.data);
+
+    // Update the table with the latest database values.
     setWarehouses((previous) =>
       previous.map((row) =>
-        String(row.id ?? row._id) === String(id)
-          ? normalizeWarehouse({
-              ...row,
-              ...updatedRecord,
-              warehouseType:
-                updatedRecord.warehouseType ??
-                updatedRecord.warehouse_type ??
-                updatedRow.warehouseType,
-              typeCode:
-                updatedRecord.typeCode ??
-                updatedRecord.type_code ??
-                updatedRow.typeCode,
-              category:
-                updatedRecord.category ?? updatedRow.category,
-            })
+        String(row.id) === String(id)
+          ? updatedWarehouse
           : row
       )
     );
+
+  } catch (err) {
+    setError(err.message || "Unable to update warehouse type.");
+    throw err;
   }
+}
+
+async function handleDeleteWarehouseType(id) {
+  if (!id) {
+    setError("Warehouse type ID is missing.");
+    return;
+  }
+
+  const confirmed = window.confirm(
+    "Are you sure you want to delete this warehouse type?"
+  );
+
+  if (!confirmed) return;
+
+  setError("");
+
+  try {
+    const response = await fetch(
+      `${API_URL}/${encodeURIComponent(id)}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    const result = await response.json().catch(() => ({}));
+
+    if (!response.ok || result.success !== true) {
+      throw new Error(
+        result.error ||
+          result.message ||
+          "Unable to delete warehouse type."
+      );
+    }
+
+    // Remove the deleted warehouse type from the displayed list.
+    setWarehouses((previous) =>
+      previous.filter((row) => String(row.id) !== String(id))
+    );
+  } catch (err) {
+    setError(err.message || "Unable to delete warehouse type.");
+  }
+}
+
+
 
   return (
     <main className="warehouse-type-page">
@@ -302,12 +442,14 @@ function WarehouseType() {
             Loading warehouse types...
           </p>
         ) : (
-          <StorageTable
-            warehouses={filteredWarehouses}
-            columns={COLUMNS}
-            onUpdate={handleUpdateWarehouseType}
-            showSerial
-          />
+<StorageTable
+  warehouses={filteredWarehouses}
+  columns={COLUMNS}
+  onUpdate={handleUpdateWarehouseType}
+  onDelete={handleDeleteWarehouseType}
+  showSerial
+/>
+
         )}
 
         {showForm && (

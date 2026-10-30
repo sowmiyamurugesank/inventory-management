@@ -4,6 +4,8 @@ import Button from "./Button.jsx";
 import "../styles/ZoneForm.css";
 
 const INITIAL_FORM = {
+  warehouseId: "",
+  warehouseZoneTypeId: "",
   zoneCode: "",
   zoneName: "",
   zoneType: "",
@@ -15,16 +17,6 @@ const INITIAL_FORM = {
   requireInspection: true,
 };
 
-const ZONE_TYPES = [
-  "Storage",
-  "Receiving",
-  "Picking",
-  "Packing",
-  "Dispatch",
-  "Returns",
-  "Quarantine",
-];
-
 const CAPACITY_UNITS = [
   "Units",
   "Pallets",
@@ -33,11 +25,67 @@ const CAPACITY_UNITS = [
   "Boxes",
 ];
 
-function ZoneForm({ onSave, onClose, saving = false }) {
+function ZoneForm({
+  warehouses = [],
+  zoneTypes = [],
+  initialData = null,
+  onSave,
+  onClose,
+  saving = false,
+}) {
   const [form, setForm] = useState({ ...INITIAL_FORM });
+
+  useEffect(() => {
+  if (!initialData) {
+    setForm({ ...INITIAL_FORM });
+    return;
+  }
+
+  setForm({
+    warehouseId: initialData.warehouse_id ?? "",
+
+    warehouseZoneTypeId:
+      initialData.warehouse_zone_type_id ?? "",
+
+    zoneCode:
+      initialData.code ??
+      initialData.zoneCode ??
+      "",
+
+    zoneName:
+      initialData.name ??
+      initialData.zoneName ??
+      "",
+
+    zoneType:
+      initialData.zoneType ??
+      initialData.zone_type_name ??
+      "",
+
+    floorLevel:
+      initialData.floor_level ?? 0,
+
+    maxCapacity:
+      initialData.maximum_capacity ?? "",
+
+    capacityUnit:
+      initialData.capacity_unit ?? "Units",
+
+    allowPicking:
+      initialData.is_pickable ?? true,
+
+    allowReceiving:
+      initialData.is_receivable ?? true,
+
+    requireInspection:
+      initialData.requires_inspection ?? true,
+  });
+
+  setError("");
+}, [initialData]);
   const [error, setError] = useState("");
 
-  // Escape key press pannina modal close aagum
+  // Close the modal when the Escape key is pressed.
   useEffect(() => {
     function handleEscape(event) {
       if (event.key === "Escape" && !saving) {
@@ -52,6 +100,7 @@ function ZoneForm({ onSave, onClose, saving = false }) {
     };
   }, [onClose, saving]);
 
+  // Handle text inputs, number inputs, and select fields.
   function handleChange(event) {
     const { name, value } = event.target;
 
@@ -61,6 +110,7 @@ function ZoneForm({ onSave, onClose, saving = false }) {
     }));
   }
 
+  // Handle checkbox changes.
   function handleCheckboxToggle(name) {
     setForm((previous) => ({
       ...previous,
@@ -68,6 +118,7 @@ function ZoneForm({ onSave, onClose, saving = false }) {
     }));
   }
 
+  // Submit the form.
   async function handleSubmit(event) {
     event.preventDefault();
 
@@ -75,9 +126,31 @@ function ZoneForm({ onSave, onClose, saving = false }) {
 
     setError("");
 
+    if (!form.warehouseId) {
+      setError("Please select a warehouse.");
+      return;
+    }
+
+    if (!form.warehouseZoneTypeId) {
+      setError("Please select a zone type.");
+      return;
+    }
+
+    if (!form.zoneCode.trim()) {
+      setError("Zone code is required.");
+      return;
+    }
+
+    if (!form.zoneName.trim()) {
+      setError("Zone name is required.");
+      return;
+    }
+
     try {
       await onSave({
         ...form,
+        zoneCode: form.zoneCode.trim(),
+        zoneName: form.zoneName.trim(),
         floorLevel: Number(form.floorLevel),
         maxCapacity:
           form.maxCapacity === ""
@@ -105,10 +178,9 @@ function ZoneForm({ onSave, onClose, saving = false }) {
         className="zone-modal"
         onSubmit={handleSubmit}
       >
+        {/* Modal Header */}
         <div className="zone-modal-header">
-          <div>
-            <h3>Zone Details</h3>
-          </div>
+          <h3>Zone Details</h3>
 
           <button
             type="button"
@@ -121,8 +193,11 @@ function ZoneForm({ onSave, onClose, saving = false }) {
           </button>
         </div>
 
+        {/* Form Body */}
         <div className="zone-form-body">
           <div className="zone-form-grid">
+
+            {/* Row 1: Zone Code */}
             <div className="zone-field">
               <label htmlFor="zoneCode">
                 Zone Code <span>*</span>
@@ -140,6 +215,7 @@ function ZoneForm({ onSave, onClose, saving = false }) {
               />
             </div>
 
+            {/* Row 1: Zone Name */}
             <div className="zone-field">
               <label htmlFor="zoneName">
                 Zone Name <span>*</span>
@@ -157,16 +233,61 @@ function ZoneForm({ onSave, onClose, saving = false }) {
               />
             </div>
 
+            {/* Row 2: Warehouse */}
             <div className="zone-field">
-              <label htmlFor="zoneType">
+              <label htmlFor="warehouseId">
+                Warehouse <span>*</span>
+              </label>
+
+              <select
+                id="warehouseId"
+                name="warehouseId"
+                value={form.warehouseId}
+                onChange={handleChange}
+                required
+                disabled={saving}
+              >
+                <option value="" disabled>
+                  Select warehouse
+                </option>
+
+                {warehouses.map((warehouse) => (
+                  <option
+                    key={warehouse.id}
+                    value={warehouse.id}
+                  >
+                    {warehouse.name ??
+                      warehouse.warehouse_name ??
+                      warehouse.code}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Row 2: Zone Type */}
+            <div className="zone-field">
+              <label htmlFor="warehouseZoneTypeId">
                 Zone Type <span>*</span>
               </label>
 
               <select
-                id="zoneType"
-                name="zoneType"
-                value={form.zoneType}
-                onChange={handleChange}
+                id="warehouseZoneTypeId"
+                name="warehouseZoneTypeId"
+                value={form.warehouseZoneTypeId}
+                onChange={(event) => {
+                  const selectedId = event.target.value;
+
+                  const selectedType = zoneTypes.find(
+                    (type) =>
+                      String(type.id) === selectedId
+                  );
+
+                  setForm((previous) => ({
+                    ...previous,
+                    warehouseZoneTypeId: selectedId,
+                    zoneType: selectedType?.name ?? "",
+                  }));
+                }}
                 required
                 disabled={saving}
               >
@@ -174,14 +295,18 @@ function ZoneForm({ onSave, onClose, saving = false }) {
                   Select zone type
                 </option>
 
-                {ZONE_TYPES.map((type) => (
-                  <option key={type} value={type}>
-                    {type}
+                {zoneTypes.map((type) => (
+                  <option
+                    key={type.id}
+                    value={type.id}
+                  >
+                    {type.name}
                   </option>
                 ))}
               </select>
             </div>
 
+            {/* Row 3: Floor Level */}
             <div className="zone-field">
               <label htmlFor="floorLevel">
                 Floor Level
@@ -198,6 +323,7 @@ function ZoneForm({ onSave, onClose, saving = false }) {
               />
             </div>
 
+            {/* Row 3: Maximum Capacity */}
             <div className="zone-field">
               <label htmlFor="maxCapacity">
                 Maximum Capacity
@@ -216,6 +342,7 @@ function ZoneForm({ onSave, onClose, saving = false }) {
               />
             </div>
 
+            {/* Row 4: Capacity Unit */}
             <div className="zone-field">
               <label htmlFor="capacityUnit">
                 Capacity Unit
@@ -235,8 +362,10 @@ function ZoneForm({ onSave, onClose, saving = false }) {
                 ))}
               </select>
             </div>
+
           </div>
 
+          {/* Zone Options */}
           <div className="zone-options">
             <h4>Zone Options</h4>
 
@@ -249,6 +378,7 @@ function ZoneForm({ onSave, onClose, saving = false }) {
                 }
                 disabled={saving}
               />
+
               <span>Allow picking</span>
             </label>
 
@@ -261,6 +391,7 @@ function ZoneForm({ onSave, onClose, saving = false }) {
                 }
                 disabled={saving}
               />
+
               <span>Allow receiving</span>
             </label>
 
@@ -273,17 +404,23 @@ function ZoneForm({ onSave, onClose, saving = false }) {
                 }
                 disabled={saving}
               />
+
               <span>Require inspection</span>
             </label>
           </div>
         </div>
 
+        {/* Validation / API Error */}
         {error && (
-          <p className="zone-form-error" role="alert">
+          <p
+            className="zone-form-error"
+            role="alert"
+          >
             {error}
           </p>
         )}
 
+        {/* Modal Footer */}
         <div className="zone-modal-actions">
           <Button
             type="button"
@@ -306,3 +443,4 @@ function ZoneForm({ onSave, onClose, saving = false }) {
 }
 
 export default ZoneForm;
+

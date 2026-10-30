@@ -13,6 +13,13 @@ export const warehouseService = {
     });
   },
 
+  async update(id, data) {
+    return warehouse("UPDATE", {
+      id,
+      data,
+    });
+  },
+
   async delete(id) {
     return warehouse("DELETE", {
       id,
