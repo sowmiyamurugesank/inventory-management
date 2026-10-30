@@ -55,7 +55,7 @@ export const zoneController = {
 
       const deletedBy = req.user?.id ?? null;
 
-      const result = await zoneService.remove(id, deletedBy);
+      const result = await zoneService.delete(id, deletedBy);
 
       return res.status(result.success ? 200 : 400).json(result);
     } catch (error) {

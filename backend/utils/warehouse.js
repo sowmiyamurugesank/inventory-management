@@ -2,7 +2,8 @@ import pool from "../config/db.js";
 
 const WAREHOUSE_OPERATIONS = {
   LIST: {
-    sql: `       SELECT public.list_warehouses(
+    sql: `
+      SELECT public.list_warehouses(
         $1::jsonb,
         $2::integer,
         $3::integer
@@ -14,17 +15,20 @@ const WAREHOUSE_OPERATIONS = {
       data.pageSize ?? 50,
     ],
   },
+
   UPDATE: {
-    sql: `     SELECT public.update_warehouse(
-      $1::uuid,
-      $2::jsonb
-    ) AS result
-  `,
+    sql: `
+      SELECT public.update_warehouse(
+        $1::uuid,
+        $2::jsonb
+      ) AS result
+    `,
     params: (data) => [data.id, JSON.stringify(data.data)],
   },
 
   DELETE: {
-    sql: `       SELECT public.delete_warehouse(
+    sql: `
+      SELECT public.delete_warehouse(
         $1::uuid,
         $2::uuid
       ) AS result
@@ -32,6 +36,10 @@ const WAREHOUSE_OPERATIONS = {
     params: (data) => [data.id, data.deletedBy ?? null],
   },
 };
+
+// --------------------------------------------------
+// Execute an allowed PostgreSQL database function
+// --------------------------------------------------
 
 async function executeFunction(client, functionName, data) {
   const allowedFunctions = new Set([
@@ -59,6 +67,133 @@ async function executeFunction(client, functionName, data) {
   return result.data;
 }
 
+// --------------------------------------------------
+// Normalize incoming warehouse data
+// Supports both camelCase and snake_case.
+// --------------------------------------------------
+
+function normalizeWarehouseData(data) {
+  const customAttributes =
+    data.custom_attributes ?? data.customAttributes ?? {};
+
+  const operatingHours = data.operating_hours ??
+    data.operatingHours ?? {
+      opening_time: data.openingTime ?? null,
+      closing_time: data.closingTime ?? null,
+      working_days: data.workingDays ?? [],
+    };
+
+  const warehouseTypeId = data.warehouse_type_id ?? data.warehouseTypeId;
+
+  const totalCapacity = data.total_capacity ?? data.totalCapacity;
+
+  const capacityUnit = data.capacity_unit ?? data.capacityUnit;
+
+  const warehouseLength =
+    data.warehouse_length ??
+    data.warehouseLength ??
+    data.length ??
+    customAttributes.length ??
+    null;
+
+  const warehouseWidth =
+    data.warehouse_width ??
+    data.warehouseWidth ??
+    data.width ??
+    customAttributes.width ??
+    null;
+
+  const warehouseHeight =
+    data.warehouse_height ??
+    data.warehouseHeight ??
+    data.height ??
+    customAttributes.height ??
+    null;
+
+  const rawDimensionUnit =
+    data.dimension_unit ??
+    data.dimensionUnit ??
+    customAttributes.dimension_unit ??
+    "M";
+
+  const dimensionUnit = ["Feet", "FT"].includes(rawDimensionUnit) ? "FT" : "M";
+
+  const isActive =
+    data.is_active ??
+    data.active ??
+    (data.status ? data.status !== "inactive" : true);
+
+  return {
+    code: data.code,
+    code_int: data.code_int ?? data.codeInt ?? null,
+
+    name: data.name,
+
+    description: data.description ?? customAttributes.description ?? null,
+
+    warehouse_type_id: warehouseTypeId,
+
+    email: data.email ?? null,
+
+    phone: data.phone ?? data.contactNumber ?? null,
+
+    total_capacity: totalCapacity,
+
+    capacity_unit: capacityUnit,
+
+    occupied_capacity: data.occupied_capacity ?? 0,
+
+    capacity_status: data.capacity_status ?? "EMPTY",
+
+    operating_hours: operatingHours,
+
+    warehouse_length: warehouseLength,
+    warehouse_width: warehouseWidth,
+    warehouse_height: warehouseHeight,
+
+    dimension_unit: dimensionUnit,
+
+    custom_attributes: {
+      ...customAttributes,
+
+      manager_name: customAttributes.manager_name ?? data.managerName ?? null,
+
+      location_code:
+        customAttributes.location_code ?? data.locationCode ?? null,
+
+      address_line_1:
+        customAttributes.address_line_1 ?? data.addressLine1 ?? null,
+
+      address_line_2:
+        customAttributes.address_line_2 ?? data.addressLine2 ?? null,
+
+      city: customAttributes.city ?? data.city ?? null,
+
+      state: customAttributes.state ?? data.state ?? null,
+
+      country: customAttributes.country ?? data.country ?? null,
+
+      postal_code: customAttributes.postal_code ?? data.postalCode ?? null,
+    },
+
+    status: data.status ?? (isActive ? "active" : "inactive"),
+
+    is_active: isActive,
+
+    is_verified: data.is_verified ?? false,
+
+    created_by: data.created_by ?? data.createdBy ?? null,
+
+    updated_by: data.updated_by ?? data.updatedBy ?? null,
+
+    zones: data.zones ?? [],
+  };
+}
+
+// --------------------------------------------------
+// Validate warehouse data
+// --------------------------------------------------
+
 function validateWarehouseData(data) {
   if (!data || typeof data !== "object" || Array.isArray(data)) {
     throw new Error("Warehouse form data must be an object.");
@@ -67,9 +202,9 @@ function validateWarehouseData(data) {
   const requiredFields = [
     "code",
     "name",
-    "warehouseTypeId",
-    "totalCapacity",
-    "capacityUnit",
+    "warehouse_type_id",
+    "total_capacity",
+    "capacity_unit",
   ];
 
   for (const field of requiredFields) {
@@ -81,78 +216,100 @@ function validateWarehouseData(data) {
   }
 
   if (
-    !Number.isFinite(Number(data.totalCapacity)) ||
-    Number(data.totalCapacity) < 0
+    !Number.isFinite(Number(data.total_capacity)) ||
+    Number(data.total_capacity) < 0
   ) {
     throw new Error("Total capacity must be a valid non-negative number.");
   }
+
+  if (
+    typeof data.operating_hours !== "object" ||
+    data.operating_hours === null ||
+    Array.isArray(data.operating_hours)
+  ) {
+    throw new Error("Operating hours must be a valid object.");
+  }
+
+  if (
+    typeof data.custom_attributes !== "object" ||
+    data.custom_attributes === null ||
+    Array.isArray(data.custom_attributes)
+  ) {
+    throw new Error("Custom attributes must be a valid object.");
+  }
 }
 
+// --------------------------------------------------
+// Create warehouse and optional zones in one transaction
+// --------------------------------------------------
+
 async function createCompleteWarehouse(data) {
-  validateWarehouseData(data);
+  const warehouseData = normalizeWarehouseData(data);
+
+  validateWarehouseData(warehouseData);
 
   const client = await pool.connect();
 
+  let transactionStarted = false;
+
   try {
     await client.query("BEGIN");
+    transactionStarted = true;
 
-    const warehouseLength = data.length ?? data.warehouseLength ?? null;
-
-    const warehouseWidth = data.width ?? data.warehouseWidth ?? null;
-
-    const warehouseHeight = data.height ?? data.warehouseHeight ?? null;
-
-    const dimensionUnit =
-      data.dimensionUnit === "Feet" || data.dimensionUnit === "FT" ? "FT" : "M";
+    // 1. Create the warehouse.
 
     const warehouse = await executeFunction(client, "create_warehouse", {
-      code: data.code,
-      code_int: data.codeInt ?? null,
-      name: data.name,
-      description: data.description ?? null,
+      code: warehouseData.code,
 
-      warehouse_type_id: data.warehouseTypeId,
+      code_int: warehouseData.code_int,
 
-      email: data.email ?? null,
-      phone: data.contactNumber ?? data.phone ?? null,
+      name: warehouseData.name,
 
-      total_capacity: Number(data.totalCapacity),
-      capacity_unit: data.capacityUnit,
+      description: warehouseData.description,
 
-      occupied_capacity: 0,
-      capacity_status: "EMPTY",
+      warehouse_type_id: warehouseData.warehouse_type_id,
 
-      operating_hours: {
-        opening_time: data.openingTime ?? null,
-        closing_time: data.closingTime ?? null,
-        working_days: data.workingDays ?? [],
-      },
+      email: warehouseData.email,
 
-      warehouse_length: warehouseLength,
-      warehouse_width: warehouseWidth,
-      warehouse_height: warehouseHeight,
-      dimension_unit: dimensionUnit,
+      phone: warehouseData.phone,
 
-      status: "active",
-      is_active: data.active ?? true,
-      is_verified: false,
+      total_capacity: Number(warehouseData.total_capacity),
 
-      custom_attributes: {
-        manager_name: data.managerName ?? null,
-        location_code: data.locationCode ?? null,
-        address_line_1: data.addressLine1 ?? null,
-        address_line_2: data.addressLine2 ?? null,
-        city: data.city ?? null,
-        state: data.state ?? null,
-        country: data.country ?? null,
-        postal_code: data.postalCode ?? null,
-      },
+      capacity_unit: warehouseData.capacity_unit,
+
+      occupied_capacity: warehouseData.occupied_capacity,
+
+      capacity_status: warehouseData.capacity_status,
+
+      operating_hours: warehouseData.operating_hours,
+
+      warehouse_length: warehouseData.warehouse_length,
+
+      warehouse_width: warehouseData.warehouse_width,
+
+      warehouse_height: warehouseData.warehouse_height,
+
+      dimension_unit: warehouseData.dimension_unit,
+
+      custom_attributes: warehouseData.custom_attributes,
+
+      status: warehouseData.status,
+
+      is_active: warehouseData.is_active,
+
+      is_verified: warehouseData.is_verified,
+
+      created_by: warehouseData.created_by,
+
+      updated_by: warehouseData.updated_by,
     });
+
+    // 2. Create optional zones associated with the warehouse.
 
     const zones = [];
 
-    for (const [index, zone] of (data.zones ?? []).entries()) {
-      if (!zone.zoneTypeId) {
+    for (const [index, zone] of warehouseData.zones.entries()) {
+      if (!zone.zoneTypeId && !zone.warehouse_zone_type_id) {
         throw new Error(`Zone type ID is required for zone ${index + 1}.`);
       }
 
@@ -161,27 +318,37 @@ async function createCompleteWarehouse(data) {
         "create_warehouse_zone",
         {
           warehouse_id: warehouse.id,
-          warehouse_zone_type_id: zone.zoneTypeId,
 
-          code: zone.zoneCode,
-          code_int: zone.codeInt ?? null,
-          name: zone.zoneName,
+          warehouse_zone_type_id:
+            zone.warehouse_zone_type_id ?? zone.zoneTypeId,
 
-          floor_level: zone.floorLevel ?? 0,
+          code: zone.zoneCode ?? zone.code,
+
+          code_int: zone.codeInt ?? zone.code_int ?? null,
+
+          name: zone.zoneName ?? zone.name,
+
+          floor_level: zone.floorLevel ?? zone.floor_level ?? 0,
+
           zone_sequence: index + 1,
 
-          maximum_capacity: zone.maximumCapacity,
-          capacity_unit: zone.capacityUnit,
+          maximum_capacity: zone.maximumCapacity ?? zone.maximum_capacity,
 
-          is_active: true,
-          custom_attributes: {},
+          capacity_unit: zone.capacityUnit ?? zone.capacity_unit,
+
+          is_active: zone.is_active ?? true,
+
+          custom_attributes: zone.custom_attributes ?? {},
         },
       );
 
       zones.push(createdZone);
     }
 
+    // 3. Commit the transaction after all operations succeed.
+
     await client.query("COMMIT");
+    transactionStarted = false;
 
     return {
       success: true,
@@ -192,23 +359,37 @@ async function createCompleteWarehouse(data) {
       error: null,
     };
   } catch (error) {
-    try {
-      await client.query("ROLLBACK");
-    } catch (rollbackError) {
-      console.error("Warehouse transaction rollback failed:", rollbackError);
+    // 4. Roll back all changes if anything fails.
+
+    if (transactionStarted) {
+      try {
+        await client.query("ROLLBACK");
+      } catch (rollbackError) {
+        console.error("Warehouse transaction rollback failed:", rollbackError);
+      }
     }
 
     console.error("Warehouse creation failed:", error.message);
 
     throw error;
   } finally {
+    // 5. Always return the connection to the pool.
+
     client.release();
   }
 }
 
+// --------------------------------------------------
+// Main warehouse utility
+// --------------------------------------------------
+
 export async function warehouse(operation, data = {}) {
   if (operation === "CREATE_COMPLETE") {
-    if (!data.data || typeof data.data !== "object") {
+    if (
+      !data.data ||
+      typeof data.data !== "object" ||
+      Array.isArray(data.data)
+    ) {
       throw new Error("Warehouse form data is required.");
     }
 
