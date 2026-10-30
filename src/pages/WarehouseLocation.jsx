@@ -1,11 +1,9 @@
 
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   SlidersHorizontal,
   ChevronDown,
   RotateCcw,
-  ArrowLeft,
 } from "lucide-react";
 
 import StorageTable from "../component/StorageTable.jsx";
@@ -21,8 +19,18 @@ const ITEMS_PER_PAGE = 10;
 
 const COLUMNS = [
   { key: "name", label: "Warehouse", editable: true },
-  { key: "location", label: "Location", editable: true },
-  { key: "capacity", label: "Capacity", editable: true, type: "number" },
+  {
+    key: "location",
+    label: "Location",
+    editable: true,
+    editKey: "address_line_1",
+  },
+  {
+    key: "capacity",
+    label: "Capacity",
+    editable: true,
+    type: "number",
+  },
   { key: "status", label: "Status", editable: false },
 ];
 
@@ -36,6 +44,8 @@ const INITIAL_FILTERS = {
   capacity: "",
 };
 
+
+
 function getWarehouseList(data) {
   if (Array.isArray(data)) return data;
   if (Array.isArray(data?.warehouses)) return data.warehouses;
@@ -45,25 +55,58 @@ function getWarehouseList(data) {
 }
 
 function normalizeWarehouse(row) {
+  const attributes = row.custom_attributes ?? {};
+
+  const locationParts = [
+    attributes.address_line_1,
+    attributes.address_line_2,
+    attributes.city,
+    attributes.state,
+    attributes.country,
+    attributes.postal_code,
+  ];
+
+  const location = locationParts
+    .filter(
+      (part) =>
+        part !== null &&
+        part !== undefined &&
+        String(part).trim() !== ""
+    )
+    .join(", ");
+
+  const totalCapacity = row.total_capacity ?? row.totalCapacity;
+  const capacityUnit = row.capacity_unit ?? row.capacityUnit ?? "";
+
   return {
     ...row,
+
+    id: row.id ?? row._id,
+
     name: row.name ?? row.warehouseName ?? row.warehouse_name ?? "",
-    location: row.location ?? row.address ?? row.city ?? "",
+
+    location: location || "—",
+
     capacity:
-      row.capacity ??
-      row.maxCapacity ??
-      row.max_capacity ??
-      row.capacityPercentage ??
-      row.capacity_percentage ??
-      "",
-    status: row.status ?? row.warehouseStatus ?? "Active",
+      totalCapacity !== null &&
+      totalCapacity !== undefined &&
+      totalCapacity !== ""
+        ? Number(totalCapacity)
+        : "",
+
+    capacityUnit,
+
+    status:
+      row.status ??
+      row.warehouseStatus ??
+      (row.is_active === false ? "inactive" : "active"),
   };
 }
 
-function WarehouseLocation() {
-  const navigate = useNavigate();
 
+function WarehouseLocation() {
   const [warehouses, setWarehouses] = useState([]);
+  const [editingWarehouse, setEditingWarehouse] = useState(null);
   const [search, setSearch] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState(INITIAL_FILTERS);
@@ -166,38 +209,88 @@ function WarehouseLocation() {
     setError("");
 
     try {
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+      const existing = editingWarehouse;
+      const existingAttributes = existing?.custom_attributes ?? {};
+
+      const customAttributes = {
+        ...existingAttributes,
+        manager_name: formData.managerName ?? "",
+        description: formData.description ?? "",
+        location_code: formData.locationCode ?? "",
+        address_line_1: formData.addressLine1 ?? "",
+        address_line_2: formData.addressLine2 ?? "",
+        city: formData.city ?? "",
+        state: formData.state ?? "",
+        country: formData.country ?? "",
+        postal_code: formData.postalCode ?? "",
+        length: Number(formData.length) || 0,
+        width: Number(formData.width) || 0,
+        height: Number(formData.height) || 0,
+        dimension_unit: formData.dimensionUnit ?? "Meters",
+        floor_area: Number(formData.floorArea) || 0,
+        floor_area_sq_ft: Number(formData.floorAreaSqFt) || 0,
+        building_volume: Number(formData.buildingVolume) || 0,
+        building_volume_cu_ft: Number(formData.buildingVolumeCuFt) || 0,
+      };
+
+      const payload = {
+        name: String(formData.name ?? "").trim(),
+        code: String(formData.code ?? "").trim(),
+        email: formData.email ?? "",
+        phone: formData.contactNumber ?? "",
+        total_capacity: Number(formData.totalCapacity) || 0,
+        capacity_unit: formData.capacityUnit ?? "Sacks",
+        warehouse_type_id: formData.warehouseTypeId || null,
+        operating_hours: {
+          opening_time: formData.openingTime ?? "09:00",
+          closing_time: formData.closingTime ?? "18:00",
+          working_days: formData.workingDays ?? [],
+        },
+        custom_attributes: customAttributes,
+        status: formData.active === false ? "inactive" : "active",
+        is_active: formData.active !== false,
+      };
+
+      const isEditing = Boolean(existing?.id);
+      if (isEditing) payload.version = existing.version;
+
+      const response = await fetch(
+        isEditing
+          ? `${API_URL}/${encodeURIComponent(existing.id)}`
+          : API_URL,
+        {
+          method: isEditing ? "PATCH" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
 
       const result = await response.json().catch(() => ({}));
 
-      if (!response.ok) {
-        throw new Error(result.message || "Unable to save warehouse.");
-      }
-
-      const savedWarehouse = result.warehouse ?? result.data;
-
-      if (savedWarehouse && typeof savedWarehouse === "object") {
-        setWarehouses((previous) => [
-          ...previous,
-          normalizeWarehouse(savedWarehouse),
-        ]);
-      } else {
-        const refresh = await fetch(API_URL);
-
-        if (!refresh.ok) {
-          throw new Error("Warehouse saved, but refresh failed.");
-        }
-
-        setWarehouses(
-          getWarehouseList(await refresh.json()).map(normalizeWarehouse)
+      if (!response.ok || result.success === false) {
+        throw new Error(
+          result.error || result.message ||
+          `Unable to ${isEditing ? "update" : "save"} warehouse.`
         );
       }
 
+      const savedWarehouse = result.data ?? result.warehouse ?? result;
+      if (!savedWarehouse || typeof savedWarehouse !== "object" || !savedWarehouse.id) {
+        throw new Error("The server did not return the saved warehouse record.");
+      }
+
+      const normalized = normalizeWarehouse(savedWarehouse);
+
+      setWarehouses((previous) =>
+        isEditing
+          ? previous.map((warehouse) =>
+              String(warehouse.id) === String(existing.id) ? normalized : warehouse
+            )
+          : [...previous, normalized]
+      );
+
       setShowForm(false);
+      setEditingWarehouse(null);
       setPage(1);
     } catch (err) {
       setError(err.message || "Unable to save warehouse.");
@@ -208,41 +301,145 @@ function WarehouseLocation() {
   }
 
   async function handleUpdateWarehouse(id, updatedRow) {
-    if (id == null || id === "") {
+    if (!id) {
       throw new Error("Warehouse ID is missing.");
     }
 
     setError("");
 
     try {
-      const response = await fetch(
-        `${API_URL}/${encodeURIComponent(id)}`,
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updatedRow),
-        }
+      const existingWarehouse = warehouses.find(
+        (warehouse) => String(warehouse.id) === String(id)
       );
+
+      if (!existingWarehouse) {
+        throw new Error("Warehouse not found.");
+      }
+
+      const payload = {
+        version: existingWarehouse.version,
+      };
+
+      // 1. Warehouse name
+      if (updatedRow.name !== existingWarehouse.name) {
+        const name = String(updatedRow.name ?? "").trim();
+
+        if (!name) {
+          throw new Error("Warehouse name cannot be empty.");
+        }
+
+        payload.name = name;
+      }
+
+      // 2. Capacity
+      if (
+        String(updatedRow.capacity ?? "") !==
+        String(existingWarehouse.capacity ?? "")
+      ) {
+        const capacity = Number(updatedRow.capacity);
+
+        if (
+          updatedRow.capacity === "" ||
+          !Number.isFinite(capacity) ||
+          capacity < 0
+        ) {
+          throw new Error("Capacity must be a valid non-negative number.");
+        }
+
+        payload.total_capacity = capacity;
+      }
+
+      // 3. Address fields: update only changed keys and preserve all others.
+      const addressKeys = [
+        "address_line_1",
+        "address_line_2",
+        "city",
+        "state",
+        "country",
+        "postal_code",
+      ];
+      const existingAttributes = existingWarehouse.custom_attributes ?? {};
+      const updatedAttributes = { ...existingAttributes };
+      let addressChanged = false;
+
+      for (const key of addressKeys) {
+        if (updatedRow[key] !== undefined) {
+          const nextValue = String(updatedRow[key] ?? "").trim();
+          const currentValue = String(existingAttributes[key] ?? "");
+
+          if (nextValue !== currentValue) {
+            updatedAttributes[key] = nextValue;
+            addressChanged = true;
+          }
+        }
+      }
+
+      // Backward compatibility with the existing inline Location editor.
+      // Its draft stores the edited Address Line 1 in `location`.
+      if (
+        updatedRow.location !== undefined &&
+        updatedRow.address_line_1 === undefined
+      ) {
+        const nextAddress = String(updatedRow.location ?? "").trim();
+        const currentAddress = String(existingAttributes.address_line_1 ?? "");
+
+        if (nextAddress !== currentAddress) {
+          updatedAttributes.address_line_1 = nextAddress;
+          addressChanged = true;
+        }
+      }
+
+      if (addressChanged) {
+        payload.custom_attributes = updatedAttributes;
+      }
+
+      // Nothing changed except the version field.
+      if (Object.keys(payload).length === 1) {
+        return;
+      }
+
+      const response = await fetch(`${API_URL}/${encodeURIComponent(id)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
       const result = await response.json().catch(() => ({}));
 
-      if (!response.ok) {
-        throw new Error(result.message || "Unable to update warehouse.");
+      if (!response.ok || result.success !== true) {
+        throw new Error(
+          result.error || result.message || "Unable to update warehouse."
+        );
       }
 
-      const updatedRecord = result.warehouse ?? result.data ?? result;
+      if (!result.data) {
+        throw new Error("Updated warehouse data was not returned.");
+      }
 
       setWarehouses((previous) =>
-        previous.map((row) =>
-          String(row.id ?? row._id) === String(id)
-            ? normalizeWarehouse({ ...row, ...updatedRecord })
-            : row
+        previous.map((warehouse) =>
+          String(warehouse.id) === String(id)
+            ? normalizeWarehouse(result.data)
+            : warehouse
         )
+      );
+
+      // Keep the selected modal record in sync if the popup remains open.
+      setSelectedWarehouse((previous) =>
+        previous && String(previous.id) === String(id)
+          ? normalizeWarehouse(result.data)
+          : previous
       );
     } catch (err) {
       setError(err.message || "Unable to update warehouse.");
       throw err;
     }
+  }
+
+  function openEditWarehouse(warehouse) {
+    setError("");
+    setEditingWarehouse(warehouse);
+    setShowForm(true);
   }
 
   async function handleDeleteWarehouse(id) {
@@ -309,6 +506,7 @@ function WarehouseLocation() {
               className="add-warehouse-btn"
               onClick={() => {
                 setError("");
+                setEditingWarehouse(null);
                 setShowForm(true);
               }}
             >
@@ -346,7 +544,7 @@ function WarehouseLocation() {
             warehouses={currentWarehouses}
             columns={COLUMNS}
             onUpdate={handleUpdateWarehouse}
-            onView={(row) => console.log("View warehouse:", row)}
+            onEdit={openEditWarehouse}
             onDelete={handleDeleteWarehouse}
             showSerial
             emptyMessage={
@@ -377,9 +575,14 @@ function WarehouseLocation() {
 
         {showForm && (
           <AddWarehouse
+            key={editingWarehouse?.id ?? "new-warehouse"}
+            initialData={editingWarehouse}
             onSave={saveWarehouse}
             onClose={() => {
-              if (!saving) setShowForm(false);
+              if (!saving) {
+                setShowForm(false);
+                setEditingWarehouse(null);
+              }
             }}
             saving={saving}
           />
