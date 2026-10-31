@@ -1,3 +1,4 @@
+
 .table-container {
   width: 100%;
   min-width: 0;
@@ -8,6 +9,62 @@
   box-sizing: border-box;
   font-family: Arial, sans-serif;
 }
+
+/* Toolbar */
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 16px;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* Search */
+
+.table-search {
+  flex: 0 0 380px;
+  width: 380px;
+  min-width: 380px;
+  max-width: 380px;
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  outline: none;
+  color: #1f2937;
+  background: #ffffff;
+  font-size: 13px;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.table-search:hover {
+  border-color: #4f46e5;
+}
+
+.table-search:focus,
+.table-search:focus-visible {
+  border-color: #4f46e5 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.15) !important;
+}
+
+.table-search::placeholder {
+  color: #6b7280;
+}
+/* Filters */
+.table-filters {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-left: auto;
+}
+
+/* Editable cells */
 .editable-cell {
   display: inline-block;
   min-width: 35px;
@@ -21,51 +78,19 @@
 }
 
 .cell-input {
-  width: 80px;
-  padding: 5px;
-  border: 1px solid #64748b;
-  border-radius: 4px;
-}
-.table-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 12px;
-  padding: 16px;
-  background: #ffffff;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.product-table tbody td {
-  border-bottom: 1px solid #e5e7eb;
-}
-.product-table tbody tr:last-child td {
-  border-bottom: none;
-}
-.table-search {
-  flex: 1;
-  min-width: 180px;
-  height: 40px;
-  padding: 0 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
+  width: 100%;
+  min-width: 70px;
+  padding: 7px 9px;
+  border: 1px solid #4b49ed;
+  border-radius: 5px;
   outline: none;
   color: #1f2937;
   background: #ffffff;
-  font-size: 14px;
   box-sizing: border-box;
+  font-size: 14px;
 }
 
-.table-search:focus {
-  border-color: #4b49ed;
-  box-shadow: 0 0 0 2px rgba(75, 73, 237, 0.1);
-}
-
-.table-search::placeholder {
-  color: #6b7280;
-}
-
+/* Table scroll */
 .table-scroll {
   width: 100%;
   max-height: 450px;
@@ -93,6 +118,7 @@
   background: #7f8a9b;
 }
 
+/* Product table */
 .product-table {
   width: 100%;
   min-width: 900px;
@@ -147,19 +173,7 @@
   font-weight: 500;
 }
 
-.cell-input {
-  width: 100%;
-  min-width: 70px;
-  padding: 7px 9px;
-  border: 1px solid #4b49ed;
-  border-radius: 5px;
-  outline: none;
-  color: #1f2937;
-  background: #ffffff;
-  box-sizing: border-box;
-  font-size: 14px;
-}
-
+/* Status badges */
 .status-badge {
   display: inline-flex;
   align-items: center;
@@ -186,6 +200,7 @@
   background: #fee2e2;
 }
 
+/* Actions */
 .table-actions {
   display: flex;
   align-items: center;
@@ -220,6 +235,8 @@
   visibility: visible !important;
   stroke: currentColor;
 }
+
+/* Footer */
 .table-footer {
   width: 100%;
   display: flex;
@@ -250,13 +267,26 @@
   padding: 0;
 }
 
+/* Responsive */
 @media (max-width: 768px) {
   .table-toolbar {
     align-items: stretch;
+    flex-direction: column;
   }
 
   .table-search {
-    flex-basis: 100%;
+    flex: 0 0 38px;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+
+  .table-filters {
+    width: 100%;
+    margin-left: 0;
+    justify-content: flex-end;
+    flex-wrap: wrap;
   }
 
   .table-footer {

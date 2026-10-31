@@ -271,7 +271,7 @@ function normalizeReceipt(receipt) {
   };
 }
 
-function PurchaseReceipt() {
+function PurchaseReceipt({ policyToEdit, onPolicyEditHandled }) {
   const [receipts, setReceipts] = useState([]);
   const [warehouses, setWarehouses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -286,6 +286,7 @@ function PurchaseReceipt() {
   const [toDate, setToDate] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editingReceipt, setEditingReceipt] = useState(null);
+  const [initialFormTab, setInitialFormTab] = useState(0);
   const [viewReceipt, setViewReceipt] = useState(null);
 
   const receiptsRef = useRef(receipts);
@@ -446,23 +447,66 @@ function PurchaseReceipt() {
   );
 
   const openCreateModal = () => {
+  setActionError("");
+  setEditingReceipt(null);
+  setInitialFormTab(0);
+  setModalOpen(true);
+};
+
+const openEditModal = (receipt) => {
+  const latestReceipt =
+    receiptsRef.current.find(
+      (item) => String(item.id) === String(receipt.id)
+    ) ?? receipt;
+
+  setActionError("");
+  setEditingReceipt(latestReceipt);
+  setInitialFormTab(0);
+  setModalOpen(true);
+};
+const openPolicyReceipt = useCallback(
+  (policy) => {
+    const receiptId =
+      policy?.purchaseReceiptId ??
+      policy?.purchase_receipt_id ??
+      policy?.receiptId ??
+      policy?.receipt_id;
+
+    if (!receiptId) {
+      setActionError("Purchase Receipt ID is missing in this policy.");
+      onPolicyEditHandled?.();
+      return;
+    }
+
+    const receipt = receiptsRef.current.find(
+      (item) => String(item.id) === String(receiptId)
+    );
+
+    if (!receipt) {
+      setActionError(`Purchase Receipt ${receiptId} not found.`);
+      onPolicyEditHandled?.();
+      return;
+    }
+
     setActionError("");
-    setEditingReceipt(null);
+    setEditingReceipt(receipt);
+    setInitialFormTab(4);
     setModalOpen(true);
-  };
 
-  const openEditModal = (receipt) => {
-    const latestReceipt =
-      receiptsRef.current.find((item) => item.id === receipt.id) ?? receipt;
+    onPolicyEditHandled?.();
+  },
+  [onPolicyEditHandled]
+);
 
-    setActionError("");
-    setEditingReceipt(latestReceipt);
-    setModalOpen(true);
-  };
-
+useEffect(() => {
+  if (policyToEdit && !loading) {
+    openPolicyReceipt(policyToEdit);
+  }
+}, [policyToEdit, loading, openPolicyReceipt]);
   const closeFormModal = () => {
     setModalOpen(false);
     setEditingReceipt(null);
+    setInitialFormTab(0);
   };
 
   const buildReceiptRow = useCallback((receiptData, existingReceipt = null) => {
@@ -914,8 +958,10 @@ function PurchaseReceipt() {
           initialData={
             editingReceipt
               ? editingReceipt.receiptData ?? editingReceipt
-              : null
+              : null 
           }
+            initialActiveTab={initialFormTab}
+          
           mode={editingReceipt ? "edit" : "create"}
         />
       </Modal>

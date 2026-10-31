@@ -66,7 +66,7 @@ export const purchaseReturnPolicySchema = z
       .trim()
       .min(1, "Please enter the return policy terms"),
 
-    status: z.enum(["ACTIVE", "INACTIVE"]),
+    status: z.enum(["DRAFT", "ACTIVE", "SUSPENDED", "EXPIRED"]),
   })
   .superRefine((data, ctx) => {
     if (

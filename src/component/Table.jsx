@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Pencil, Trash2, Eye } from "lucide-react";
+import { Pencil, Trash2, Eye, Ban } from "lucide-react";
 import Button from "./Button";
 import Dropdown from "./Dropdown";
 import Pagination from "./Pagination";
@@ -19,6 +19,7 @@ function Table({
   showSearch = true,
   showCategoryFilter = true,
   showStatusFilter = true,
+  actionType = "delete",
 }) {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
@@ -37,33 +38,33 @@ function Table({
     if (quantity <= 5) return "Low Stock";
     return "In Stock";
   };
-
+ 
   const getItemStatus = (item) => {
     if (type === "stock") return getStatus(item);
     return item.status || "Unknown";
   };
   const getBadgeVariant = (value) => {
-  const normalized = String(value || "").toLowerCase().trim();
+ const normalized = String(value || "").toLowerCase().trim();
 
-  if (
-    ["passed", "accepted", "completed", "inspected", "received", "closed", "in stock"].includes(normalized)
-  ) {
-    return "success";
-  }
+if (
+  ["passed", "accepted", "completed", "inspected", "received", "closed", "in stock", "active", "verified"].includes(normalized)
+) {
+  return "success";
+}
 
-  if (
-    ["pending", "awaiting inspection", "partially received", "partially passed", "low stock"].includes(normalized)
-  ) {
-    return "warning";
-  }
+if (
+  ["pending", "awaiting inspection", "partially received", "partially passed", "low stock", "draft"].includes(normalized)
+) {
+  return "warning";
+}
 
-  if (
-    ["failed", "rejected", "cancelled", "canceled", "out of stock"].includes(normalized)
-  ) {
-    return "danger";
-  }
+if (
+  ["failed", "rejected", "cancelled", "canceled", "out of stock", "suspended", "expired"].includes(normalized)
+) {
+  return "danger";
+}
 
-  return "default";
+return "default";
 };
   const categoryOptions = [
     { label: "All Categories", value: "all" },
@@ -73,9 +74,11 @@ function Table({
   ];
 
   const statusValues =
-    type === "stock"
-      ? ["In Stock", "Low Stock", "Out of Stock"]
-      : [...new Set(data.map((item) => item.status).filter(Boolean))];
+  type === "stock"
+    ? ["In Stock", "Low Stock", "Out of Stock"]
+    : type === "return"
+    ? ["PENDING", "APPROVED", "REJECTED", "COMPLETED"]
+    : [...new Set(data.map((item) => item.status).filter(Boolean))];
 
   const statusOptions = [
     { label: "All Status", value: "all" },
@@ -181,7 +184,7 @@ const saveCell = async (item, column) => {
   return (
     <div className="table-container">
       {(showSearch || showCategoryFilter || showStatusFilter) && (
-        <div className="table-toolbar">
+       <div className="table-toolbar">
           {showSearch && (
             <input
               type="text"
@@ -195,39 +198,41 @@ const saveCell = async (item, column) => {
             />
           )}
 
-          {showCategoryFilter && (
-            <Dropdown
-              options={categoryOptions}
-              value={category}
-              isOpen={openDropdown === "category"}
-              onToggle={(open) =>
-                setOpenDropdown(open ? "category" : null)
-              }
-              onChange={(value) => {
-                setCategory(value);
-                setCurrentPage(1);
-                setOpenDropdown(null);
-              }}
-              placeholder="All Categories"
-            />
-          )}
+          <div className="table-filters">
+            {showCategoryFilter && (
+              <Dropdown
+                options={categoryOptions}
+                value={category}
+                isOpen={openDropdown === "category"}
+                onToggle={(open) =>
+                  setOpenDropdown(open ? "category" : null)
+                }
+                onChange={(value) => {
+                  setCategory(value);
+                  setCurrentPage(1);
+                  setOpenDropdown(null);
+                }}
+                placeholder="All Categories"
+              />
+            )}
 
-          {showStatusFilter && (
-            <Dropdown
-              options={statusOptions}
-              value={status}
-              isOpen={openDropdown === "status"}
-              onToggle={(open) =>
-                setOpenDropdown(open ? "status" : null)
-              }
-              onChange={(value) => {
-                setStatus(value);
-                setCurrentPage(1);
-                setOpenDropdown(null);
-              }}
-              placeholder="All Status"
-            />
-          )}
+            {showStatusFilter && (
+              <Dropdown
+                options={statusOptions}
+                value={status}
+                isOpen={openDropdown === "status"}
+                onToggle={(open) =>
+                  setOpenDropdown(open ? "status" : null)
+                }
+                onChange={(value) => {
+                  setStatus(value);
+                  setCurrentPage(1);
+                  setOpenDropdown(null);
+                }}
+                placeholder="All Status"
+              />
+            )}
+          </div>
         </div>
       )}
 
@@ -341,12 +346,22 @@ const saveCell = async (item, column) => {
                           </Button>
                         )}
 
-                        {onDelete && (
+                       {onDelete && (
                           <Button
-                            onClick={() => onDelete(item.id)}
-                            title="Delete"
+                            onClick={() => {
+                              if (actionType === "deactivate") {
+                                onDelete(item);
+                              } else {
+                                onDelete(item.id);
+                              }
+                            }}
+                            title={actionType === "deactivate" ? "Deactivate" : "Delete"}
                           >
-                            <Trash2 size={16} />
+                            {actionType === "deactivate" ? (
+                              <Ban size={16} />
+                            ) : (
+                              <Trash2 size={16} />
+                            )}
                           </Button>
                         )}
                       </div>

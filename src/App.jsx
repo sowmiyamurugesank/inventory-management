@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import MainLayout from "./pages/Mainlayout.jsx";
@@ -46,4 +45,3 @@ function App() {
 }
 
 export default App;
-
