@@ -6,13 +6,7 @@ import Signup from "./pages/Signup.jsx";
 import Dashboard from "./Dashboard.jsx";
 import Product from "./pages/Product.jsx";
 import Storage from "./pages/Storage.jsx";
-import Billing from "./pages/Billing.jsx";
-
-
-// Add these imports if these components exist in your project
-import IncomingStock from "./pages/IncomingStock.jsx";
-import OutgoingStock from "./pages/OutgoingStock.jsx";
-
+import Billing  from "./pages/Billing.jsx";
 function Page({ title }) {
   return <h1>{title}</h1>;
 }
@@ -29,17 +23,8 @@ function App() {
           <Route path="products" element={<Product />} />
 
           <Route path="storage" element={<Storage />} />
-          <Route
-            path="storage/incoming-stock"
-            element={<IncomingStock />}
-          />
-          <Route
-            path="storage/outgoing-stock"
-            element={<OutgoingStock />}
-          />
-
-          <Route path="billing" element={<Billing />} />
-          <Route path="purchase-invoices" element={<Invoice />} />
+         
+          <Route path="Billing" element={<Billing/>}/>
 
           <Route path="parties" element={<Page title="Parties" />} />
           <Route

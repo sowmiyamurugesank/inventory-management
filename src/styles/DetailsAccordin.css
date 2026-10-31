@@ -1,0 +1,37 @@
+
+.details-accordion {
+  margin-bottom: 14px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.details-accordion-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 17px 20px;
+  border: none;
+  background: #ffffff;
+  color: #1f2937;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.details-accordion-header svg {
+  flex-shrink: 0;
+  color: #4f46e5;
+}
+
+.details-accordion-header:hover {
+  background: #f8fafc;
+}
+
+.details-accordion-content {
+  padding: 20px;
+  border-top: 1px solid #e5e7eb;
+}

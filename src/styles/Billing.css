@@ -1,0 +1,110 @@
+
+.billing-page {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.billing-tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px;
+  overflow-x: auto;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 2px 5px rgba(15, 23, 42, 0.03);
+  scrollbar-width: thin;
+}
+
+.billing-tab {
+  flex-shrink: 0;
+  padding: 10px 17px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.billing-tab:hover {
+  color: #4f46e5;
+  background: #f5f3ff;
+}
+
+.billing-tab.active {
+  color: #ffffff;
+  background: #4f46e5;
+  border-color: #4f46e5;
+  box-shadow: 0 2px 5px rgba(79, 70, 229, 0.18);
+}
+
+.billing-tab:focus-visible {
+  outline: 2px solid #818cf8;
+  outline-offset: 2px;
+}
+
+.billing-tab-content {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.billing-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 280px;
+  padding: 30px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.billing-placeholder h2 {
+  margin: 0 0 8px;
+  color: #111827;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.billing-placeholder p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .billing-page {
+    gap: 16px;
+  }
+
+  .billing-tabs {
+    gap: 5px;
+    padding: 6px;
+    border-radius: 10px;
+  }
+
+  .billing-tab {
+    padding: 9px 13px;
+    font-size: 12px;
+  }
+
+  .billing-placeholder {
+    min-height: 220px;
+    padding: 20px;
+  }
+}

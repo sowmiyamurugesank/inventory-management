@@ -46,6 +46,7 @@ const tabs = [
 const today = () => new Date().toISOString().slice(0, 10);
 
 const initialPolicy = {
+  id: null,
   policyName: "",
   description: "",
   effectiveFrom: "",
@@ -236,10 +237,11 @@ function PurchaseReceiptForm({
   currentUser = "",
   initialData = null,
   mode = "create",
+  initialActiveTab = 0,
 }) {
   const isEdit = mode === "edit";
 
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeTab, setActiveTab] = useState(initialActiveTab);
   const [poSearch, setPoSearch] = useState("");
   const [selectedPO, setSelectedPO] = useState(null);
   const [showPOSuggestions, setShowPOSuggestions] = useState(false);
@@ -274,18 +276,24 @@ function PurchaseReceiptForm({
     Boolean(initialData?.returnPolicy)
   );
   const [returnPolicy, setReturnPolicy] = useState({
-    ...initialPolicy,
-    ...(initialData?.returnPolicy || {}),
-    returnConditions: {
-      ...(initialData?.returnPolicy?.returnConditions || {}),
-    },
-    allowedResolutionMethods:
-      initialData?.returnPolicy?.allowedResolutionMethods || [],
-  });
-  const [policyProductId, setPolicyProductId] = useState(
-    initialData?.returnPolicy?.productId || ""
-  );
-
+  ...initialPolicy,
+  ...(initialData?.returnPolicy || {}),
+  id:
+    initialData?.returnPolicy?.id ??
+    initialData?.returnPolicy?.policyId ??
+    initialData?.returnPolicyId ??
+    null,
+  returnConditions: {
+    ...(initialData?.returnPolicy?.returnConditions || {}),
+  },
+  allowedResolutionMethods:
+    initialData?.returnPolicy?.allowedResolutionMethods || [],
+});
+const [policyProductId, setPolicyProductId] = useState(
+  initialData?.returnPolicy?.productId ??
+    initialData?.returnPolicy?.itemId ??
+    ""
+);
   const saveTimerRef = useRef(null);
   const mountedRef = useRef(false);
   const latestPayloadRef = useRef(null);
@@ -328,14 +336,26 @@ function PurchaseReceiptForm({
         setInspectionOptions(
           normalizeDropdownOptions(options.inspectionStatuses ?? [])
         );
+       
         setWindowStartOptions(
           normalizeDropdownOptions(options.windowStartsFrom ?? [])
         );
-       
+
         setStatusOptions(
           normalizeDropdownOptions(options.policyStatuses ?? [])
         );
-      
+
+        setResolutionOptions(
+          options.resolutionMethods?.length
+            ? normalizeDropdownOptions(options.resolutionMethods)
+            : DEFAULT_RESOLUTION_METHODS
+        );
+
+        setReturnConditionOptions(
+          options.returnConditions?.length
+            ? normalizeDropdownOptions(options.returnConditions)
+            : DEFAULT_RETURN_CONDITIONS
+        );
 
         if (options.defaultReturnPolicy) {
           setReturnPolicy((previous) => ({
@@ -459,20 +479,34 @@ function PurchaseReceiptForm({
         : po?.items?.map(createReceiptItem) ?? []
     );
 
-    const savedPolicy = initialData?.returnPolicy;
+  const savedPolicy =
+  initialData?.returnPolicy ??
+  initialData?.return_policy ??
+  null;
 
-    setPolicyEnabled(Boolean(savedPolicy));
-    setReturnPolicy({
-      ...initialPolicy,
-      ...(savedPolicy || {}),
-      returnConditions: {
-        ...(savedPolicy?.returnConditions || {}),
-      },
-      allowedResolutionMethods: savedPolicy?.allowedResolutionMethods || [],
-    });
-    setPolicyProductId(savedPolicy?.productId || "");
+setPolicyEnabled(Boolean(savedPolicy));
 
-    setActiveTab(0);
+  setReturnPolicy({
+    ...initialPolicy,
+    ...(savedPolicy || {}),
+    id:
+      savedPolicy?.id ??
+      savedPolicy?.policyId ??
+      initialData?.returnPolicyId ??
+       initialData?.return_policy_id ??
+      null,
+    returnConditions: {
+      ...(savedPolicy?.returnConditions || {}),
+    },
+    allowedResolutionMethods:
+      savedPolicy?.allowedResolutionMethods || [],
+  });
+
+    setPolicyProductId(
+      savedPolicy?.productId ?? savedPolicy?.itemId ?? ""
+    );
+
+  setActiveTab(initialActiveTab);
     setErrors({});
     setSubmitMessage("");
     setSaveStatus("saved");
@@ -481,7 +515,7 @@ function PurchaseReceiptForm({
       mountedRef.current = false;
       clearTimeout(saveTimerRef.current);
     };
-  }, [initialData?.id, currentUser, purchaseOrders]);
+  }, [initialData?.id, currentUser, purchaseOrders, initialActiveTab]);
 
   const filteredPurchaseOrders = useMemo(() => {
     const search = poSearch.trim().toLowerCase();
@@ -662,37 +696,43 @@ function PurchaseReceiptForm({
 
     return next;
   };
+const buildReturnPolicyPayload = () => {
+  if (!policyEnabled) return null;
 
-  const buildReturnPolicyPayload = () => {
-    if (!policyEnabled) return null;
+  const selectedProduct = items.find(
+    (item) =>
+      String(item.id) === String(policyProductId) ||
+      String(item.code) === String(policyProductId)
+  );
 
-    const selectedProduct = items.find(
-      (item) =>
-        String(item.id) === String(policyProductId) ||
-        String(item.code) === String(policyProductId)
-    );
-
-    return {
-      ...returnPolicy,
-      vendorName:
-        selectedPO?.supplier ??
-        initialData?.supplierName ??
-        initialData?.supplier ??
-        "",
-      productId: policyProductId,
-      productCode: selectedProduct?.code || "",
-      productName: selectedProduct?.description || "",
-      effectiveFrom: returnPolicy.effectiveFrom,
-      effectiveUntil: returnPolicy.effectiveUntil || "",
-      returnWindow: Number(returnPolicy.returnWindow),
-      maximumReturnQuantity:
-        returnPolicy.maximumReturnQuantity === ""
-          ? null
-          : Number(returnPolicy.maximumReturnQuantity),
-      restockingFee: Number(returnPolicy.restockingFee),
-      status: returnPolicy.status || "",
-    };
+  return {
+    ...returnPolicy,
+    id:
+      returnPolicy.id ??
+      returnPolicy.policyId ??
+      initialData?.returnPolicy?.id ??
+      initialData?.returnPolicy?.policyId ??
+      initialData?.returnPolicyId ??
+      null,
+    vendorName:
+      selectedPO?.supplier ??
+      initialData?.supplierName ??
+      initialData?.supplier ??
+      "",
+    productId: policyProductId,
+    productCode: selectedProduct?.code || "",
+    productName: selectedProduct?.description || "",
+    effectiveFrom: returnPolicy.effectiveFrom,
+    effectiveUntil: returnPolicy.effectiveUntil || "",
+    returnWindow: Number(returnPolicy.returnWindow),
+    maximumReturnQuantity:
+      returnPolicy.maximumReturnQuantity === ""
+        ? null
+        : Number(returnPolicy.maximumReturnQuantity),
+    restockingFee: Number(returnPolicy.restockingFee),
+    status: returnPolicy.status || "",
   };
+};
 
   const buildReceiptPayload = useCallback(() => {
     const receiptDate = String(formData.receiptDate ?? "").slice(0, 10);
@@ -1401,9 +1441,8 @@ function PurchaseReceiptForm({
                 <h4>Return Conditions</h4>
                 <div className="pr-policy-check-grid">
                   {returnConditionOptions.map((option) => {
-                    const [name, label] = Array.isArray(option)
-                      ? option
-                      : [option.value ?? option.code, option.label ?? option.name];
+                    const name = option.value ?? option.code;
+                    const label = option.label ?? option.name;
 
                     return (
                       <Checkbox

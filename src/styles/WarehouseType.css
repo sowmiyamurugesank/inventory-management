@@ -1,0 +1,270 @@
+.warehouse-type-page {
+  width: 100%;
+  min-width: 0;
+  min-height: 100%;
+  padding: 24px;
+  box-sizing: border-box;
+  background: #f5f7fc;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.warehouse-type-page::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.warehouse-type-page::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.warehouse-type-page::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+.warehouse-type-page::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.warehouse-type-section {
+  width: 100%;
+  max-width: 1600px;
+  min-width: 0;
+  margin: 0 auto;
+  padding: 24px;
+  box-sizing: border-box;
+  background: #ffffff;
+  border: 1px solid #e4e8f2;
+  border-radius: 12px;
+}
+
+.warehouse-type-section .warehouse-type-heading {
+   width: 100%;
+  margin: 0;
+  padding: 0 50px;
+  color: #4857a9;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.4;
+  text-align: center;
+  box-sizing: border-box;
+}
+.warehouse-type-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+  margin-top: 30px;
+  margin-bottom: 15px;
+}
+
+.warehouse-type-search {
+  flex: 1;
+  min-width: 0;
+}
+
+.warehouse-type-toolbar button {
+  min-height: 40px;
+  padding: 9px 16px;
+  border: 1px solid #d9e0eb;
+  border-radius: 7px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.warehouse-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-shrink: 0;
+  background: #ffffff;
+  color: #344054;
+}
+
+.warehouse-filter-btn:hover {
+  color: #eef2ff;
+  background-color: #6878db;
+}
+
+.add-warehouse-type-btn {
+  flex-shrink: 0;
+  background: #4055c5;
+  color: #ffffff;
+  border-color: #4055c5;
+  white-space: nowrap;
+}
+
+.add-warehouse-type-btn:hover {
+  background: #3446ad;
+}
+
+.warehouse-type-filter-panel {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  align-items: end;
+  gap: 16px;
+  padding: 18px;
+  margin-bottom: 20px;
+  background: #ffffff;
+  border: 1px solid #e1e6ef;
+  border-radius: 10px;
+  box-sizing: border-box;
+}
+
+.warehouse-type-filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.warehouse-type-filter-field label {
+  color: #344054;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.warehouse-type-filter-field input {
+  width: 100%;
+  min-width: 0;
+  height: 40px;
+  padding: 0 12px;
+  box-sizing: border-box;
+  border: 1px solid #d5dce7;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #344054;
+  font-size: 14px;
+  outline: none;
+}
+
+.warehouse-type-filter-field input:focus {
+  border-color: #5268d5;
+  box-shadow: 0 0 0 2px rgba(82, 104, 213, 0.1);
+}
+
+.warehouse-type-filter-field input::placeholder {
+  color: #98a2b3;
+}
+
+.warehouse-type-filter-panel button {
+  min-height: 40px;
+  padding: 0 18px;
+  border: 1px solid #d5dce7;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #344054;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.warehouse-type-filter-panel button:hover {
+  background: #f2f4f7;
+}
+
+.warehouse-type-message {
+  padding: 12px 0;
+  color: #475467;
+  font-size: 14px;
+}
+
+.warehouse-type-section table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.warehouse-type-section th,
+.warehouse-type-section td {
+  padding: 14px 16px;
+  text-align: left;
+  border-bottom: 1px solid #eaecf0;
+  white-space: nowrap;
+}
+
+.warehouse-type-section th {
+  background: #f8f9fc;
+  color: #475467;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.warehouse-type-section td {
+  color: #344054;
+  font-size: 14px;
+}
+
+.warehouse-type-section tbody tr:hover {
+  background: #f8faff;
+}
+
+@media (max-width: 900px) {
+  .warehouse-type-page {
+    padding: 18px;
+  }
+
+  .warehouse-type-section {
+    padding: 20px;
+  }
+
+  .warehouse-type-filter-panel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .warehouse-type-page {
+    padding: 12px;
+  }
+
+  .warehouse-type-section {
+    padding: 16px;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+  }
+
+  .warehouse-type-section::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .warehouse-type-section::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .warehouse-type-section::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+  }
+
+  .warehouse-type-heading {
+    font-size: 21px;
+  }
+
+  .warehouse-type-toolbar {
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .warehouse-type-search {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  .warehouse-type-filter-panel {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    padding: 14px;
+  }
+
+  .warehouse-type-section table {
+    min-width: 600px;
+  }
+}

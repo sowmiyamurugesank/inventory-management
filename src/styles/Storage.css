@@ -2,92 +2,74 @@
 .storage-page {
   width: 100%;
   min-width: 0;
-  padding: 24px;
   min-height: 100%;
+  padding: 24px;
   background: #f5f7fc;
   box-sizing: border-box;
+  color: #20243a;
 }
 
 .storage-heading {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  gap: 16px;
+  justify-content: space-between;
   width: 100%;
-  margin: 0 0 24px;
-  text-align: left;
-}
-
-.storage-heading-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  color: #635bff;
-}
-
-.storage-heading-icon svg {
-  width: 30px;
-  height: 30px;
-  stroke-width: 2;
+  margin-bottom: 20px;
 }
 
 .storage-heading-text {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 5px;
+  min-width: 0;
 }
-
-.storage-heading-text h2 {
-  margin: 0;
-  font-size: 26px;
-  font-weight: 650;
-  line-height: 1.2;
-  color: #283b80;
-  text-align: left;
-}
-
 
 .storage-tabs {
   display: flex;
+  align-items: center;
   gap: 8px;
+  width: 100%;
+  max-width: 100%;
   padding: 6px;
-  margin-top: 24px;
+  margin-bottom: 24px;
   background: #eef2ff;
   border-radius: 10px;
-  overflow-x: auto;
   box-sizing: border-box;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #a1a1aa #e5e7eb;
 }
 
 .storage-tab {
+  flex: 0 0 auto;
   padding: 12px 16px;
   border: none;
   border-radius: 8px;
-  background: #e0e7ff;
-  color: #4338ca;
-  font-size: 12px;
+  background: #dce4ff;
+  color: #4b49ed;
+  font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
-  flex-shrink: 0;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
 .storage-tab:hover {
-  color: #4f46e5;
+  background: #cbd5ff;
 }
 
 .storage-tab.active {
-  background: #4f46e5;
+  background: #4b49ed;
   color: #ffffff;
   font-weight: 600;
 }
-
 
 .storage-summary {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
-  margin-top: 24px;
+  margin-bottom: 24px;
+}
+
+.storage-summary > * {
+  min-width: 0;
 }
 
 .storage-content {
@@ -95,7 +77,6 @@
   min-width: 0;
   margin-top: 24px;
   padding: 20px;
-  min-height: 150px;
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
@@ -103,32 +84,32 @@
   overflow: hidden;
 }
 
+.storage-content h1,
+.storage-content h2,
 .storage-content h3 {
-  margin: 0 0 12px;
+  color: #20243a;
+}
+
+.storage-content h3 {
+  margin: 0 0 16px;
   font-size: 18px;
-  color: #1e293b;
 }
 
 .storage-content p {
-  margin: 0;
   color: #64748b;
   font-size: 14px;
 }
 
-
-.storage-content .warehouse-page {
+.storage-content .warehouse-page,
+.storage-content .warehouse-section {
   width: 100%;
   min-width: 0;
-  padding: 0;
   margin: 0;
   box-sizing: border-box;
 }
 
 .storage-content .warehouse-section {
-  width: 100%;
-  min-width: 0;
-  padding: 16px 12px 12px;
-  box-sizing: border-box;
+  padding: 12px 0;
 }
 
 .storage-content .storage-table-container {
@@ -148,12 +129,12 @@
 
 .storage-content .storage-table th,
 .storage-content .storage-table td {
-  padding: 12px 8px;
+  padding: 12px 10px;
+  border-bottom: 1px solid #e2e8f0;
   white-space: nowrap;
 }
 
-
-@media (max-width: 1000px) {
+@media (max-width: 1100px) {
   .storage-summary {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -161,14 +142,28 @@
 
 @media (max-width: 600px) {
   .storage-page {
-    padding: 16px;
+    padding: 14px;
   }
 
-  .storage-content {
-    padding: 12px;
+  .storage-tabs {
+    gap: 6px;
+    margin-bottom: 18px;
+  }
+
+  .storage-tab {
+    padding: 10px 12px;
+    font-size: 12px;
   }
 
   .storage-summary {
     grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  .storage-content {
+    margin-top: 16px;
+    padding: 12px;
+    border-radius: 10px;
   }
 }

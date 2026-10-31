@@ -1,0 +1,548 @@
+
+/* Main Form */
+.purchase-quotation-form {
+  width: 100%;
+  box-sizing: border-box;
+  color: #222;
+  font-family: Arial, sans-serif;
+}
+
+/* Header */
+.purchase-quotation-form .quotation-form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.purchase-quotation-form .quotation-form-header h2 {
+  margin: 0 0 8px;
+  font-size: 22px;
+  font-weight: 600;
+  text-align: left;
+  color: #20243a;
+}
+
+.purchase-quotation-form .quotation-form-header p {
+  margin: 0;
+  color: #777;
+  font-size: 14px;
+  text-align: left;
+  line-height: 1.5;
+}
+
+/* Tabs */
+.purchase-quotation-form .quotation-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 28px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.purchase-quotation-form .quotation-tabs button {
+  width: 100%;
+  min-width: 0;
+  padding: 13px 12px;
+  border: none;
+  border-bottom: 3px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: #697085;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: normal;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.purchase-quotation-form .quotation-tabs button:hover {
+  color: #5b5de6;
+}
+
+.purchase-quotation-form .quotation-tabs button.active {
+  border-bottom-color: #5b5de6;
+  color: #5b5de6;
+  font-weight: 600;
+  background: transparent;
+}
+
+/* Form Sections */
+.purchase-quotation-form .quotation-form-section {
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+.purchase-quotation-form .quotation-form-section h3 {
+  margin: 0 0 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #e5e7eb;
+  color: #20243a;
+  font-size: 18px;
+  font-weight: 600;
+  text-align: left;
+}
+
+/* Two-Column Form Grid */
+.purchase-quotation-form .quotation-form-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  column-gap: 18px;
+  row-gap: 18px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Individual Fields */
+.purchase-quotation-form .quotation-form-field {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+/* Fields spanning both columns */
+.purchase-quotation-form .quotation-form-field.full-width {
+  grid-column: 1 / -1;
+}
+
+/* Labels */
+.purchase-quotation-form .quotation-form-field label {
+  display: block;
+  margin: 0 0 7px;
+  color: #444b61;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
+  text-align: left;
+}
+
+/* Required Indicator */
+.purchase-quotation-form .quotation-form-field label span {
+  color: #dc2626;
+}
+
+/* Rectangular Inputs, Selects and Textareas */
+.purchase-quotation-form .quotation-form-field input:not([type="checkbox"]),
+.purchase-quotation-form .quotation-form-field select,
+.purchase-quotation-form .quotation-form-field textarea {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  margin: 0;
+  padding: 10px 12px;
+  box-sizing: border-box;
+  border: 1px solid #d1d5db;
+  border-radius: 5px;
+  background: #fff;
+  color: #222;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  text-align: left;
+  outline: none;
+  box-shadow: none;
+  transition: border-color 0.2s ease;
+}
+
+/* Input Focus */
+.purchase-quotation-form .quotation-form-field input:not([type="checkbox"]):focus,
+.purchase-quotation-form .quotation-form-field select:focus,
+.purchase-quotation-form .quotation-form-field textarea:focus {
+  border-color: #5b5de6;
+}
+
+/* Placeholder */
+.purchase-quotation-form .quotation-form-field input::placeholder,
+.purchase-quotation-form .quotation-form-field textarea::placeholder {
+  color: #929292;
+  opacity: 1;
+}
+
+/* Textareas */
+.purchase-quotation-form .quotation-form-field textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* Number Inputs */
+.purchase-quotation-form .quotation-form-field input[type="number"] {
+  appearance: auto;
+}
+
+/* Dropdown Width Fix */
+.purchase-quotation-form .quotation-form-field .dropdown-wrapper,
+.purchase-quotation-form .quotation-form-field .reusable-dropdown,
+.purchase-quotation-form .quotation-form-field .dropdown-container,
+.purchase-quotation-form .quotation-form-field .custom-dropdown {
+width: 100% !important;
+max-width: 100%;
+min-width: 0;
+box-sizing: border-box;
+}
+
+
+/* Checkbox Section */
+.purchase-quotation-form .quotation-checkboxes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 20px;
+  margin-top: 22px;
+}
+
+.purchase-quotation-form .quotation-checkboxes label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: #444b61;
+  font-size: 13px;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.purchase-quotation-form .quotation-checkboxes input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: #5b5de6;
+  cursor: pointer;
+}
+
+/* Validation Errors */
+.purchase-quotation-form .field-error,
+.purchase-quotation-form .quotation-form-field .field-error {
+  margin: 6px 0 0;
+  color: #dc2626;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* Form Action Buttons */
+.purchase-quotation-form .quotation-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* Quotation Items Table Wrapper */
+.purchase-quotation-form .quotation-items-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+}
+
+/* Quotation Items Table */
+.purchase-quotation-form .quotation-items-table {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: collapse;
+  background: #fff;
+  font-size: 13px;
+  text-align: left;
+}
+
+.purchase-quotation-form .quotation-items-table th {
+  padding: 12px 14px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f8fafc;
+  color: #374151;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.purchase-quotation-form .quotation-items-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #e5e7eb;
+  color: #444b61;
+  vertical-align: middle;
+}
+
+.purchase-quotation-form .quotation-items-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Empty Table Message */
+.purchase-quotation-form .quotation-items-empty {
+  padding: 24px 16px;
+  color: #777;
+  font-size: 14px;
+  text-align: center;
+}
+
+/* Table Action Buttons */
+.purchase-quotation-form .quotation-items-table td button {
+  margin-right: 6px;
+  padding: 6px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 5px;
+  background: #fff;
+  color: #374151;
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.purchase-quotation-form .quotation-items-table td button:hover {
+  border-color: #5b5de6;
+  color: #5b5de6;
+}
+
+/* Quotation Total Summary */
+.purchase-quotation-form .quotation-total-summary {
+  width: 100%;
+  max-width: 400px;
+  margin: 20px 0 0 auto;
+  padding: 16px;
+  box-sizing: border-box;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.purchase-quotation-form .quotation-total-summary > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 12px;
+  color: #555;
+  font-size: 13px;
+}
+
+.purchase-quotation-form .quotation-total-summary > div:last-child {
+  margin-bottom: 0;
+}
+
+.purchase-quotation-form .quotation-total-summary strong {
+  color: #20243a;
+  font-weight: 600;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+/* Grand Total */
+.purchase-quotation-form .quotation-total-summary .quotation-grand-total {
+  margin-top: 8px;
+  padding-top: 14px;
+  border-top: 1px solid #e5e7eb;
+  color: #20243a;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.purchase-quotation-form .quotation-total-summary .quotation-grand-total strong {
+  color: #5b5de6;
+  font-size: 17px;
+}
+
+/* Responsive Layout */
+@media (max-width: 640px) {
+  .purchase-quotation-form .quotation-form-header {
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .purchase-quotation-form .quotation-form-header h2 {
+    font-size: 20px;
+  }
+
+  .purchase-quotation-form .quotation-form-header p {
+    font-size: 12px;
+  }
+
+  .purchase-quotation-form .quotation-tabs {
+    gap: 4px;
+    margin-bottom: 22px;
+  }
+
+  .purchase-quotation-form .quotation-tabs button {
+    padding: 11px 6px;
+    font-size: 12px;
+  }
+
+  .purchase-quotation-form .quotation-form-grid {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 16px;
+  }
+
+  .purchase-quotation-form .quotation-form-field.full-width {
+    grid-column: 1;
+  }
+
+  .purchase-quotation-form .quotation-form-section h3 {
+    margin-bottom: 16px;
+    font-size: 16px;
+  }
+
+  .purchase-quotation-form .quotation-checkboxes {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .purchase-quotation-form .quotation-form-actions {
+    gap: 8px;
+  }
+
+  .purchase-quotation-form .quotation-total-summary {
+    max-width: 100%;
+  }
+}
+.purchase-quotation-form .vendor-field {
+  padding-top: 5.5px;
+}
+.purchase-quotation-form .notes textarea,
+.purchase-quotation-form .customAttributes textarea {
+  min-height: 60px;
+  height: 60px;
+}
+.purchase-quotation-form .product-field {
+  padding-top: 4.9px;
+}
+.purchase-quotation-form .description-field textarea { 
+    min-height: 60px;   
+    height: 60px;   
+    resize: vertical; 
+  } 
+  .purchase-quotation-form .item-small-textarea textarea { 
+      min-height: 60px;   
+      height: 60px;   
+      resize: vertical;
+     }
+
+/* Multiple Quotation Items */
+
+.purchase-quotation-form .quotation-item-card {
+  padding: 20px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-sizing: border-box;
+}
+
+.purchase-quotation-form .quotation-item-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.purchase-quotation-form .quotation-item-heading h3 {
+  flex: 1;
+  margin: 0;
+}
+
+.purchase-quotation-form .quotation-remove-item {
+  padding: 8px 14px;
+  border: 1px solid #dc2626;
+  border-radius: 6px;
+  background: #fff;
+  color: #dc2626;
+  cursor: pointer;
+}
+
+.purchase-quotation-form .quotation-remove-item:hover {
+  background: #fef2f2;
+}
+
+.purchase-quotation-form .quotation-line-summary {
+  width: 100%;
+  max-width: 360px;
+  margin: 20px 0 0 auto;
+  padding: 16px;
+  box-sizing: border-box;
+  border-radius: 10px;
+  background: #f8f8f8;
+}
+
+.purchase-quotation-form .quotation-line-summary > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 14px;
+  font-size: 14px;
+}
+
+.purchase-quotation-form .quotation-line-summary strong {
+  font-weight: 500;
+  text-align: right;
+}
+
+.purchase-quotation-form .quotation-line-summary .quotation-line-total {
+  margin-bottom: 0;
+  padding-top: 14px;
+  border-top: 1px solid #ddd;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.purchase-quotation-form .quotation-line-summary .quotation-line-total strong {
+  color: #15803d;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.purchase-quotation-form .quotation-add-product {
+  width: 100%;
+  margin: 0 0 20px;
+  padding: 13px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 28px;
+  background: #fff;
+  color: #555;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.purchase-quotation-form .quotation-add-product:hover {
+  border-color: #5b5de6;
+  color: #5b5de6;
+}
+
+.purchase-quotation-form .quotation-total-summary h3 {
+  margin: 0 0 20px;
+  color: #20243a;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.purchase-quotation-form .quotation-summary-note {
+  margin: 14px 0 0;
+  color: #777;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+@media (max-width: 640px) {
+  .purchase-quotation-form .quotation-item-card {
+    padding: 14px;
+  }
+
+  .purchase-quotation-form .quotation-line-summary {
+    max-width: 100%;
+  }
+
+  .purchase-quotation-form .quotation-item-heading {
+    align-items: center;
+  }
+}
+
+
+
