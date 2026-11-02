@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Plus } from "lucide-react";
+
 import DataTable from "./DataTable";
 import Button from "./Button";
 import Pagination from "./Pagination";
@@ -10,6 +11,12 @@ import Input from "./Atom/Input";
 import Label from "./Atom/Label";
 import SelectField from "./Atom/SelectField";
 import Textarea from "./Atom/Textarea";
+
+const API_BASE_URL = (
+  import.meta.env.VITE_API_URL || "http://localhost:5000/api"
+).replace(/\/$/, "");
+
+const CATEGORY_API = `${API_BASE_URL}/product-categories`;
 
 const emptyForm = {
   categoryCode: "",
@@ -23,15 +30,29 @@ const emptyForm = {
 
 function ProductManagement({ activeTab }) {
   const [categories, setCategories] = useState([]);
+
   const [currentPage, setCurrentPage] = useState(1);
+
   const [showForm, setShowForm] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
+
   const [form, setForm] = useState(emptyForm);
   const [formTab, setFormTab] = useState("basic");
+
   const [errors, setErrors] = useState({});
 
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
+
+  const [apiError, setApiError] = useState("");
+
+  // --------------------------------------------------
+  // TABLE COLUMNS
+  // --------------------------------------------------
+
   const columns = [
-    { key: "id", label: "S.No" },
+    { key: "serialNumber", label: "S.No" },
     { key: "categoryCode", label: "Category Code" },
     { key: "integerCode", label: "Integer Code" },
     { key: "category", label: "Category Name" },
@@ -40,9 +61,111 @@ function ProductManagement({ activeTab }) {
     { key: "verification", label: "Verification" },
   ];
 
+  // --------------------------------------------------
+  // API RESPONSE HANDLER
+  // --------------------------------------------------
+
+  async function handleResponse(response) {
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(
+        result.error || "Something went wrong."
+      );
+    }
+
+    return result;
+  }
+
+  // --------------------------------------------------
+  // MAP DATABASE RESPONSE TO FRONTEND FORMAT
+  // --------------------------------------------------
+
+  function mapCategory(category, index) {
+    return {
+      id: category.id,
+
+      serialNumber: index + 1,
+
+      categoryCode: category.code ?? "",
+
+      integerCode:
+        category.code_int != null
+          ? String(category.code_int)
+          : "",
+
+      category: category.name ?? "",
+
+      description: category.description ?? "",
+
+      customAttributes: JSON.stringify(
+        category.custom_attributes ?? {},
+        null,
+        2
+      ),
+
+      status: category.is_active ? "Active" : "Inactive",
+
+      verification: category.is_verified
+        ? "Verified"
+        : "Not verified",
+
+      version: category.version,
+    };
+  }
+
+  // --------------------------------------------------
+  // GET ALL CATEGORIES
+  // --------------------------------------------------
+
+  const loadCategories = useCallback(async () => {
+    try {
+      setLoading(true);
+      setApiError("");
+
+      const response = await fetch(CATEGORY_API);
+
+      const result = await handleResponse(response);
+
+      const categoryList = Array.isArray(result.data)
+        ? result.data
+        : [];
+
+      setCategories(
+        categoryList.map((category, index) =>
+          mapCategory(category, index)
+        )
+      );
+    } catch (error) {
+      console.error("Failed to load categories:", error);
+
+      setApiError(error.message);
+
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === "Categories") {
+      loadCategories();
+    }
+  }, [activeTab, loadCategories]);
+
+  // --------------------------------------------------
+  // FORM FIELD HANDLING
+  // --------------------------------------------------
+
   const updateField = (name, value) => {
-    setForm((prev) => ({ ...prev, [name]: value }));
-    setErrors((prev) => ({ ...prev, [name]: "" }));
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    setErrors((prev) => ({
+      ...prev,
+      [name]: "",
+    }));
   };
 
   const closeForm = () => {
@@ -55,112 +178,260 @@ function ProductManagement({ activeTab }) {
 
   const openAdd = () => {
     closeForm();
+    setApiError("");
     setShowForm(true);
   };
 
+  // --------------------------------------------------
+  // OPEN EDIT FORM
+  // --------------------------------------------------
+
   const openEdit = (item) => {
     setEditingCategory(item);
+
     setForm({
       ...emptyForm,
+
       categoryCode: item.categoryCode || "",
+
       integerCode: item.integerCode || "",
+
       categoryName: item.category || "",
+
       description: item.description || "",
-      customAttributes: item.customAttributes || "",
+
+      customAttributes: item.customAttributes || "{}",
+
       status: item.status || "Active",
+
       verification: item.verification || "Not verified",
     });
+
     setErrors({});
+    setApiError("");
     setFormTab("basic");
     setShowForm(true);
   };
 
+  // --------------------------------------------------
+  // FORM VALIDATION
+  // --------------------------------------------------
+
   const validate = () => {
     const e = {};
 
-    if (!form.categoryCode.trim())
+    if (!form.categoryCode.trim()) {
       e.categoryCode = "Category code is required";
-    else if (!/^[A-Za-z0-9-]+$/.test(form.categoryCode.trim()))
+    } else if (
+      !/^[A-Za-z0-9-]+$/.test(form.categoryCode.trim())
+    ) {
       e.categoryCode = "Letters, numbers and hyphens only";
+    }
 
-    if (!form.integerCode.trim())
+    if (!form.integerCode.trim()) {
       e.integerCode = "Integer code is required";
-    else if (!/^\d+$/.test(form.integerCode.trim()))
+    } else if (!/^\d+$/.test(form.integerCode.trim())) {
       e.integerCode = "Digits only";
+    }
 
-    if (!form.categoryName.trim())
+    if (!form.categoryName.trim()) {
       e.categoryName = "Category name is required";
-    else if (!/^[A-Za-z ]+$/.test(form.categoryName.trim()))
+    } else if (
+      !/^[A-Za-z ]+$/.test(form.categoryName.trim())
+    ) {
       e.categoryName = "Letters and spaces only";
+    }
 
     if (
       form.description.trim() &&
-      !/^[A-Za-z0-9\s.,!?'":;()&/-]+$/.test(form.description.trim())
-    )
+      !/^[A-Za-z0-9\s.,!?'":;()&/-]+$/.test(
+        form.description.trim()
+      )
+    ) {
       e.description = "Invalid description";
+    }
 
     if (form.customAttributes.trim()) {
       try {
         const value = JSON.parse(form.customAttributes);
-        if (!value || Array.isArray(value) || typeof value !== "object")
+
+        if (
+          !value ||
+          Array.isArray(value) ||
+          typeof value !== "object"
+        ) {
           e.customAttributes = "Enter a valid JSON object";
+        }
       } catch {
         e.customAttributes = "Enter valid JSON";
       }
     }
 
     setErrors(e);
+
     return Object.keys(e).length === 0;
   };
 
-  const saveCategory = () => {
-    if (!validate()) return;
+  // --------------------------------------------------
+  // CONVERT FORM DATA TO DATABASE FORMAT
+  // --------------------------------------------------
 
-    const data = {
-      ...form,
-      categoryCode: form.categoryCode.trim(),
-      integerCode: form.integerCode.trim(),
-      category: form.categoryName.trim(),
-      description: form.description.trim(),
-      customAttributes: form.customAttributes.trim(),
-    };
+  const preparePayload = () => {
+    let customAttributes = {};
 
-    if (editingCategory) {
-      setCategories((prev) =>
-        prev.map((item) =>
-          item.id === editingCategory.id ? { ...item, ...data } : item
-        )
+    if (form.customAttributes.trim()) {
+      customAttributes = JSON.parse(
+        form.customAttributes
       );
-    } else {
-      setCategories((prev) => [
-        ...prev,
-        {
-          id: prev.length
-            ? Math.max(...prev.map((item) => item.id)) + 1
-            : 1,
-          ...data,
-        },
-      ]);
     }
 
-    closeForm();
+    const isActive = form.status === "Active";
+
+    return {
+      code: form.categoryCode.trim(),
+
+      code_int: Number(form.integerCode),
+
+      name: form.categoryName.trim(),
+
+      description: form.description.trim(),
+
+      custom_attributes: customAttributes,
+
+      status: isActive ? "active" : "inactive",
+
+      is_active: isActive,
+
+      is_verified: form.verification === "Verified",
+
+      ...(editingCategory && {
+        version: editingCategory.version,
+      }),
+    };
   };
+
+  // --------------------------------------------------
+  // CREATE / UPDATE CATEGORY
+  // --------------------------------------------------
+
+  const saveCategory = async () => {
+    if (!validate()) return;
+
+    try {
+      setSaving(true);
+      setApiError("");
+
+      const payload = preparePayload();
+
+      const isEditing = Boolean(editingCategory);
+
+      const url = isEditing
+        ? `${CATEGORY_API}/${editingCategory.id}`
+        : CATEGORY_API;
+
+      const method = isEditing ? "PATCH" : "POST";
+
+      const response = await fetch(url, {
+        method,
+
+        headers: {
+          "Content-Type": "application/json",
+        },
+
+        body: JSON.stringify(payload),
+      });
+
+      await handleResponse(response);
+
+      // Reload actual database records.
+      await loadCategories();
+
+      closeForm();
+
+    } catch (error) {
+      console.error("Failed to save category:", error);
+
+      setApiError(error.message);
+
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // --------------------------------------------------
+  // DELETE CATEGORY
+  // --------------------------------------------------
+
+  const deleteCategory = async (item) => {
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${item.category}"?`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setDeletingId(item.id);
+      setApiError("");
+
+      const response = await fetch(
+        `${CATEGORY_API}/${item.id}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      await handleResponse(response);
+
+      await loadCategories();
+
+    } catch (error) {
+      console.error("Failed to delete category:", error);
+
+      setApiError(error.message);
+
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  // --------------------------------------------------
+  // FORM FIELD COMPONENT
+  // --------------------------------------------------
 
   const field = (name, label, placeholder, type = "text") => (
     <div className="category-field" key={name}>
-      <Label htmlFor={name} required={["categoryCode", "integerCode", "categoryName"].includes(name)}>
+      <Label
+        htmlFor={name}
+        required={[
+          "categoryCode",
+          "integerCode",
+          "categoryName",
+        ].includes(name)}
+      >
         {label}
       </Label>
+
       <Input
         name={name}
         type={type}
         value={form[name]}
         placeholder={placeholder}
-        onChange={(e) => updateField(name, e.target.value)}
+        onChange={(e) =>
+          updateField(name, e.target.value)
+        }
       />
-      {errors[name] && <p className="validation-error">{errors[name]}</p>}
+
+      {errors[name] && (
+        <p className="validation-error">
+          {errors[name]}
+        </p>
+      )}
     </div>
   );
+
+  // --------------------------------------------------
+  // JSX
+  // --------------------------------------------------
 
   return (
     <div>
@@ -168,31 +439,67 @@ function ProductManagement({ activeTab }) {
         <>
           <div className="category-header">
             <h3>Product Categories</h3>
-            <Button className="add-category-button" onClick={openAdd}>
+
+            <Button
+              className="add-category-button"
+              onClick={openAdd}
+            >
               <Plus size={16} /> Add Category
             </Button>
           </div>
 
+          {apiError && (
+            <p className="validation-error">
+              {apiError}
+            </p>
+          )}
+
           {showForm && (
-            <div className="category-modal-overlay" onClick={closeForm}>
-              <div className="category-modal" onClick={(e) => e.stopPropagation()}>
+            <div
+              className="category-modal-overlay"
+              onClick={closeForm}
+            >
+              <div
+                className="category-modal"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <div className="category-modal-header">
-                  <h3>{editingCategory ? "Edit Category" : "Add Category"}</h3>
-                  <button type="button" onClick={closeForm}>×</button>
+                  <h3>
+                    {editingCategory
+                      ? "Edit Category"
+                      : "Add Category"}
+                  </h3>
+
+                  <button
+                    type="button"
+                    onClick={closeForm}
+                    disabled={saving}
+                  >
+                    ×
+                  </button>
                 </div>
 
                 <div className="category-form-tabs">
                   <button
                     type="button"
-                    className={formTab === "basic" ? "active" : ""}
+                    className={
+                      formTab === "basic" ? "active" : ""
+                    }
                     onClick={() => setFormTab("basic")}
                   >
                     Basic Information
                   </button>
+
                   <button
                     type="button"
-                    className={formTab === "additional" ? "active" : ""}
-                    onClick={() => setFormTab("additional")}
+                    className={
+                      formTab === "additional"
+                        ? "active"
+                        : ""
+                    }
+                    onClick={() =>
+                      setFormTab("additional")
+                    }
                   >
                     Additional Information
                   </button>
@@ -200,35 +507,72 @@ function ProductManagement({ activeTab }) {
 
                 {formTab === "basic" ? (
                   <div className="category-form-section">
-                    {field("categoryCode", "Category Code", "Enter category code")}
-                    {field("integerCode", "Integer Code", "Enter integer code", "text")}
-                    {field("categoryName", "Category Name", "Enter category name")}
+                    {field(
+                      "categoryCode",
+                      "Category Code",
+                      "Enter category code"
+                    )}
+
+                    {field(
+                      "integerCode",
+                      "Integer Code",
+                      "Enter integer code",
+                      "text"
+                    )}
+
+                    {field(
+                      "categoryName",
+                      "Category Name",
+                      "Enter category name"
+                    )}
 
                     <div className="category-field">
-                      <Label htmlFor="description">Description</Label>
+                      <Label htmlFor="description">
+                        Description
+                      </Label>
+
                       <Textarea
                         name="description"
                         value={form.description}
                         placeholder="Enter category description"
-                        onChange={(e) => updateField("description", e.target.value)}
+                        onChange={(e) =>
+                          updateField(
+                            "description",
+                            e.target.value
+                          )
+                        }
                       />
+
                       {errors.description && (
-                        <p className="validation-error">{errors.description}</p>
+                        <p className="validation-error">
+                          {errors.description}
+                        </p>
                       )}
                     </div>
                   </div>
                 ) : (
                   <div className="category-form-section">
                     <div className="category-field">
-                      <Label htmlFor="customAttributes">Custom Attributes (JSON)</Label>
+                      <Label htmlFor="customAttributes">
+                        Custom Attributes (JSON)
+                      </Label>
+
                       <Textarea
                         name="customAttributes"
                         value={form.customAttributes}
-                        placeholder=""
-                        onChange={(e) => updateField("customAttributes", e.target.value)}
+                        placeholder='{"key": "value"}'
+                        onChange={(e) =>
+                          updateField(
+                            "customAttributes",
+                            e.target.value
+                          )
+                        }
                       />
+
                       {errors.customAttributes && (
-                        <p className="validation-error">{errors.customAttributes}</p>
+                        <p className="validation-error">
+                          {errors.customAttributes}
+                        </p>
                       )}
                     </div>
 
@@ -236,10 +580,21 @@ function ProductManagement({ activeTab }) {
                       label="Status"
                       name="status"
                       value={form.status}
-                      onChange={(e) => updateField("status", e.target.value)}
+                      onChange={(e) =>
+                        updateField(
+                          "status",
+                          e.target.value
+                        )
+                      }
                       options={[
-                        { label: "Active", value: "Active" },
-                        { label: "Inactive", value: "Inactive" },
+                        {
+                          label: "Active",
+                          value: "Active",
+                        },
+                        {
+                          label: "Inactive",
+                          value: "Inactive",
+                        },
                       ]}
                     />
 
@@ -247,10 +602,21 @@ function ProductManagement({ activeTab }) {
                       label="Verification"
                       name="verification"
                       value={form.verification}
-                      onChange={(e) => updateField("verification", e.target.value)}
+                      onChange={(e) =>
+                        updateField(
+                          "verification",
+                          e.target.value
+                        )
+                      }
                       options={[
-                        { label: "Not verified", value: "Not verified" },
-                        { label: "Verified", value: "Verified" },
+                        {
+                          label: "Not verified",
+                          value: "Not verified",
+                        },
+                        {
+                          label: "Verified",
+                          value: "Verified",
+                        },
                       ]}
                     />
                   </div>
@@ -258,12 +624,35 @@ function ProductManagement({ activeTab }) {
 
                 <div className="category-modal-buttons">
                   {formTab === "basic" ? (
-                    <Button onClick={() => setFormTab("additional")}>Next</Button>
+                    <Button
+                      onClick={() => {
+                        if (validate()) {
+                          setFormTab("additional");
+                        }
+                      }}
+                    >
+                      Next
+                    </Button>
                   ) : (
                     <>
-                      <Button onClick={() => setFormTab("basic")}>Back</Button>
-                      <Button onClick={saveCategory}>
-                        {editingCategory ? "Update" : "Add"}
+                      <Button
+                        onClick={() =>
+                          setFormTab("basic")
+                        }
+                        disabled={saving}
+                      >
+                        Back
+                      </Button>
+
+                      <Button
+                        onClick={saveCategory}
+                        disabled={saving}
+                      >
+                        {saving
+                          ? "Saving..."
+                          : editingCategory
+                            ? "Update"
+                            : "Add"}
                       </Button>
                     </>
                   )}
@@ -277,17 +666,32 @@ function ProductManagement({ activeTab }) {
             data={categories}
             actions={(item) => (
               <>
-                <Button onClick={() => openEdit(item)}>Edit</Button>
                 <Button
-                  onClick={() =>
-                    setCategories((prev) => prev.filter((c) => c.id !== item.id))
-                  }
+                  onClick={() => openEdit(item)}
+                  disabled={deletingId === item.id}
                 >
-                  Delete
+                  Edit
+                </Button>
+
+                <Button
+                  onClick={() => deleteCategory(item)}
+                  disabled={deletingId === item.id}
+                >
+                  {deletingId === item.id
+                    ? "Deleting..."
+                    : "Delete"}
                 </Button>
               </>
             )}
           />
+
+          {loading && (
+            <p>Loading product categories...</p>
+          )}
+
+          {!loading && categories.length === 0 && !apiError && (
+            <p>No product categories found.</p>
+          )}
 
           {categories.length > 15 && (
             <Pagination
@@ -299,8 +703,13 @@ function ProductManagement({ activeTab }) {
         </>
       )}
 
-      {activeTab === "Stock Management" && <StockManagement />}
-      {activeTab === "Suppliers" && <SupplierManagement />}
+      {activeTab === "Stock Management" && (
+        <StockManagement />
+      )}
+
+      {activeTab === "Suppliers" && (
+        <SupplierManagement />
+      )}
     </div>
   );
 }
