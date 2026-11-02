@@ -540,35 +540,108 @@ export default function ProductForm({
     </div>
   );
 
-  const dropdown = (
-    name,
-    label,
-    options = [],
-    required = false
-  ) => (
-    <div className="product-form-field" key={name}>
-      <Label htmlFor={name} required={required}>
-        {label}
-      </Label>
+  // Show only active zones that belong to the selected warehouse.
+  // The API returns the relationship as `warehouse_id`.
+// Filter warehouse zones based on the selected warehouse.
+const filteredWarehouseZones = warehouseZones.filter((zone) => {
+  const zoneWarehouseId = String(
+    zone.warehouse_id ?? zone.warehouseId ?? ""
+  ).trim();
 
-      <Dropdown
-        name={name}
-        value={String(data[name] ?? "")}
-        options={normalizeOptions(options)}
-        onChange={(value) =>
-          update(
-            name,
-            value?.target ? value.target.value : value
-          )
-        }
-      />
+  const selectedWarehouseId = String(data.warehouseId ?? "").trim();
 
-      {errors[name] && (
-        <p className="field-error">{errors[name]}</p>
-      )}
-    </div>
+  const isActive =
+    zone.is_active !== false &&
+    String(zone.status ?? "").toLowerCase() !== "inactive";
+
+  const isNotDeleted = !zone.deleted_at;
+
+  return (
+    selectedWarehouseId !== "" &&
+    zoneWarehouseId === selectedWarehouseId &&
+    isActive &&
+    isNotDeleted
   );
+});
 
+// Temporary debugging — remove after verification.
+console.log("Selected Warehouse ID:", data.warehouseId);
+console.log("Available Warehouse Zones:", warehouseZones);
+console.log("Filtered Warehouse Zones:", filteredWarehouseZones);
+
+const dropdown = (
+  name,
+  label,
+  options = [],
+  required = false
+) => (
+  <div className="product-form-field" key={name}>
+    <Label htmlFor={name} required={required}>
+      {label}
+    </Label>
+
+    <Dropdown
+      name={name}
+      value={String(data[name] ?? "")}
+      options={normalizeOptions(options)}
+      onChange={(value) => {
+        const selectedValue = value?.target
+          ? value.target.value
+          : value;
+
+        if (name === "warehouseId") {
+          setData((previous) => ({
+            ...previous,
+            warehouseId: selectedValue,
+            warehouseZoneId: "",
+          }));
+
+          setErrors((previous) => ({
+            ...previous,
+            warehouseId: "",
+            warehouseZoneId: "",
+          }));
+
+          return;
+        }
+
+        if (name === "vendorId") {
+          const selectedVendor = vendors.find(
+            (vendor) =>
+              String(vendor.id ?? vendor.vendor_id ?? "") ===
+              String(selectedValue)
+          );
+
+          const vendorCode =
+            selectedVendor?.code ??
+            selectedVendor?.vendor_code ??
+            selectedVendor?.vendorCode ??
+            "";
+
+          setData((previous) => ({
+            ...previous,
+            vendorId: selectedValue,
+            vendorItemId: String(vendorCode),
+          }));
+
+          setErrors((previous) => ({
+            ...previous,
+            vendorId: "",
+            vendorItemId: "",
+          }));
+
+          return;
+        }
+
+        update(name, selectedValue);
+      }}
+    />
+
+    {errors[name] && (
+      <p className="field-error">{errors[name]}</p>
+    )}
+  </div>
+);
   const textarea = (name, label, placeholder = "") => (
     <div
       className="product-form-field product-form-full"
@@ -998,7 +1071,7 @@ export default function ProductForm({
             {dropdown(
               "warehouseZoneId",
               "Warehouse Zone",
-              warehouseZones,
+              filteredWarehouseZones,
               true
             )}
 
@@ -1050,7 +1123,7 @@ export default function ProductForm({
 
         {tab === 3 && (
           <section className="product-form-grid">
-            {field("vendorItemId", "Supplier Item ID")}
+            {field("vendorItemId", "Supplier Item Code")}
 
             {dropdown(
               "vendorId",

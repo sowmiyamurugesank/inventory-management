@@ -16,6 +16,8 @@ import zoneTypeRoutes from "./routes/zoneType.routes.js";
 
 import { errorHandler } from "./middleware/errorHandler.js";
 
+import itemCategoryRoutes from "./routes/itemCategory.routes.js";
+
 const app = express();
 
 app.use(express.json());
@@ -44,6 +46,8 @@ app.use("/api/warehouse-types", warehouseTypeRoutes);
 app.use("/api/zones", zoneRoutes);
 
 app.use("/api/zone-types", zoneTypeRoutes);
+
+app.use("/api/product-categories", itemCategoryRoutes);
 
 app.use(errorHandler);
 

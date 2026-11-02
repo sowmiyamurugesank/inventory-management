@@ -37,13 +37,12 @@ const CRUD_OPERATIONS = {
   },
   UPDATE: {
     sql: `
-            SELECT update_item_list(
-                $1::uuid,
-                $2::jsonb,
-                $3::uuid
-            ) AS result
-        `,
-    params: (data) => [data.id, JSON.stringify(data.data), data.userId ?? null],
+    SELECT update_item_list(
+      $1::uuid,
+      $2::jsonb
+    ) AS result
+  `,
+    params: (data) => [data.id, JSON.stringify(data.data)],
   },
 
   DELETE: {

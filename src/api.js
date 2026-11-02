@@ -16,6 +16,11 @@ export function getItems() {
   return request("/items", {}, "Failed to fetch items");
 }
 
+// Get individual product with incoming stock details
+export function getItemById(id) {
+  return request(`/items/${id}`, {}, "Failed to fetch product details");
+}
+
 export function createItem(itemData) {
   return request(
     "/items",
@@ -42,6 +47,17 @@ export function updateItem(id, itemData) {
 
 export function deleteItem(id) {
   return request(`/items/${id}`, { method: "DELETE" }, "Failed to delete item");
+}
+
+// Product Categories
+export async function getProductCategories() {
+  const data = await request(
+    "/product-categories",
+    {},
+    "Failed to fetch product categories",
+  );
+
+  return Array.isArray(data) ? data : (data?.categories ?? data?.rows ?? []);
 }
 
 // Suppliers / Vendors

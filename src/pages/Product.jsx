@@ -22,12 +22,50 @@ import ProductDetails from "./ProductDetail.jsx";
 
 import {
   getItems,
+  getItemById,
   createItem,
   updateItem,
   deleteItem,
+  getProductCategories,
 } from "../api";
 
 import "../styles/Product.css";
+
+const API_BASE_URL = "http://localhost:5000/api";
+
+function extractApiRows(result, resourceName) {
+  const rows =
+    Array.isArray(result) ? result :
+    Array.isArray(result?.data) ? result.data :
+    Array.isArray(result?.data?.items) ? result.data.items :
+    Array.isArray(result?.data?.rows) ? result.data.rows :
+    Array.isArray(result?.items) ? result.items :
+    Array.isArray(result?.rows) ? result.rows :
+    Array.isArray(result?.warehouses) ? result.warehouses :
+    Array.isArray(result?.data?.warehouses) ? result.data.warehouses :
+    Array.isArray(result?.vendors) ? result.vendors :
+    Array.isArray(result?.data?.vendors) ? result.data.vendors :
+    null;
+
+  if (!rows) {
+    throw new Error(`Invalid ${resourceName} response from server.`);
+  }
+
+  return rows;
+}
+
+async function fetchReferenceRows(path, resourceName) {
+  const response = await fetch(`${API_BASE_URL}${path}`);
+  const result = await response.json().catch(() => ({}));
+
+  if (!response.ok || result.success === false) {
+    throw new Error(
+      result.error || result.message || `Unable to load ${resourceName}.`
+    );
+  }
+
+  return extractApiRows(result, resourceName);
+}
 
 function fromApiItem(item) {
   return {
@@ -52,6 +90,57 @@ function fromApiItem(item) {
     status: item.status ?? "OUT_OF_STOCK",
     quantity: Number(item.quantity ?? 0),
     version: item.version,
+  };
+}
+
+function fromApiStock(stock) {
+  return {
+    ...stock,
+
+    stockId: stock.id,
+
+    warehouseId: stock.warehouse_id ?? "",
+    warehouseZoneId: stock.zone_id ?? "",
+
+    incomingStockCode: stock.code ?? "",
+    incomingQuantity: Number(stock.incoming_quantity ?? 0),
+
+    quantityUnit: stock.quantity_unit ?? "PCS",
+
+    vendorId: stock.vendor_id ?? "",
+    vendorItemId: stock.vendor_item_id ?? "",
+
+    directEntry: stock.is_direct ?? true,
+
+    sourceDocumentType:
+      stock.source_document_type ?? "MANUAL",
+
+    quotationNumber: stock.quotation_number ?? "",
+    purchaseOrderNumber: stock.purchase_order_number ?? "",
+    goodsReceiptNumber: stock.goods_receipt_number ?? "",
+    invoiceNumber: stock.invoice_number ?? "",
+
+    creditNoteNumber: stock.credit_note_number ?? "",
+    paymentReferenceNumber: stock.payment_reference_number ?? "",
+    otherReferenceNumber: stock.reference_number ?? "",
+
+    unitCost: Number(stock.unit_cost ?? 0),
+    totalCost: Number(stock.total_cost ?? 0),
+
+    stockCurrency: stock.currency_code ?? "INR",
+
+    expiryDate: stock.expiry_date ?? "",
+    receivedAt: stock.received_at ?? "",
+
+    notes: stock.notes ?? "",
+
+    incomingStockStatus: stock.status ?? "PENDING",
+
+    stockVerified: stock.is_verified ?? false,
+
+    customAttributes: stock.custom_attributes ?? {},
+
+    stockVersion: stock.version,
   };
 }
 
@@ -161,6 +250,89 @@ function Products() {
     },
   ];
 
+  // Load product categories from API
+const loadCategories = async () => {
+  try {
+    const result = await getProductCategories();
+
+    setCategories(
+      result.filter(
+        (category) =>
+          category.is_active !== false &&
+          !category.deleted_at
+      )
+    );
+  } catch (err) {
+    console.error("Failed to load product categories:", err);
+
+    setError(
+      err.message || "Unable to load product categories"
+    );
+  }
+};
+
+  // Load active warehouses and warehouse zones for Incoming Stock.
+  const loadWarehouseOptions = async () => {
+    try {
+      const [warehouseRows, zoneRows] = await Promise.all([
+        fetchReferenceRows("/warehouses", "warehouses"),
+        fetchReferenceRows("/zones", "warehouse zones"),
+      ]);
+
+      setWarehouses(
+        warehouseRows.filter(
+          (row) => row.is_active !== false && !row.deleted_at
+        )
+      );
+
+      setWarehouseZones(
+        zoneRows.filter(
+          (row) => row.is_active !== false && !row.deleted_at
+        )
+      );
+    } catch (err) {
+      console.error("Failed to load warehouse options:", err);
+      setError(err.message || "Unable to load warehouses and zones.");
+      throw err;
+    }
+  };
+
+  // Load active suppliers for the Add Product form.
+  const loadVendorOptions = async () => {
+    try {
+      const vendorRows = await fetchReferenceRows("/vendors", "suppliers");
+
+      setVendors(
+        vendorRows.filter(
+          (vendor) =>
+            vendor.is_active !== false &&
+            !vendor.deleted_at
+        )
+      );
+    } catch (err) {
+      console.error("Failed to load suppliers:", err);
+      setError(err.message || "Unable to load suppliers.");
+      throw err;
+    }
+  };
+
+  // Refresh reference data whenever the Add Product form is opened.
+  const handleOpenAddProduct = async () => {
+    setEditingProduct(null);
+    setError("");
+
+    try {
+      await Promise.all([
+        loadCategories(),
+        loadWarehouseOptions(),
+        loadVendorOptions(),
+      ]);
+      setShowForm(true);
+    } catch {
+      // Keep the form closed if required reference data cannot load.
+    }
+  };
+
   // Load products from API
   const loadProducts = async () => {
     setLoading(true);
@@ -189,8 +361,9 @@ function Products() {
   };
 
   useEffect(() => {
-    loadProducts();
-  }, []);
+  loadProducts();
+  loadCategories();
+}, []);
 
   // Save new or edited product
   const handleSave = async (formData) => {
@@ -260,11 +433,46 @@ function Products() {
   };
 
   // Edit product
-  const handleEdit = (product) => {
-    setEditingProduct(product);
+ const handleEdit = async (product) => {
+  setError("");
+
+  try {
+    // Load reference data required by the form.
+    await Promise.all([
+      loadCategories(),
+      loadWarehouseOptions(),
+      loadVendorOptions(),
+    ]);
+
+    // Fetch complete product details and its incoming stock records.
+    const result = await getItemById(product.id);
+
+    if (!result?.item) {
+      throw new Error("Product details were not found.");
+    }
+
+    const incomingStocks = (
+      result.incomingStocks ?? []
+    ).map(fromApiStock);
+
+    // Keep the product details and associated stock records together.
+    setEditingProduct({
+      ...fromApiItem(result.item),
+
+      incomingStocks,
+
+      // Initially select the most recently returned stock record.
+      selectedIncomingStockId:
+        incomingStocks[0]?.stockId ?? "",
+    });
+
     setShowForm(true);
-    setError("");
-  };
+  } catch (err) {
+    setError(
+      err.message || "Unable to load product details."
+    );
+  }
+};
 
   // Update product
   const handleUpdate = async (updatedProduct) => {
@@ -428,11 +636,7 @@ function Products() {
               <Button
                 className="add-button"
                 disabled={saving}
-                onClick={() => {
-                  setEditingProduct(null);
-                  setError("");
-                  setShowForm(true);
-                }}
+                onClick={handleOpenAddProduct}
               >
                 <Plus size={18} />
                 Add Product
