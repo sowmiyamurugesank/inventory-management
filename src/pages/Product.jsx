@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -32,40 +31,6 @@ import {
 import "../styles/Product.css";
 
 const API_BASE_URL = "http://localhost:5000/api";
-
-function extractApiRows(result, resourceName) {
-  const rows =
-    Array.isArray(result) ? result :
-    Array.isArray(result?.data) ? result.data :
-    Array.isArray(result?.data?.items) ? result.data.items :
-    Array.isArray(result?.data?.rows) ? result.data.rows :
-    Array.isArray(result?.items) ? result.items :
-    Array.isArray(result?.rows) ? result.rows :
-    Array.isArray(result?.warehouses) ? result.warehouses :
-    Array.isArray(result?.data?.warehouses) ? result.data.warehouses :
-    Array.isArray(result?.vendors) ? result.vendors :
-    Array.isArray(result?.data?.vendors) ? result.data.vendors :
-    null;
-
-  if (!rows) {
-    throw new Error(`Invalid ${resourceName} response from server.`);
-  }
-
-  return rows;
-}
-
-async function fetchReferenceRows(path, resourceName) {
-  const response = await fetch(`${API_BASE_URL}${path}`);
-  const result = await response.json().catch(() => ({}));
-
-  if (!response.ok || result.success === false) {
-    throw new Error(
-      result.error || result.message || `Unable to load ${resourceName}.`
-    );
-  }
-
-  return extractApiRows(result, resourceName);
-}
 
 function fromApiItem(item) {
   return {
@@ -201,10 +166,10 @@ function Products() {
   const [editingProduct, setEditingProduct] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
 
-  // Existing Purchase Order form
+  // Purchase Order form visibility
   const [showPurchaseOrder, setShowPurchaseOrder] = useState(false);
 
-  // PurchaseWorkflow component visibility
+  // Purchase Workflow visibility
   const [showPurchaseWorkflow, setShowPurchaseWorkflow] = useState(false);
 
   // Purchase Orders table data
@@ -360,10 +325,92 @@ const loadCategories = async () => {
     }
   };
 
+  // Load Purchase Orders from database
+  const loadPurchaseOrders = async () => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/purchase-orders`
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result.message || "Unable to load purchase orders"
+        );
+      }
+
+      const orders = Array.isArray(result)
+        ? result
+        : result?.data?.purchaseOrders ??
+          result?.data?.purchase_orders ??
+          result?.data ??
+          result?.purchaseOrders ??
+          result?.purchase_orders ??
+          [];
+
+      if (!Array.isArray(orders)) {
+        throw new Error("Invalid purchase order response");
+      }
+
+      const formattedOrders = orders.map((order) => ({
+        id: order.id,
+
+        poNumber:
+          order.poNumber ??
+          order.po_number ??
+          order.code ??
+          "-",
+
+        supplier:
+          order.supplier ??
+          order.vendor_name ??
+          order.vendorName ??
+          "-",
+
+        poDate:
+          order.poDate ??
+          order.po_date ??
+          "-",
+
+        product:
+          order.product ??
+          order.item_name ??
+          order.itemName ??
+          "-",
+
+        quantity:
+          order.quantity ??
+          "-",
+
+        amount:
+          order.amount ??
+          order.total_amount ??
+          order.totalPurchaseOrder ??
+          0,
+
+        currency:
+          order.currency ??
+          order.currency_code ??
+          "INR",
+
+        status:
+          order.status ??
+          "DRAFT",
+      }));
+
+      setPurchaseOrders(formattedOrders);
+    } catch (err) {
+      console.error("Purchase Order loading error:", err);
+      setError(err.message || "Unable to load purchase orders");
+    }
+  };
+
+  // Load products and Purchase Orders when page opens
   useEffect(() => {
-  loadProducts();
-  loadCategories();
-}, []);
+    loadProducts();
+    loadPurchaseOrders();
+  }, []);
 
   // Save new or edited product
   const handleSave = async (formData) => {
@@ -511,23 +558,12 @@ const loadCategories = async () => {
   };
 
   // Purchase Order submit
-  const handlePurchaseOrderSubmit = (orderData) => {
-    setPurchaseOrders((previousOrders) => [
-      ...previousOrders,
-      {
-        id: Date.now(),
-        poNumber: orderData.poNumber,
-        supplier: orderData.supplier,
-        poDate: orderData.poDate,
-        product: orderData.product,
-        quantity: orderData.quantity,
-        amount: orderData.totalPurchaseOrder,
-        currency: orderData.currency,
-        status: "Pending",
-      },
-    ]);
+  // PurchaseOrder.jsx should call this only after successful POST
+  const handlePurchaseOrderSubmit = async () => {
+    await loadPurchaseOrders();
 
     setShowPurchaseOrder(false);
+    setShowPurchaseWorkflow(false);
   };
 
   // Open purchase workflow component
@@ -591,7 +627,13 @@ const loadCategories = async () => {
         <div className="product-error" role="alert">
           <span>{error}</span>
 
-          <button type="button" onClick={loadProducts}>
+          <button
+            type="button"
+            onClick={() => {
+              loadProducts();
+              loadPurchaseOrders();
+            }}
+          >
             Retry
           </button>
         </div>
@@ -794,4 +836,3 @@ const loadCategories = async () => {
 }
 
 export default Products;
-

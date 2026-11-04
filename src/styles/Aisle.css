@@ -1,0 +1,334 @@
+.aisle-page {
+  width: 100%;
+  min-width: 0;
+  min-height: 500px;
+  padding: 28px;
+  box-sizing: border-box;
+  background: #f4f6fc;
+  color: #243b63;
+  font-family: inherit;
+}
+
+.aisle-heading {
+  margin: 8px 0 26px;
+  color: #4f46e5;
+  font-size: 26px;
+  font-weight: 700;
+  text-align: center;
+}
+
+
+.aisle-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+
+.aisle-search {
+  flex: 1;
+  min-width: 220px;
+  max-width: 420px;
+}
+
+.aisle-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
+.aisle-filter-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.aisle-filter-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 42px;
+  padding: 10px 15px;
+  border: 1px solid #d7deeb;
+  border-radius: 8px;
+  background: #4f46e5;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.aisle-filter-button svg {
+  flex-shrink: 0;
+}
+
+.aisle-chevron-open {
+  transform: rotate(180deg);
+}
+
+
+.aisle-filter-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 1000;
+
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+
+  width: 440px;
+  max-width: calc(100vw - 32px);
+  max-height: 440px;
+  overflow-y: auto;
+
+  padding: 20px;
+  box-sizing: border-box;
+
+  border: 1px solid #e0e5ef;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 12px 30px rgba(36, 59, 99, 0.14);
+}
+
+.aisle-filter-heading {
+  grid-column: 1 / -1;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #edf0f6;
+  color: #243b63;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+
+.aisle-filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+
+.aisle-filter-field label {
+  color: #475569;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.aisle-filter-field select {
+  width: 100%;
+  height: 42px;
+  padding: 0 10px;
+  box-sizing: border-box;
+  border: 1px solid #d6dce8;
+  border-radius: 7px;
+  background: #ffffff;
+  color: #334155;
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.aisle-filter-field select:hover {
+  border-color: #a5b4fc;
+}
+
+.aisle-filter-field select:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+}
+
+.aisle-clear-button {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 40px;
+  margin-top: 2px;
+  padding: 9px 12px;
+  border: 1px solid #d6dce8;
+  border-radius: 7px;
+  background: #f8fafc;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.aisle-add-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 10px 17px;
+  border: 1px solid #4f46e5;
+  border-radius: 8px;
+  background: #4f46e5;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.aisle-add-button:hover {
+  border-color: #4338ca;
+  background: #4338ca;
+}
+
+.aisle-message {
+  padding: 28px 12px;
+  color: #64748b;
+  font-size: 15px;
+  text-align: center;
+}
+
+.aisle-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+  padding: 12px 4px;
+}
+
+.aisle-record-count {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.aisle-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
+}
+.aisle-filter-wrapper {
+  position: relative;
+}
+
+.aisle-filter-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  left: auto;
+  transform: none;
+
+  width: 440px;
+  max-width: calc(100vw - 24px);
+
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+
+  padding: 18px;
+  box-sizing: border-box;
+  border: 1px solid #e0e5ef;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 12px 30px rgba(36, 59, 99, 0.14);
+  z-index: 9999;
+}
+
+.aisle-filter-wrapper {
+  position: relative;
+}
+
+.aisle-filter-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  left: auto;
+  transform: none;
+
+  width: 340px;
+  max-width: calc(100vw - 32px);
+  max-height: 70vh;
+  overflow-y: auto;
+
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+
+  padding: 16px;
+  box-sizing: border-box;
+  border: 1px solid #e0e5ef;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 12px 30px rgba(36, 59, 99, 0.14);
+  z-index: 9999;
+}
+
+.aisle-filter-heading,
+.aisle-clear-button {
+  grid-column:  1/-1;
+}
+
+.aisle-filter-field {
+  min-width: 0;
+}
+
+.aisle-filter-field select {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+@media (max-width: 480px) {
+  .aisle-filter-wrapper {
+    position: relative;
+  }
+
+  .aisle-filter-panel {
+    position: absolute;
+    top: calc(100% + 8px);
+
+    right: 0;
+    left: auto;
+    transform: none;
+
+    width: min(300px, calc(100vw - 24px));
+    max-width: calc(100vw - 24px);
+
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    padding: 12px;
+
+    box-sizing: border-box;
+    z-index: 9999;
+  }
+
+  .aisle-filter-field select {
+    width: 100%;
+    min-width: 0;
+    padding: 0 6px;
+    font-size: 12px;
+    box-sizing: border-box;
+  }
+}
+
+@media (max-width: 340px) {
+  .aisle-filter-panel {
+    width: calc(100vw - 24px);
+    grid-template-columns: 1fr;
+  }
+
+  .aisle-filter-heading,
+  .aisle-clear-button {
+    grid-column: 1;
+  }
+}

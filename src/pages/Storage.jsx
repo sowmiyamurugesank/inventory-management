@@ -15,6 +15,7 @@ import IncomingStock from "./IncomingStock.jsx";
 import OutgoingStock from "./OutgoingStock.jsx";
 import WarehouseInventory from "./Warehouse Inventory.jsx";
 import DamagedGoods from "./DamagedGoods.jsx";
+import Aisle from "./Aisle.jsx";
 
 import "../styles/Storage.css";
 
@@ -31,6 +32,7 @@ const warehouseTabs = [
   "Warehouse",
   "Zone Type",
   "Zone",
+  "Aisle",
 ];
 
 function Storage() {
@@ -109,6 +111,9 @@ function Storage() {
             )}
 
             {activeWarehouseTab === "Zone" && <Zone />}
+
+            {activeWarehouseTab === "Aisle" && <Aisle />}
+            
           </div>
         </>
       )}

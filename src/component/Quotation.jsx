@@ -16,19 +16,168 @@ import DetailsField from "./Atom/DetailsField";
 import Badge from "./Atom/Badge.jsx";
 import "../styles/Quotation.css";
 
-const STORAGE_KEY = "sharedPurchaseQuotations";
+const API_URL = "http://localhost:5000/api/purchase-quotations";
 
-const readQuotations = () => {
-  try {
-    const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-    return Array.isArray(data) ? data : [];
-  } catch {
-    return [];
+const getQuotationId = (quotation) =>
+  quotation?.id ?? quotation?.quotation_id;
+
+const getResponseData = (result) => {
+  if (Array.isArray(result)) return result;
+  if (Array.isArray(result?.data)) return result.data;
+  if (Array.isArray(result?.quotations)) return result.quotations;
+  if (Array.isArray(result?.data?.quotations)) {
+    return result.data.quotations;
   }
+  return [];
+};
+
+const normalizeQuotation = (quotation = {}) => {
+  const items = Array.isArray(quotation.items)
+    ? quotation.items
+    : [];
+
+  const vendor =
+    typeof quotation.vendor === "object"
+      ? quotation.vendor?.name ||
+        quotation.vendor?.vendorName ||
+        ""
+      : quotation.vendor || quotation.vendor_name || "";
+
+  return {
+    ...quotation,
+
+    id: getQuotationId(quotation),
+
+    quotationNumber:
+      quotation.quotationNumber ||
+      quotation.quotation_number ||
+      quotation.quotationNo ||
+      "",
+
+    quotationNo:
+      quotation.quotationNo ||
+      quotation.quotationNumber ||
+      quotation.quotation_number ||
+      "",
+
+    quotationCode:
+      quotation.quotationCode ||
+      quotation.quotation_code ||
+      quotation.systemCode ||
+      "",
+
+    quotationDate:
+      quotation.quotationDate ||
+      quotation.quotation_date ||
+      quotation.date ||
+      "",
+
+    validUntil:
+      quotation.validUntil ||
+      quotation.valid_until ||
+      "",
+
+    vendor,
+
+    vendorCode:
+      quotation.vendorCode ||
+      quotation.vendor_code ||
+      quotation.vendorDetails?.vendorCode ||
+      "",
+
+    contactPerson:
+      quotation.contactPerson ||
+      quotation.contact_person ||
+      quotation.vendorDetails?.contact ||
+      "",
+
+    email:
+      quotation.email ||
+      quotation.vendorDetails?.email ||
+      "",
+
+    phone:
+      quotation.phone ||
+      quotation.vendorDetails?.phone ||
+      "",
+
+    gstin:
+      quotation.gstin ||
+      quotation.GSTIN ||
+      quotation.vendorDetails?.gstin ||
+      "",
+
+    items,
+
+    item:
+      quotation.item ||
+      items[0]?.product ||
+      "",
+
+    date:
+      quotation.date ||
+      quotation.quotationDate ||
+      quotation.quotation_date ||
+      "",
+
+    quantity:
+      quotation.quantity ??
+      items.reduce(
+        (total, item) => total + Number(item.quantity || 0),
+        0
+      ),
+
+    unitPrice: Number(
+      quotation.unitPrice ??
+        items[0]?.unitPrice ??
+        items[0]?.unit_price ??
+        0
+    ),
+
+    quotationTotal: Number(
+      quotation.quotationTotal ??
+        quotation.quotation_total ??
+        0
+    ),
+
+    quotationDiscount:
+      quotation.quotationDiscount ??
+      quotation.quotation_discount ??
+      0,
+
+    additionalCharges:
+      quotation.additionalCharges ??
+      quotation.additional_charges ??
+      0,
+
+    overallDeliveryDays:
+      quotation.overallDeliveryDays ??
+      quotation.overall_delivery_days ??
+      "",
+
+    paymentTerms:
+      quotation.paymentTerms ||
+      quotation.payment_terms ||
+      "",
+
+    deliveryTerms:
+      quotation.deliveryTerms ||
+      quotation.delivery_terms ||
+      "",
+
+    is_direct:
+      quotation.is_direct ??
+      quotation.isDirect ??
+      false,
+  };
 };
 
 const displayValue = (value) => {
-  if (value === undefined || value === null || value === "") {
+  if (
+    value === undefined ||
+    value === null ||
+    value === ""
+  ) {
     return "-";
   }
 
@@ -88,13 +237,19 @@ const getStatusType = (status) => {
 
 const calculateItemValues = (item = {}) => {
   const quantity = Number(item.quantity || 0);
-  const unitPrice = Number(item.unitPrice || 0);
+
+  const unitPrice = Number(
+    item.unitPrice ?? item.unit_price ?? 0
+  );
+
   const discountValue = Number(item.discount || 0);
-  const taxRate = Number(item.taxRate || 0);
+
+  const taxRate = Number(
+    item.taxRate ?? item.tax_rate ?? 0
+  );
 
   const subtotal = quantity * unitPrice;
 
-  // The form uses discount as a percentage.
   const discount =
     subtotal * (discountValue > 0 ? discountValue / 100 : 0);
 
@@ -105,7 +260,11 @@ const calculateItemValues = (item = {}) => {
     item.taxAmount !== null &&
     item.taxAmount !== ""
       ? Number(item.taxAmount) || 0
-      : taxableAmount * (taxRate / 100);
+      : item.tax_amount !== undefined &&
+          item.tax_amount !== null &&
+          item.tax_amount !== ""
+        ? Number(item.tax_amount) || 0
+        : taxableAmount * (taxRate / 100);
 
   const lineTotal = taxableAmount + tax;
 
@@ -121,10 +280,54 @@ const calculateItemValues = (item = {}) => {
 
 function Quotation({ openModalOnLoad = false }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [viewingQuotation, setViewingQuotation] = useState(null);
-  const [editingQuotation, setEditingQuotation] = useState(null);
 
-  const [quotations, setQuotations] = useState(readQuotations);
+  const [viewingQuotation, setViewingQuotation] =
+    useState(null);
+
+  const [editingQuotation, setEditingQuotation] =
+    useState(null);
+
+  const [quotations, setQuotations] = useState([]);
+
+  const [loading, setLoading] = useState(true);
+
+  const [saving, setSaving] = useState(false);
+
+  const [deletingId, setDeletingId] = useState(null);
+
+  const [apiError, setApiError] = useState("");
+
+  // GET: Fetch quotations from the backend.
+  const fetchQuotations = async () => {
+    setLoading(true);
+    setApiError("");
+
+    try {
+      const response = await fetch(API_URL);
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch quotations (${response.status})`
+        );
+      }
+
+      const result = await response.json();
+
+      const records = getResponseData(result);
+
+      setQuotations(records.map(normalizeQuotation));
+    } catch (error) {
+      setApiError(
+        error.message || "Unable to load quotations."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchQuotations();
+  }, []);
 
   useEffect(() => {
     if (openModalOnLoad) {
@@ -132,29 +335,6 @@ function Quotation({ openModalOnLoad = false }) {
       setIsModalOpen(true);
     }
   }, [openModalOnLoad]);
-
-  // Synchronize quotations with other components, including LOI.
-  useEffect(() => {
-    const syncQuotations = () => {
-      setQuotations(readQuotations());
-    };
-
-    window.addEventListener(
-      "purchase-quotations-updated",
-      syncQuotations
-    );
-
-    window.addEventListener("storage", syncQuotations);
-
-    return () => {
-      window.removeEventListener(
-        "purchase-quotations-updated",
-        syncQuotations
-      );
-
-      window.removeEventListener("storage", syncQuotations);
-    };
-  }, []);
 
   const columns = [
     { key: "quotationNo", label: "Quotation No." },
@@ -168,84 +348,55 @@ function Quotation({ openModalOnLoad = false }) {
     { key: "status", label: "Status" },
   ];
 
-  const handleSaveQuotation = (quotationData) => {
-    const quotationRow = {
-      ...quotationData,
-      id:
-        editingQuotation?.id ??
-        quotationData.id ??
-        Date.now(),
+  // POST: Add quotation.
+  // PUT: Update quotation.
+  const handleSaveQuotation = async (quotationData) => {
+    setSaving(true);
+    setApiError("");
 
-      quotationNo:
-        quotationData.quotationNumber ||
-        quotationData.quotationNo ||
-        "",
+    const isEditing = Boolean(editingQuotation);
 
-      vendor: quotationData.vendor || "",
-      item: quotationData.items?.[0]?.product || "",
-      date: quotationData.quotationDate || "",
+    const quotationId = getQuotationId(editingQuotation);
 
-      quantity:
-        quotationData.items?.reduce(
-          (total, item) =>
-            total + Number(item.quantity || 0),
-          0
-        ) || 0,
+    if (isEditing && quotationId == null) {
+      setApiError("Quotation ID is missing. Cannot update.");
+      setSaving(false);
+      return;
+    }
 
-      unitPrice: Number(
-        quotationData.items?.[0]?.unitPrice || 0
-      ),
+    try {
+      const url = isEditing
+        ? `${API_URL}/${encodeURIComponent(quotationId)}`
+        : API_URL;
 
-      quotationTotal: Number(
-        quotationData.quotationTotal || 0
-      ),
-    };
+      const response = await fetch(url, {
+        method: isEditing ? "PUT" : "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(quotationData),
+      });
 
-    setQuotations((previous) => {
-      let updated;
+      if (!response.ok) {
+        const message = await response.text();
 
-      if (editingQuotation) {
-        updated = previous.map((item) =>
-          item.id === editingQuotation.id
-            ? { ...item, ...quotationRow }
-            : item
+        throw new Error(
+          message ||
+            `Failed to ${isEditing ? "update" : "create"} quotation (${response.status})`
         );
-      } else {
-        const existingIndex = previous.findIndex(
-          (item) =>
-            item.quotationNo === quotationRow.quotationNo &&
-            item.vendor === quotationRow.vendor
-        );
-
-        if (existingIndex !== -1) {
-          updated = previous.map((item, index) =>
-            index === existingIndex
-              ? {
-                  ...item,
-                  ...quotationRow,
-                  id: item.id,
-                }
-              : item
-          );
-        } else {
-          updated = [...previous, quotationRow];
-        }
       }
 
-      localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(updated)
+      await fetchQuotations();
+
+      setEditingQuotation(null);
+      setIsModalOpen(false);
+    } catch (error) {
+      setApiError(
+        error.message || "Unable to save quotation."
       );
-
-      return updated;
-    });
-
-    window.dispatchEvent(
-      new Event("purchase-quotations-updated")
-    );
-
-    setEditingQuotation(null);
-    setIsModalOpen(false);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleView = (quotation) => {
@@ -258,7 +409,15 @@ function Quotation({ openModalOnLoad = false }) {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (quotation) => {
+  // DELETE: Remove quotation from the backend.
+  const handleDelete = async (quotation) => {
+    const quotationId = getQuotationId(quotation);
+
+    if (quotationId == null) {
+      setApiError("Quotation ID is missing.");
+      return;
+    }
+
     const confirmed = window.confirm(
       `Are you sure you want to delete quotation ${
         quotation.quotationNo || ""
@@ -267,27 +426,52 @@ function Quotation({ openModalOnLoad = false }) {
 
     if (!confirmed) return;
 
-    const updated = quotations.filter(
-      (item) => item.id !== quotation.id
-    );
+    setDeletingId(quotationId);
+    setApiError("");
 
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify(updated)
-    );
+    try {
+      const response = await fetch(
+        `${API_URL}/${encodeURIComponent(quotationId)}`,
+        {
+          method: "DELETE",
+        }
+      );
 
-    setQuotations(updated);
+      if (!response.ok) {
+        const message = await response.text();
 
-    window.dispatchEvent(
-      new Event("purchase-quotations-updated")
-    );
+        throw new Error(
+          message ||
+            `Failed to delete quotation (${response.status})`
+        );
+      }
 
-    if (viewingQuotation?.id === quotation.id) {
-      setViewingQuotation(null);
+      setQuotations((previous) =>
+        previous.filter(
+          (item) =>
+            String(getQuotationId(item)) !==
+            String(quotationId)
+        )
+      );
+
+      if (
+        String(getQuotationId(viewingQuotation || {})) ===
+        String(quotationId)
+      ) {
+        setViewingQuotation(null);
+      }
+    } catch (error) {
+      setApiError(
+        error.message || "Unable to delete quotation."
+      );
+    } finally {
+      setDeletingId(null);
     }
   };
 
   const closeFormModal = () => {
+    if (saving) return;
+
     setIsModalOpen(false);
     setEditingQuotation(null);
   };
@@ -382,6 +566,7 @@ function Quotation({ openModalOnLoad = false }) {
         <Button
           type="button"
           onClick={() => {
+            setApiError("");
             setEditingQuotation(null);
             setIsModalOpen(true);
           }}
@@ -391,43 +576,72 @@ function Quotation({ openModalOnLoad = false }) {
       </div>
 
       <div className="quotation-table-section">
-        <DataTable
-          columns={columns}
-          data={quotations}
-          actions={(item) => (
-            <>
-              <button
-                type="button"
-                className="quotation-action-btn view-action"
-                title="View quotation"
-                aria-label="View quotation"
-                onClick={() => handleView(item)}
-              >
-                <Eye size={17} />
-              </button>
+        {apiError && (
+          <div
+            className="quotation-api-error"
+            role="alert"
+          >
+            <span>{apiError}</span>
 
-              <button
-                type="button"
-                className="quotation-action-btn edit-action"
-                title="Edit quotation"
-                aria-label="Edit quotation"
-                onClick={() => handleEdit(item)}
-              >
-                <Pencil size={17} />
-              </button>
+            <button
+              type="button"
+              aria-label="Close error"
+              onClick={() => setApiError("")}
+            >
+              <X size={16} />
+            </button>
+          </div>
+        )}
 
-              <button
-                type="button"
-                className="quotation-action-btn delete-action"
-                title="Delete quotation"
-                aria-label="Delete quotation"
-                onClick={() => handleDelete(item)}
-              >
-                <Trash2 size={17} />
-              </button>
-            </>
-          )}
-        />
+        {loading ? (
+          <p className="quotation-loading">
+            Loading quotations...
+          </p>
+        ) : (
+          <DataTable
+            columns={columns}
+            data={quotations}
+            actions={(item) => (
+              <>
+                <button
+                  type="button"
+                  className="quotation-action-btn view-action"
+                  title="View quotation"
+                  aria-label="View quotation"
+                  onClick={() => handleView(item)}
+                >
+                  <Eye size={17} />
+                </button>
+
+                <button
+                  type="button"
+                  className="quotation-action-btn edit-action"
+                  title="Edit quotation"
+                  aria-label="Edit quotation"
+                  onClick={() => handleEdit(item)}
+                >
+                  <Pencil size={17} />
+                </button>
+
+                <button
+                  type="button"
+                  className="quotation-action-btn delete-action"
+                  title="Delete quotation"
+                  aria-label="Delete quotation"
+                  disabled={
+                    deletingId != null &&
+                    String(deletingId) ===
+                      String(getQuotationId(item))
+                  }
+                  onClick={() => handleDelete(item)}
+                >
+                  <Trash2 size={17} />
+                </button>
+              </>
+            )}
+          />
+        )}
+
       </div>
 
       {/* Add / Edit Quotation Modal */}
@@ -455,9 +669,7 @@ function Quotation({ openModalOnLoad = false }) {
                 <h2>Quotation Details</h2>
 
                 <div className="quotation-details-number">
-                  <span>
-                    Quotation No.:
-                  </span>
+                  <span>Quotation No.:</span>
 
                   <strong>
                     {displayValue(
@@ -509,7 +721,8 @@ function Quotation({ openModalOnLoad = false }) {
                   <DetailsField
                     label="Quotation Date"
                     value={formatDate(
-                      quotation.quotationDate || quotation.date
+                      quotation.quotationDate ||
+                        quotation.date
                     )}
                   />
 
@@ -601,7 +814,8 @@ function Quotation({ openModalOnLoad = false }) {
                                   Vendor item code:{" "}
                                   {displayValue(
                                     item.vendorItemCode ||
-                                      item.vendorItem
+                                      item.vendorItem ||
+                                      item.vendor_item_code
                                   )}
                                 </span>
                               </div>
@@ -654,8 +868,12 @@ function Quotation({ openModalOnLoad = false }) {
                             <DetailsField
                               label="Expected Delivery"
                               value={
-                                item.deliveryDays
-                                  ? `${item.deliveryDays} days`
+                                item.deliveryDays ||
+                                item.delivery_days
+                                  ? `${
+                                      item.deliveryDays ||
+                                      item.delivery_days
+                                    } days`
                                   : "-"
                               }
                             />
@@ -667,8 +885,7 @@ function Quotation({ openModalOnLoad = false }) {
                           </div>
 
                           <div className="quotation-item-description">
-                            {item.description ||
-                            item.notes ? (
+                            {item.description || item.notes ? (
                               <>
                                 {item.description && (
                                   <p>{item.description}</p>
@@ -680,8 +897,7 @@ function Quotation({ openModalOnLoad = false }) {
                               </>
                             ) : (
                               <p>
-                                Description and item notes appear
-                                here.
+                                No item description or notes.
                               </p>
                             )}
                           </div>
@@ -695,7 +911,6 @@ function Quotation({ openModalOnLoad = false }) {
                   </div>
                 )}
 
-                {/* Totals card — intentionally no Price Summary heading */}
                 <div className="quotation-total-card">
                   <div className="quotation-total-row">
                     <span>Subtotal</span>
@@ -736,7 +951,9 @@ function Quotation({ openModalOnLoad = false }) {
                   </div>
 
                   <div className="quotation-grand-total">
-                    <strong>Total Quotation Amount</strong>
+                    <strong>
+                      Total Quotation Amount
+                    </strong>
 
                     <strong>
                       {formatCurrency(grandTotal, currency)}
@@ -793,4 +1010,3 @@ function Quotation({ openModalOnLoad = false }) {
 }
 
 export default Quotation;
-

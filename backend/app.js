@@ -16,7 +16,13 @@ import zoneTypeRoutes from "./routes/zoneType.routes.js";
 
 import { errorHandler } from "./middleware/errorHandler.js";
 
-import itemCategoryRoutes from "./routes/itemCategory.routes.js";
+import incomingStockRoutes from "./routes/incomingStock.routes.js";
+
+
+
+import purchaseOrderRoutes from "./routes/purchaseOrder.routes.js";
+
+
 
 const app = express();
 
@@ -47,7 +53,10 @@ app.use("/api/zones", zoneRoutes);
 
 app.use("/api/zone-types", zoneTypeRoutes);
 
-app.use("/api/product-categories", itemCategoryRoutes);
+app.use("/api/incoming-stock", incomingStockRoutes);
+
+app.use("/api/purchase-orders", purchaseOrderRoutes);
+
 
 app.use(errorHandler);
 

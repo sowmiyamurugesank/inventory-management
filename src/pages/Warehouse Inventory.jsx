@@ -8,13 +8,15 @@ import {
   CheckCircle,
   RotateCcw,
   X,
+  Eye,
+  AlertTriangle,
 } from "lucide-react";
 
 import StatCard from "../StatCard.jsx";
-import StorageTable from "../component/StorageTable.jsx";
 import Pagination from "../component/Pagination.jsx";
 import Button from "../component/Button.jsx";
 import ReportDamagedGoods from "../component/ReportDamagedGoods.jsx";
+import ReturnForm from "../component/ReturnForm.jsx";
 
 import "../styles/Warehouse Inventory.css";
 
@@ -22,22 +24,23 @@ const API_URL = "http://localhost:5000/api/warehouse-Inventory";
 const ITEMS_PER_PAGE = 10;
 const STORAGE_KEY = "warehouseInventoryData";
 const REPORTS_KEY = "damagedGoodsReports";
+const RETURNS_KEY = "billingReturns";
 
 const inventoryColumns = [
-  { key: "inventoryCode", label: "Inventory Code", editable: false },
-  { key: "itemName", label: "Item Name", editable: false },
-  { key: "warehouse", label: "Warehouse", editable: false },
-  { key: "zone", label: "Zone", editable: false },
-  { key: "onHand", label: "On Hand", editable: false },
-  { key: "reserved", label: "Reserved", editable: false },
-  { key: "available", label: "Available", editable: false },
-  { key: "damaged", label: "Damaged", editable: false },
-  { key: "reorderLevel", label: "Reorder Level", editable: false },
-  { key: "status", label: "Status", editable: false },
-  { key: "remark", label: "Remark", editable: false },
+  { key: "inventoryCode", label: "Inventory Code" },
+  { key: "itemName", label: "Item Name" },
+  { key: "warehouse", label: "Warehouse" },
+  { key: "zone", label: "Zone" },
+  { key: "onHand", label: "On Hand" },
+  { key: "reserved", label: "Reserved" },
+  { key: "available", label: "Available" },
+  { key: "damaged", label: "Damaged" },
+  { key: "reorderLevel", label: "Reorder Level" },
+  { key: "status", label: "Status" },
+  { key: "remark", label: "Remark" },
 ];
 
-function readStoredData(key, fallback = null) {
+function readStoredData(key, fallback = []) {
   try {
     const stored = localStorage.getItem(key);
     return stored ? JSON.parse(stored) : fallback;
@@ -75,6 +78,12 @@ function WarehouseInventory() {
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [selectedDamageItem, setSelectedDamageItem] = useState(null);
   const [showDamageForm, setShowDamageForm] = useState(false);
+
+  const [selectedReturnItem, setSelectedReturnItem] = useState(null);
+  const [showReturnForm, setShowReturnForm] = useState(false);
+  const [returnQty, setReturnQty] = useState("");
+  const [returnReason, setReturnReason] = useState("Customer Return");
+  const [returnRemark, setReturnRemark] = useState("");
 
   useEffect(() => {
     const controller = new AbortController();
@@ -179,7 +188,7 @@ function WarehouseInventory() {
               : onHand <= reorderLevel
                 ? "Low Stock"
                 : "Available",
-          remark: item.remark ?? (damaged > 0 ? "Damaged" : ""),
+          remark: item.remark ?? (damaged > 0 ? "Damaged" : "—"),
         };
       }),
     [data]
@@ -270,10 +279,6 @@ function WarehouseInventory() {
     setSelectedRecord(row);
   }
 
-  function closeModal() {
-    setSelectedRecord(null);
-  }
-
   function handleDamage(row) {
     if (row.available <= 0) {
       window.alert("No available quantity to report as damaged.");
@@ -315,9 +320,7 @@ function WarehouseInventory() {
     const updatedData = data.map((item, index) => {
       const itemId = String(item.id ?? item._id ?? index);
 
-      if (itemId !== String(selectedDamageItem.id)) {
-        return item;
-      }
+      if (itemId !== String(selectedDamageItem.id)) return item;
 
       return {
         ...item,
@@ -377,8 +380,128 @@ function WarehouseInventory() {
       window.dispatchEvent(new Event("damagedGoodsReportsUpdated"));
       window.alert("Damage quantity updated and report saved successfully!");
     } catch {
-      window.alert("Unable to save the damage report in local storage.");
+      window.alert("Unable to save the damage report.");
     }
+  }
+
+  function handleReturn(row) {
+    if (row.available <= 0) {
+      window.alert("No available quantity to return.");
+      return;
+    }
+
+    setSelectedReturnItem(row);
+    setReturnQty("");
+    setReturnReason("Customer Return");
+    setReturnRemark("");
+    setShowReturnForm(true);
+  }
+
+  function closeReturnForm() {
+    setShowReturnForm(false);
+    setSelectedReturnItem(null);
+  }
+
+  function handleReturnSubmit(event) {
+    event.preventDefault();
+
+    if (!selectedReturnItem) return;
+
+    const quantity = Number(returnQty);
+
+    if (
+      !Number.isInteger(quantity) ||
+      quantity <= 0 ||
+      quantity > selectedReturnItem.available
+    ) {
+      window.alert(
+        `Enter a whole quantity between 1 and ${selectedReturnItem.available}.`
+      );
+      return;
+    }
+
+    const now = new Date().toISOString();
+    const returnId = `RET-${Date.now()}`;
+
+    const returnRecord = {
+      id: returnId,
+      returnNo: returnId,
+      inventoryId: selectedReturnItem.id,
+      inventoryCode: selectedReturnItem.inventoryCode,
+      itemName: selectedReturnItem.itemName,
+      productName: selectedReturnItem.itemName,
+      warehouse: selectedReturnItem.warehouse,
+      zone: selectedReturnItem.zone,
+      returnQuantity: quantity,
+      quantity,
+      reason: returnReason,
+      remark: returnRemark.trim(),
+      returnDate: now,
+      status: "Returned",
+    };
+
+    const updatedData = data.map((item, index) => {
+      const itemId = String(item.id ?? item._id ?? index);
+
+      if (itemId !== String(selectedReturnItem.id)) return item;
+
+      const onHand =
+        Number(getValue(item, ["onHand", "quantity", "stock"], 0)) || 0;
+      const reserved =
+        Number(getValue(item, ["reserved", "reservedQuantity"], 0)) || 0;
+      const oldAvailableValue = getValue(
+        item,
+        ["available", "availableQuantity"],
+        null
+      );
+      const available =
+        oldAvailableValue !== null
+          ? Number(oldAvailableValue) || 0
+          : Math.max(onHand - reserved, 0);
+
+      return {
+        ...item,
+        onHand: onHand + quantity,
+        available: available + quantity,
+        remark: returnRemark.trim() || "Customer Return",
+      };
+    });
+
+    const existingReturns = readStoredData(RETURNS_KEY, []);
+    const safeReturns = Array.isArray(existingReturns)
+      ? existingReturns
+      : [];
+
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedData));
+      localStorage.setItem(
+        RETURNS_KEY,
+        JSON.stringify([...safeReturns, returnRecord])
+      );
+
+      setData(updatedData);
+      closeReturnForm();
+
+      window.dispatchEvent(new Event("billingReturnsUpdated"));
+      window.alert("Return saved and inventory quantity updated!");
+    } catch {
+      window.alert("Unable to save the return.");
+    }
+  }
+
+  function renderStatus(value) {
+    const className =
+      value === "Available"
+        ? "inventory-status-available"
+        : value === "Low Stock"
+          ? "inventory-status-low"
+          : "inventory-status-out";
+
+    return (
+      <span className={`inventory-status ${className}`}>
+        {value}
+      </span>
+    );
   }
 
   return (
@@ -495,19 +618,86 @@ function WarehouseInventory() {
       )}
 
       <div className="warehouse-inventory-table-card">
-        <StorageTable
-          warehouses={currentData}
-          columns={inventoryColumns}
-          onView={handleView}
-          onDamage={handleDamage}
-          emptyMessage={
-            loading
-              ? "Loading warehouse inventory..."
-              : error
-                ? "Unable to load warehouse inventory."
-                : "No warehouse inventory records found."
-          }
-        />
+        <div className="warehouse-inventory-table-scroll">
+          <table className="warehouse-inventory-table">
+            <thead>
+              <tr>
+                {inventoryColumns.map((column) => (
+                  <th key={column.key}>{column.label}</th>
+                ))}
+                <th className="inventory-action-heading">Action</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan={inventoryColumns.length + 1}>
+                    Loading warehouse inventory...
+                  </td>
+                </tr>
+              ) : error ? (
+                <tr>
+                  <td colSpan={inventoryColumns.length + 1}>
+                    Unable to load warehouse inventory.
+                  </td>
+                </tr>
+              ) : currentData.length === 0 ? (
+                <tr>
+                  <td colSpan={inventoryColumns.length + 1}>
+                    No warehouse inventory records found.
+                  </td>
+                </tr>
+              ) : (
+                currentData.map((row) => (
+                  <tr key={row.id}>
+                    {inventoryColumns.map((column) => (
+                      <td key={column.key}>
+                        {column.key === "status"
+                          ? renderStatus(row.status)
+                          : row[column.key] ?? "—"}
+                      </td>
+                    ))}
+
+                    <td className="inventory-action-cell">
+                      <div className="inventory-action-buttons">
+                        <button
+                          type="button"
+                          className="inventory-action-btn inventory-view-btn"
+                          onClick={() => handleView(row)}
+                          title="View details"
+                        >
+                          <Eye size={14} />
+                          View
+                        </button>
+
+                        <button
+                          type="button"
+                          className="inventory-action-btn inventory-damage-btn"
+                          onClick={() => handleDamage(row)}
+                          title="Report damaged goods"
+                        >
+                          <AlertTriangle size={14} />
+                          Damage
+                        </button>
+
+                        <button
+                          type="button"
+                          className="inventory-action-btn inventory-return-btn"
+                          onClick={() => handleReturn(row)}
+                          title="Process return"
+                        >
+                          <RotateCcw size={14} />
+                          Return
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
 
         {error && (
           <p className="warehouse-inventory-error" role="alert">
@@ -519,11 +709,8 @@ function WarehouseInventory() {
           <div className="warehouse-inventory-footer">
             <span className="pagination-info">
               Showing {filteredData.length === 0 ? 0 : startIndex + 1} -{" "}
-              {Math.min(
-                startIndex + ITEMS_PER_PAGE,
-                filteredData.length
-              )}{" "}
-              of {filteredData.length} records
+              {Math.min(startIndex + ITEMS_PER_PAGE, filteredData.length)} of{" "}
+              {filteredData.length} records
             </span>
 
             <Pagination
@@ -538,26 +725,24 @@ function WarehouseInventory() {
       {selectedRecord && (
         <div
           className="warehouse-inventory-modal-overlay"
-          onClick={closeModal}
+          onClick={() => setSelectedRecord(null)}
         >
           <div
             className="warehouse-inventory-details-modal"
             role="dialog"
             aria-modal="true"
-            aria-labelledby="warehouse-inventory-details-title"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="warehouse-inventory-modal-header">
-              <h2 id="warehouse-inventory-details-title">
-                Warehouse Inventory Details
-              </h2>
-
-              <Button
-                className="warehouse-inventory-modal-close"
-                onClick={closeModal}
+              <h2>Warehouse Inventory Details</h2>
+              <button
+                type="button"
+                className="inventory-close-btn"
+                onClick={() => setSelectedRecord(null)}
+                aria-label="Close details"
               >
                 <X />
-              </Button>
+              </button>
             </div>
 
             <div className="warehouse-inventory-details-grid">
@@ -568,17 +753,14 @@ function WarehouseInventory() {
                 >
                   <span>{column.label}</span>
                   <strong>
-                    {getValue(selectedRecord, [column.key])}
+                    {selectedRecord[column.key] ?? "—"}
                   </strong>
                 </div>
               ))}
             </div>
 
             <div className="warehouse-inventory-modal-footer">
-              <Button
-                className="warehouse-inventory-modal-done"
-                onClick={closeModal}
-              >
+              <Button onClick={() => setSelectedRecord(null)}>
                 Close
               </Button>
             </div>
@@ -592,6 +774,118 @@ function WarehouseInventory() {
           onClose={closeDamageForm}
           onSubmit={handleDamageSubmit}
         />
+      )}
+
+      {showReturnForm && selectedReturnItem && (
+        <div
+          className="warehouse-inventory-modal-overlay"
+          onClick={closeReturnForm}
+        >
+          <div
+            className="warehouse-inventory-return-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="inventory-return-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="warehouse-inventory-modal-header">
+              <h2 id="inventory-return-title">Process Return</h2>
+
+              <button
+                type="button"
+                className="inventory-close-btn"
+                onClick={closeReturnForm}
+                aria-label="Close return form"
+              >
+                <X />
+              </button>
+            </div>
+
+            <form onSubmit={handleReturnSubmit}>
+              <div className="inventory-return-form">
+                <div className="inventory-return-info">
+                  <span>Inventory Code</span>
+                  <strong>{selectedReturnItem.inventoryCode}</strong>
+                </div>
+
+                <div className="inventory-return-info">
+                  <span>Item Name</span>
+                  <strong>{selectedReturnItem.itemName}</strong>
+                </div>
+
+                <div className="inventory-return-info">
+                  <span>Warehouse</span>
+                  <strong>{selectedReturnItem.warehouse}</strong>
+                </div>
+
+                <div className="inventory-return-info">
+                  <span>Available Quantity</span>
+                  <strong>{selectedReturnItem.available}</strong>
+                </div>
+
+                <div className="inventory-return-field">
+                  <label htmlFor="return-quantity">
+                    Return Quantity <span>*</span>
+                  </label>
+                  <input
+                    id="return-quantity"
+                    type="number"
+                    min="1"
+                    max={selectedReturnItem.available}
+                    step="1"
+                    required
+                    value={returnQty}
+                    onChange={(event) => setReturnQty(event.target.value)}
+                    placeholder="Enter quantity"
+                  />
+                </div>
+
+                <div className="inventory-return-field">
+                  <label htmlFor="return-reason">
+                    Reason <span>*</span>
+                  </label>
+                  <select
+                    id="return-reason"
+                    value={returnReason}
+                    onChange={(event) => setReturnReason(event.target.value)}
+                    required
+                  >
+                    <option value="Customer Return">Customer Return</option>
+                    <option value="Wrong Product">Wrong Product</option>
+                    <option value="Excess Quantity">Excess Quantity</option>
+                    <option value="Quality Issue">Quality Issue</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+
+                <div className="inventory-return-field">
+                  <label htmlFor="return-remark">Remark</label>
+                  <textarea
+                    id="return-remark"
+                    rows="3"
+                    value={returnRemark}
+                    onChange={(event) => setReturnRemark(event.target.value)}
+                    placeholder="Enter return details"
+                  />
+                </div>
+              </div>
+
+              <div className="inventory-return-actions">
+                <button
+                  type="button"
+                  className="inventory-return-cancel"
+                  onClick={closeReturnForm}
+                >
+                  Cancel
+                </button>
+
+                <button type="submit" className="inventory-return-save">
+                  Save Return
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );
